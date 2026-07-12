@@ -1,0 +1,72 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast),
+    transform var(--t-fast), box-shadow var(--t-fast), opacity var(--t-fast);
+  position: relative;
+}
+
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:disabled { cursor: not-allowed; }
+
+.btn-full { width: 100%; }
+
+.btn-icon { flex-shrink: 0; }
+.btn-label { display: inline-block; }
+
+.btn-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* SIZES */
+.btn-xs { padding: 5px 12px; font-size: 12px; border-radius: var(--r-sm); }
+.btn-sm { padding: 8px 16px; font-size: 13px; border-radius: var(--r-sm); }
+.btn-md { padding: 11px 20px; font-size: 14px; border-radius: var(--r-md); }
+.btn-lg { padding: 14px 28px; font-size: 15px; border-radius: var(--r-md); }
+.btn-xl { padding: 18px 36px; font-size: 16px; border-radius: var(--r-lg); }
+
+/* PRIMARY */
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 0 32px rgba(108,99,255,0.20); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 0 32px rgba(108,99,255,0.45); transform: translateY(-1px); }
+.btn-primary:active:not(:disabled) { background: var(--accent-press); box-shadow: none; }
+.btn-primary:disabled { background: rgba(108,99,255,0.35); color: rgba(255,255,255,0.5); box-shadow: none; }
+
+/* SECONDARY */
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); }
+.btn-secondary:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--border-accent); box-shadow: var(--shadow-sm); }
+.btn-secondary:active:not(:disabled) { background: var(--surface-active); border-color: var(--accent); }
+.btn-secondary:disabled { background: var(--surface); color: var(--text-3); border-color: var(--border); }
+
+/* GHOST */
+.btn-ghost { background: transparent; color: var(--text-2); }
+.btn-ghost:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
+.btn-ghost:active:not(:disabled) { background: var(--surface-active); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:disabled { background: transparent; color: var(--text-3); }
+
+/* DANGER */
+.btn-danger { background: var(--v-false-bg); color: var(--v-false); border: 1px solid var(--v-false-border); }
+.btn-danger:hover:not(:disabled) { background: rgba(239,68,68,0.20); }
+.btn-danger:active:not(:disabled) { background: rgba(239,68,68,0.28); border-color: var(--v-false); }
+.btn-danger:disabled { background: rgba(239,68,68,0.12); color: rgba(239,68,68,0.4); border-color: var(--v-false-border); }
+
+/* VERDICT VARIANTS */
+.btn-verdict-TRUE { background: var(--v-true-bg); color: var(--v-true); border: 1px solid var(--v-true-border); }
+.btn-verdict-TRUE:hover:not(:disabled) { background: rgba(34,197,94,0.20); }
+.btn-verdict-FALSE { background: var(--v-false-bg); color: var(--v-false); border: 1px solid var(--v-false-border); }
+.btn-verdict-FALSE:hover:not(:disabled) { background: rgba(239,68,68,0.20); }
+.btn-verdict-MISLEADING { background: var(--v-misleading-bg); color: var(--v-misleading); border: 1px solid var(--v-misleading-border); }
+.btn-verdict-MISLEADING:hover:not(:disabled) { background: rgba(245,158,11,0.20); }
+.btn-verdict-UNVERIFIABLE { background: var(--v-unverifiable-bg); color: var(--v-unverifiable); border: 1px solid var(--v-unverifiable-border); }
+.btn-verdict-UNVERIFIABLE:hover:not(:disabled) { background: rgba(107,114,128,0.20); }

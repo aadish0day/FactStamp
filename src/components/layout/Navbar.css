@@ -1,0 +1,113 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 64px;
+}
+
+.navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  white-space: nowrap;
+}
+.navbar-brand-icon { color: var(--accent); display: inline-flex; }
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+}
+
+.navbar-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-2);
+  transition: var(--t-fast);
+}
+.navbar-link:hover { background: var(--surface-hover); color: var(--text); }
+.navbar-link--active { color: var(--accent); background: var(--accent-subtle); }
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.navbar-profile-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.navbar-login {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: var(--t-fast);
+}
+.navbar-login:hover { color: var(--text); }
+.navbar-logout {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  padding: 7px 14px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.navbar-logout:hover { background: var(--surface-hover); color: var(--text); }
+
+.navbar-burger {
+  display: none;
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+@media (max-width: 860px) {
+  .navbar-burger { display: inline-flex; }
+  .navbar-links,
+  .navbar-actions {
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 16px var(--sp-6);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+  .navbar-links { display: none; }
+  .navbar-links--open { display: flex; }
+  .navbar-actions { display: none; }
+  .navbar-actions--open { display: flex; margin-left: 0; }
+  .navbar-actions--open .navbar-login,
+  .navbar-actions--open .navbar-logout { text-align: center; }
+}

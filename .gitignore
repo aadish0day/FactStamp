@@ -1,0 +1,26 @@
+# Build output
+dist
+dist-ssr
+
+# Dependencies
+node_modules
+
+# Vite cache
+.vite
+
+# Env / local
+.env
+.env.*
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+
+# Docker (context only; keep Dockerfile/compose)
+docker-compose.override.yml

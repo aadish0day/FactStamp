@@ -1,0 +1,216 @@
+.submit-page {
+  padding-top: 48px;
+}
+
+.submit-head {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.submit-head .badge { margin-bottom: 14px; }
+.submit-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 32px;
+  color: var(--text);
+}
+.submit-sub {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--text-2);
+  margin-top: 10px;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.submit-body {
+  margin-top: 32px;
+  margin-bottom: 40px;
+}
+
+.submit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.submit-charcount {
+  text-align: right;
+  font-size: 12px;
+  margin-top: -4px;
+}
+
+.submit-field {
+  margin-top: 12px;
+}
+.submit-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-2);
+  margin-bottom: 8px;
+}
+
+.submit-select-wrap {
+  position: relative;
+}
+.submit-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  padding: 12px 40px 12px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: var(--t-fast);
+}
+.submit-select:hover { border-color: var(--border-accent); }
+.submit-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.submit-select-chevron {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.submit-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 56px 24px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.submit-result {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  border-radius: var(--r-lg);
+  padding: 20px 24px;
+}
+.submit-result.duplicate {
+  background: var(--accent-subtle);
+  border: 1px solid var(--border-accent);
+}
+.submit-result.success {
+  background: var(--v-true-bg);
+  border: 1px solid var(--v-true-border);
+}
+.submit-result-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+}
+.submit-result.duplicate .submit-result-title { color: var(--accent); }
+.submit-result.success .submit-result-title { color: var(--v-true); }
+.submit-result-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+.submit-result-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.submit-image {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.dropzone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--r-lg);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  text-align: center;
+  transition: var(--t-fast);
+}
+.dropzone--over {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+.dropzone-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--text-2);
+}
+.dropzone-or {
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.submit-img-error {
+  color: var(--v-false);
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.submit-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+.submit-preview-img {
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  max-width: 100%;
+}
+.submit-preview-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.submit-preview-size { color: var(--text-3); }
+
+.submit-ghost-note {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: -4px;
+}
+.submit-readonly .input-el {
+  background: var(--surface-2);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.submit-img-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
