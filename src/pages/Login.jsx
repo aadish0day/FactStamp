@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useToast } from '../context/ToastContext.jsx';
+import { toast } from "sonner";
 import './Login.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,7 +24,6 @@ function GoogleIcon() {
 
 export default function Login() {
   const { login, loginWithGoogle } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -81,6 +81,7 @@ export default function Login() {
 
   return (
     <div className="auth-page">
+    <Helmet><title>WhisperStop | Log In</title></Helmet>
       <Link to="/" className="auth-back">
         <ArrowLeft size={16} /> Back to Home
       </Link>

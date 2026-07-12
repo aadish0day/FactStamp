@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
@@ -12,7 +13,7 @@ import Badge from '../components/ui/Badge.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 import ClaimCard from '../components/claim/ClaimCard.jsx';
 import { useData } from '../context/DataContext.jsx';
-import { useToast } from '../context/ToastContext.jsx';
+import { toast } from "sonner";
 import { detectDuplicate } from '../logic/duplicateDetection.js';
 import './Submit.css';
 
@@ -29,7 +30,6 @@ const SAMPLE_TEXT =
 
 export default function Submit() {
   const { claims, addClaim } = useData();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const [tab, setTab] = useState('text');
@@ -118,6 +118,7 @@ export default function Submit() {
 
   return (
     <div className="submit-page container">
+    <Helmet><title>WhisperStop | Submit a Claim</title></Helmet>
       <header className="submit-head">
         <Badge tone="neutral" size="sm" icon={ShieldCheck}>Protected Page</Badge>
         <h2 className="submit-title display">Check a Forward</h2>

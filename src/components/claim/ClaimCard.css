@@ -3,7 +3,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 20px;
+  padding: clamp(20px, 3.5vw, 32px);
   transition: background var(--t-fast), border-color var(--t-fast),
               transform var(--t-fast), box-shadow var(--t-fast);
 }
@@ -63,7 +63,7 @@
 }
 
 .claim-card-text {
-  margin-top: 10px;
+  margin-top: 14px;
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -79,7 +79,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 14px;
+  margin-top: 18px;
 }
 
 .claim-card-confidence {

@@ -1,5 +1,5 @@
 .home-hero {
-  padding: 96px 0 80px;
+  padding: clamp(96px, 12vw, 140px) 0 clamp(80px, 10vw, 120px);
   background:
     radial-gradient(ellipse 80% 50% at 50% -5%, var(--accent-subtle) 0%, transparent 65%),
     var(--bg);
@@ -26,7 +26,7 @@
   font-size: 12px;
   color: var(--accent);
   letter-spacing: 0.04em;
-  margin-bottom: 28px;
+  margin-bottom: 36px;
 }
 
 .home-title {
@@ -50,23 +50,23 @@
   color: var(--text-2);
   line-height: 1.7;
   max-width: 520px;
-  margin: 20px auto 0;
+  margin: 24px auto 0;
 }
 
 .home-cta {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 36px;
+  margin-top: 48px;
 }
 
 .home-trust {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 24px;
+  margin-top: 32px;
 }
 .home-trust span {
   display: inline-flex;
@@ -81,14 +81,14 @@
 .home-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin: 64px 0;
+  gap: clamp(20px, 3vw, 32px);
+  margin: clamp(80px, 10vw, 128px) auto;
 }
 .home-stat {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 28px;
+  padding: clamp(24px, 3.5vw, 36px) clamp(20px, 2.5vw, 28px);
   text-align: center;
   transition: transform var(--t-base), box-shadow var(--t-base);
 }
@@ -107,14 +107,14 @@
   font-weight: 500;
   font-size: 13px;
   color: var(--text-2);
-  margin-top: 6px;
+  margin-top: 10px;
 }
 
 .home-section-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 .home-section-title {
   font-family: 'Space Grotesk', sans-serif;
@@ -130,10 +130,13 @@
 }
 .home-section-link:hover { color: var(--accent-hover); }
 
+.home-recent {
+  margin: clamp(80px, 10vw, 128px) auto;
+}
 .home-recent-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: clamp(20px, 3vw, 32px);
 }
 .claim-card-skel {
   background: var(--surface);
@@ -143,11 +146,11 @@
 }
 
 .home-how {
-  margin: 80px 0;
+  margin: clamp(96px, 12vw, 140px) auto;
 }
 .home-how-head {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 56px;
 }
 .home-how-title {
   font-family: 'Space Grotesk', sans-serif;
@@ -166,13 +169,13 @@
 .home-steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: clamp(20px, 3vw, 32px);
 }
 .home-step {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 28px 24px;
+  padding: clamp(28px, 4vw, 40px) clamp(20px, 3vw, 28px);
   text-align: center;
 }
 .home-step-num {
@@ -202,18 +205,18 @@
 }
 
 .home-why {
-  margin: 80px 0;
+  margin: clamp(96px, 12vw, 140px) auto;
 }
 .home-compare {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: clamp(20px, 3vw, 32px);
 }
 .home-compare-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 28px 24px;
+  padding: clamp(28px, 4vw, 40px) clamp(24px, 3vw, 32px);
 }
 .home-compare-card--accent {
   background: var(--accent-subtle);

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 import { useData } from "../context/DataContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useToast } from "../context/ToastContext.jsx";
+import { toast } from "sonner";
 import Input from "../components/ui/Input.jsx";
 import Button from "../components/ui/Button.jsx";
 import Modal from "../components/ui/Modal.jsx";
@@ -35,7 +36,6 @@ const FILTERS = [
 export default function AdminPanel() {
   const { claims, updateClaim, removeClaim } = useData();
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const [filter, setFilter] = useState("all");
@@ -111,6 +111,7 @@ export default function AdminPanel() {
 
   return (
     <div className="ad-page container">
+    <Helmet><title>WhisperStop | Admin</title></Helmet>
       <header className="ad-head">
         <div>
           <h2 className="ad-title display">

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RTooltip } from 'recharts';
 import {
@@ -87,6 +88,7 @@ export default function Dashboard() {
 
   return (
     <div className="db-page container">
+    <Helmet><title>WhisperStop | Dashboard</title></Helmet>
       <header className="db-head">
         <h2 className="db-title display">
           <BarChart3 size={26} /> Misinformation Dashboard

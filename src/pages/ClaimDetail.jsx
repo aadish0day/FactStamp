@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import clsx from "clsx";
 import { ArrowLeft, ExternalLink, CheckCircle2, BookOpen, AlertTriangle, Download, Clock, RefreshCw, Check } from "lucide-react";
@@ -10,7 +11,7 @@ import FactCheckCard from "../components/claim/FactCheckCard.jsx";
 import Spinner from "../components/ui/Spinner.jsx";
 import { useData } from "../context/DataContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useToast } from "../context/ToastContext.jsx";
+import { toast } from "sonner";
 import { timeAgo } from "../logic/formatDate.js";
 import { sourceQuality } from "../logic/confidenceScore.js";
 import { generateCard } from "../logic/cardGenerator.js";
@@ -35,7 +36,6 @@ export default function ClaimDetail() {
   const navigate = useNavigate();
   const { getClaim, getVerdicts } = useData();
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const claim = getClaim(id);
   const verdicts = getVerdicts(id);
@@ -44,6 +44,7 @@ export default function ClaimDetail() {
   if (!claim) {
     return (
       <div className="cd-page container">
+    <Helmet><title>WhisperStop | Claim Details</title></Helmet>
         <Link to="/verify" className="btn btn-ghost btn-sm">
           <ArrowLeft size={16} /> All Claims
         </Link>

@@ -4,19 +4,21 @@ import App from "./App.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { DataProvider } from "./context/DataContext.jsx";
-import { ToastProvider } from "./context/ToastContext.jsx";
+import { HelmetProvider } from "react-helmet-async";
+import { Toaster } from "sonner";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <ToastProvider>
+    <HelmetProvider>
+      <ThemeProvider>
         <AuthProvider>
           <DataProvider>
             <App />
+            <Toaster richColors position="top-right" closeButton />
           </DataProvider>
         </AuthProvider>
-      </ToastProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   </React.StrictMode>,
 );

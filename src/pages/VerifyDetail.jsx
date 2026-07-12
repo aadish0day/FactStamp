@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import clsx from 'clsx';
 import {
@@ -15,7 +16,7 @@ import Spinner from '../components/ui/Spinner.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import { useData } from '../context/DataContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useToast } from '../context/ToastContext.jsx';
+import { toast } from "sonner";
 import { timeAgo } from '../logic/formatDate.js';
 import { sourceQuality, computeConfidence, consensusVerdict } from '../logic/confidenceScore.js';
 import './VerifyDetail.css';
@@ -44,7 +45,6 @@ export default function VerifyDetail() {
   const navigate = useNavigate();
   const { getClaim, getVerdicts, addVerdict, updateClaim } = useData();
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const claim = getClaim(id);
   const verdicts = getVerdicts(id);
@@ -90,6 +90,7 @@ export default function VerifyDetail() {
   if (!claim) {
     return (
       <div className="vd-page container">
+    <Helmet><title>WhisperStop | Verify a Claim</title></Helmet>
         <Link to="/verify" className="btn btn-ghost btn-sm"><ArrowLeft size={16} /> Back to Queue</Link>
         <div className="vd-missing">
           <h2 className="display">Claim Not Found</h2>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from 'react-router-dom';
 import { Edit3, CheckCircle2, XCircle, Sprout, Gem, Trophy, Star, ClipboardList, Scale } from 'lucide-react';
 import Avatar from '../components/ui/Avatar.jsx';
@@ -11,7 +12,7 @@ import ClaimCard from '../components/claim/ClaimCard.jsx';
 import VerdictBadge from '../components/claim/VerdictBadge.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useData } from '../context/DataContext.jsx';
-import { useToast } from '../context/ToastContext.jsx';
+import { toast } from "sonner";
 import { MOCK_MY_SUBMISSIONS, MOCK_MY_VERIFICATIONS } from '../data/mockData.js';
 import { formatMemberSince, timeAgo } from '../logic/formatDate.js';
 import './Profile.css';
@@ -26,7 +27,6 @@ function repLevel(rep) {
 export default function Profile() {
   const { user } = useAuth();
   const { claims } = useData();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const [tab, setTab] = useState('submissions');
@@ -56,6 +56,7 @@ export default function Profile() {
 
   return (
     <div className="pf-page container">
+    <Helmet><title>WhisperStop | Profile</title></Helmet>
       <div className="pf-head-card">
         <Avatar name={user?.displayName || '?'} size={56} />
         <div className="pf-head-info">

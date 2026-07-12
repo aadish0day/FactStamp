@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
 import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowRight, Search, Users, CheckCircle, Share2, ShieldAlert, Check, X } from 'lucide-react';
@@ -63,7 +65,14 @@ export default function Home() {
 
   return (
     <div className="home">
-      <section className="home-hero">
+    <Helmet><title>WhisperStop | Fact-Check WhatsApp Forwards</title></Helmet>
+      <motion.section
+        className="home-hero"
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <div className="container home-hero-inner">
           <span className="home-eyebrow">
             <ShieldAlert size={15} /> India's Misinformation Fact-Checker — Now in Beta
@@ -88,18 +97,30 @@ export default function Home() {
             <span><Check size={14} /> AI-Powered</span>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="container home-stats">
+      <motion.section
+        className="container home-stats"
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         {STATS.map((s) => (
           <div key={s.label} className="home-stat">
             <div className="home-stat-num mono"><CountUp end={s.end} suffix={s.suffix || ''} /></div>
             <div className="home-stat-label">{s.label}</div>
           </div>
         ))}
-      </section>
+      </motion.section>
 
-      <section className="container home-recent">
+      <motion.section
+        className="container home-recent"
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <div className="home-section-head">
           <h2 className="home-section-title display">Recently Verified</h2>
           <Link to="/verify" className="home-section-link">View All Verified →</Link>
@@ -109,9 +130,16 @@ export default function Home() {
             ? Array.from({ length: 6 }).map((_, i) => <ClaimCardSkeleton key={i} />)
             : recent.map((c) => <ClaimCard key={c.id} claim={c} onClick={() => navigate(`/claim/${c.id}`)} />)}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="container home-how" id="how">
+      <motion.section
+        className="container home-how"
+        id="how"
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <div className="home-how-head">
           <h2 className="home-how-title display">How It Works</h2>
           <p className="home-how-sub">From a suspicious forward to a verified, shareable fact in four simple steps.</p>
@@ -126,9 +154,16 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
-      <section className="container home-why" id="why">
+      <motion.section
+        className="container home-why"
+        id="why"
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <div className="home-how-head">
           <h2 className="home-how-title display">Why WhisperStop</h2>
           <p className="home-how-sub">Built for the way misinformation actually spreads — inside group chats.</p>
@@ -150,7 +185,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }

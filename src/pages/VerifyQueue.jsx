@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import clsx from "clsx";
 import { ArrowRight, CheckCircle2, HeartPulse, Landmark, BookHeart, Coins, ClipboardList, AlertTriangle, ShieldCheck, ListFilter } from "lucide-react";
@@ -58,6 +59,7 @@ export default function VerifyQueue() {
 
   return (
     <div className="vq-page container">
+    <Helmet><title>WhisperStop | Verification Queue</title></Helmet>
       <header className="vq-head">
         <Badge tone="neutral" size="sm" icon={ShieldCheck}>
           Protected
