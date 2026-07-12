@@ -8,7 +8,7 @@ import NotificationBell from '../NotificationBell.jsx';
 import './Navbar.css';
 
 export default function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -33,48 +33,56 @@ export default function Navbar() {
           <span>WhisperStop</span>
         </Link>
 
-        <nav className={clsx('navbar-links', open && 'navbar-links--open')}>
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.end}
-              className={({ isActive }) => clsx('navbar-link', isActive && 'navbar-link--active')}
-              onClick={() => setOpen(false)}
-            >
-              {l.label}
-            </NavLink>
-          ))}
-          {user?.isAdmin && (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) => clsx('navbar-link', isActive && 'navbar-link--active')}
-              onClick={() => setOpen(false)}
-            >
-              <ShieldCheck size={15} /> Admin
-            </NavLink>
-          )}
-        </nav>
+        <div id="navbar-menu" className={clsx('navbar-menu', open && 'navbar-menu--open')}>
+          <nav className="navbar-links" aria-label="Primary">
+            {links.map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) => clsx('navbar-link', isActive && 'navbar-link--active')}
+                onClick={() => setOpen(false)}
+              >
+                {l.label}
+              </NavLink>
+            ))}
+            {user?.isAdmin && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) => clsx('navbar-link', isActive && 'navbar-link--active')}
+                onClick={() => setOpen(false)}
+              >
+                <ShieldCheck size={15} /> Admin
+              </NavLink>
+            )}
+          </nav>
 
-        <div className={clsx('navbar-actions', open && 'navbar-actions--open')}>
-          <ThemeToggle />
-          {isAuthenticated ? (
-            <>
-              <NotificationBell />
-              <Link to="/profile" className="navbar-profile">
-                <span className="navbar-profile-name">{user.displayName}</span>
-              </Link>
-              <button className="navbar-logout" onClick={handleLogout}>Log out</button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="navbar-login">Log in</Link>
-              <Link to="/register" className="btn btn-primary btn-sm">Sign up</Link>
-            </>
-          )}
+          <div className="navbar-actions">
+            <ThemeToggle />
+            {user ? (
+              <>
+                <NotificationBell />
+                <Link to="/profile" className="navbar-profile">
+                  <span className="navbar-profile-name">{user.displayName}</span>
+                </Link>
+                <button className="navbar-logout" onClick={handleLogout}>Log out</button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="navbar-login">Log in</Link>
+                <Link to="/register" className="btn btn-primary btn-sm">Sign up</Link>
+              </>
+            )}
+          </div>
         </div>
 
-        <button className="navbar-burger" onClick={() => setOpen((o) => !o)} aria-label="Menu">
+        <button
+          className="navbar-burger"
+          onClick={() => setOpen((o) => !o)}
+          aria-label="Toggle menu"
+          aria-expanded={open}
+          aria-controls="navbar-menu"
+        >
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>

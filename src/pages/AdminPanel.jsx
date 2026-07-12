@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -111,7 +111,7 @@ export default function AdminPanel() {
 
   return (
     <div className="ad-page container">
-    <Helmet><title>WhisperStop | Admin</title></Helmet>
+    <Seo title="WhisperStop | Admin" description="WhisperStop admin tools to moderate claims, users and categories." />
       <header className="ad-head">
         <div>
           <h2 className="ad-title display">

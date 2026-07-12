@@ -2,9 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 200;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .navbar-inner {
@@ -25,11 +26,17 @@
 }
 .navbar-brand-icon { color: var(--accent); display: inline-flex; }
 
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
 .navbar-links {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-left: 16px;
 }
 
 .navbar-link {
@@ -45,7 +52,10 @@
   transition: var(--t-fast);
 }
 .navbar-link:hover { background: var(--surface-hover); color: var(--text); }
-.navbar-link--active { color: var(--accent); background: var(--accent-subtle); }
+.navbar-link--active {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
 
 .navbar-actions {
   display: flex;
@@ -86,12 +96,15 @@
   border: none;
   color: var(--text);
   cursor: pointer;
+  padding: 4px;
+  border-radius: var(--r-sm);
 }
+.navbar-burger:hover { background: var(--surface-hover); }
 
 @media (max-width: 860px) {
   .navbar-burger { display: inline-flex; }
-  .navbar-links,
-  .navbar-actions {
+  .navbar-menu {
+    display: none;
     position: absolute;
     top: 64px;
     left: 0;
@@ -104,10 +117,18 @@
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow-md);
   }
-  .navbar-links { display: none; }
-  .navbar-links--open { display: flex; }
-  .navbar-actions { display: none; }
-  .navbar-actions--open { display: flex; margin-left: 0; }
-  .navbar-actions--open .navbar-login,
-  .navbar-actions--open .navbar-logout { text-align: center; }
+  .navbar-menu--open { display: flex; }
+  .navbar-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .navbar-actions {
+    margin-left: 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .navbar-actions .btn,
+  .navbar-actions .navbar-login,
+  .navbar-actions .navbar-logout { text-align: center; }
 }

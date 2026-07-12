@@ -1,0 +1,29 @@
+.breadcrumbs {
+  margin-bottom: var(--sp-5);
+}
+.breadcrumbs ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.breadcrumbs-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+.breadcrumbs-link {
+  color: var(--text-2);
+  font-weight: 500;
+  transition: var(--t-fast);
+}
+.breadcrumbs-link:hover { color: var(--accent); }
+.breadcrumbs-current {
+  color: var(--text);
+  font-weight: 600;
+}
+.breadcrumbs-sep {
+  color: var(--text-3);
+}

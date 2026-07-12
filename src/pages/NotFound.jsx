@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import Button from "../components/ui/Button.jsx";
 import { ArrowLeft, Search } from "lucide-react";
 
 export default function NotFound() {
   return (
     <div className="nf-page">
-    <Helmet><title>WhisperStop | Page Not Found</title></Helmet>
+    <Seo title="WhisperStop | Page Not Found" description="The page you're looking for isn't on WhisperStop. Head back to verify the next forward." />
       <div className="nf-bg">404</div>
       <div className="nf-content">
         <span className="nf-emoji"><Search size={64} /></span>

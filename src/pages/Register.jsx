@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShieldAlert, Check } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
@@ -70,7 +70,7 @@ export default function Register() {
 
   return (
     <div className="auth-page">
-    <Helmet><title>WhisperStop | Create Account</title></Helmet>
+    <Seo title="WhisperStop | Create Account" description="Create a WhisperStop account to submit suspicious forwards and join community fact-checking." />
       <Link to="/" className="auth-back">
         <ArrowLeft size={16} /> Back to Home
       </Link>

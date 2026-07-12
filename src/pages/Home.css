@@ -177,6 +177,13 @@
   border-radius: var(--r-lg);
   padding: clamp(28px, 4vw, 40px) clamp(20px, 3vw, 28px);
   text-align: center;
+  transition: transform var(--t-base), box-shadow var(--t-base),
+              border-color var(--t-base);
+}
+.home-step:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 .home-step-num {
   font-family: 'JetBrains Mono', monospace;
@@ -217,6 +224,13 @@
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   padding: clamp(28px, 4vw, 40px) clamp(24px, 3vw, 32px);
+  transition: transform var(--t-base), box-shadow var(--t-base),
+              border-color var(--t-base);
+}
+.home-compare-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 .home-compare-card--accent {
   background: var(--accent-subtle);

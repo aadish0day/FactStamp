@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import clsx from "clsx";
 import { ArrowLeft, ExternalLink, CheckCircle2, BookOpen, AlertTriangle, Download, Clock, RefreshCw, Check } from "lucide-react";
@@ -9,6 +9,7 @@ import ConfidenceBar from "../components/claim/ConfidenceBar.jsx";
 import CategoryTag from "../components/claim/CategoryTag.jsx";
 import FactCheckCard from "../components/claim/FactCheckCard.jsx";
 import Spinner from "../components/ui/Spinner.jsx";
+import Breadcrumbs from "../components/layout/Breadcrumbs.jsx";
 import { useData } from "../context/DataContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { toast } from "sonner";
@@ -44,7 +45,7 @@ export default function ClaimDetail() {
   if (!claim) {
     return (
       <div className="cd-page container">
-    <Helmet><title>WhisperStop | Claim Details</title></Helmet>
+    <Seo title="WhisperStop | Claim Details" description="Read the community verdict, confidence and sources behind this WhatsApp claim on WhisperStop." />
         <Link to="/verify" className="btn btn-ghost btn-sm">
           <ArrowLeft size={16} /> All Claims
         </Link>
@@ -88,6 +89,17 @@ export default function ClaimDetail() {
 
   return (
     <div className="cd-page container">
+      <Seo
+        title={`WhisperStop | ${claim?.text?.slice(0, 48) || "Claim Details"}`}
+        description="Read the community verdict, confidence and sources behind this WhatsApp claim on WhisperStop."
+      />
+      <Breadcrumbs
+        items={[
+          { label: "Home", to: "/" },
+          { label: "Verify Queue", to: "/verify" },
+          { label: claim?.text?.slice(0, 40) || "Claim" },
+        ]}
+      />
       <Link to="/verify" className="btn btn-ghost btn-sm cd-back">
         <ArrowLeft size={16} /> All Claims
       </Link>

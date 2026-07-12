@@ -392,3 +392,103 @@ a {
   flex: 1;
   padding-bottom: var(--sp-10);
 }
+
+/* ── Route loading / progress ── */
+.route-fallback {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.route-fallback-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid var(--border-strong);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+.route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  transform-origin: left;
+  z-index: 2000;
+  box-shadow: 0 0 12px var(--accent);
+  pointer-events: none;
+}
+
+/* ── Skip link (a11y) ── */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 3000;
+  transform: translateY(-150%);
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: var(--r-sm);
+  font-weight: 600;
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--text-inv);
+  outline-offset: 2px;
+}
+
+/* ── Error boundary ── */
+.error-boundary {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+.error-boundary-card {
+  max-width: 440px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 40px 32px;
+}
+.error-boundary-card h1 {
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.error-boundary-card p {
+  color: var(--text-2);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.error-boundary-card .btn-reset {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--r-sm);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── ACCESSIBILITY ── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .page-fade {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

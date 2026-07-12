@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
@@ -118,7 +118,7 @@ export default function Submit() {
 
   return (
     <div className="submit-page container">
-    <Helmet><title>WhisperStop | Submit a Claim</title></Helmet>
+    <Seo title="WhisperStop | Submit a Claim" description="Submit a viral WhatsApp forward to WhisperStop and let the community verify it with sources." />
       <header className="submit-head">
         <Badge tone="neutral" size="sm" icon={ShieldCheck}>Protected Page</Badge>
         <h2 className="submit-title display">Check a Forward</h2>

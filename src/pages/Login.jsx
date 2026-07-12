@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
@@ -81,7 +81,7 @@ export default function Login() {
 
   return (
     <div className="auth-page">
-    <Helmet><title>WhisperStop | Log In</title></Helmet>
+    <Seo title="WhisperStop | Log In" description="Log in to WhisperStop to submit and verify WhatsApp claims with the community." />
       <Link to="/" className="auth-back">
         <ArrowLeft size={16} /> Back to Home
       </Link>

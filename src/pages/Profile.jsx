@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import { useNavigate } from 'react-router-dom';
 import { Edit3, CheckCircle2, XCircle, Sprout, Gem, Trophy, Star, ClipboardList, Scale } from 'lucide-react';
 import Avatar from '../components/ui/Avatar.jsx';
@@ -56,7 +56,7 @@ export default function Profile() {
 
   return (
     <div className="pf-page container">
-    <Helmet><title>WhisperStop | Profile</title></Helmet>
+    <Seo title="WhisperStop | Profile" description="View your WhisperStop profile, contributions and earned badges." />
       <div className="pf-head-card">
         <Avatar name={user?.displayName || '?'} size={56} />
         <div className="pf-head-info">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import clsx from 'clsx';
 import {
@@ -13,6 +13,7 @@ import Badge from '../components/ui/Badge.jsx';
 import CategoryTag from '../components/claim/CategoryTag.jsx';
 import VerdictBadge from '../components/claim/VerdictBadge.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
+import Breadcrumbs from '../components/layout/Breadcrumbs.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import { useData } from '../context/DataContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -90,7 +91,7 @@ export default function VerifyDetail() {
   if (!claim) {
     return (
       <div className="vd-page container">
-    <Helmet><title>WhisperStop | Verify a Claim</title></Helmet>
+    <Seo title="WhisperStop | Verify a Claim" description="Review evidence, pick a verdict and verify this WhatsApp claim on WhisperStop." />
         <Link to="/verify" className="btn btn-ghost btn-sm"><ArrowLeft size={16} /> Back to Queue</Link>
         <div className="vd-missing">
           <h2 className="display">Claim Not Found</h2>
@@ -144,6 +145,13 @@ export default function VerifyDetail() {
 
   return (
     <div className="vd-page container">
+      <Breadcrumbs
+        items={[
+          { label: "Home", to: "/" },
+          { label: "Verify Queue", to: "/verify" },
+          { label: claim?.text?.slice(0, 40) || "Claim" },
+        ]}
+      />
       <Link to="/verify" className="btn btn-ghost btn-sm vd-back"><ArrowLeft size={16} /> Back to Queue</Link>
 
       {isOwn && (

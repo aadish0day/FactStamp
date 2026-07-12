@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Helmet } from "react-helmet-async";
+import Seo from "../components/Seo.jsx";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
@@ -65,7 +65,7 @@ export default function Home() {
 
   return (
     <div className="home">
-    <Helmet><title>WhisperStop | Fact-Check WhatsApp Forwards</title></Helmet>
+    <Seo title="WhisperStop | Fact-Check WhatsApp Forwards" />
       <motion.section
         className="home-hero"
         initial={{ opacity: 0, y: 24 }}
