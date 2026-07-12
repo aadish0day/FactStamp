@@ -59,7 +59,7 @@ export default function VerifyQueue() {
 
   return (
     <div className="vq-page container">
-    <Seo title="WhisperStop | Verification Queue" description="Browse unverified WhatsApp claims in the WhisperStop verification queue and help fact-check them." />
+    <Seo title="FactStamp | Verification Queue" description="Browse unverified WhatsApp claims in the FactStamp verification queue and help fact-check them." />
       <header className="vq-head">
         <Badge tone="neutral" size="sm" icon={ShieldCheck}>
           Protected

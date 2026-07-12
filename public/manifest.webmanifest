@@ -1,6 +1,6 @@
 {
-  "name": "WhisperStop",
-  "short_name": "WhisperStop",
+  "name": "FactStamp",
+  "short_name": "FactStamp",
   "description": "Fact-check viral WhatsApp forwards with transparent, community-driven verdicts.",
   "start_url": "/",
   "scope": "/",

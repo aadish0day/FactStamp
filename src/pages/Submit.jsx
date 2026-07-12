@@ -118,7 +118,7 @@ export default function Submit() {
 
   return (
     <div className="submit-page container">
-    <Seo title="WhisperStop | Submit a Claim" description="Submit a viral WhatsApp forward to WhisperStop and let the community verify it with sources." />
+    <Seo title="FactStamp | Submit a Claim" description="Submit a viral WhatsApp forward to FactStamp and let the community verify it with sources." />
       <header className="submit-head">
         <Badge tone="neutral" size="sm" icon={ShieldCheck}>Protected Page</Badge>
         <h2 className="submit-title display">Check a Forward</h2>

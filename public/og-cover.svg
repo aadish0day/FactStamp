@@ -11,7 +11,7 @@
     <path d="M40 0l60 21v40c0 36-24 65-60 76-36-11-60-40-60-76V21L40 0z" fill="#6c63ff"/>
     <path d="M40 24v36" stroke="#080810" stroke-width="10" stroke-linecap="round"/>
     <circle cx="40" cy="78" r="7" fill="#080810"/>
-    <text x="150" y="40" fill="#eeeef8" font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="64" font-weight="700">WhisperStop</text>
+    <text x="150" y="40" fill="#eeeef8" font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="64" font-weight="700">FactStamp</text>
     <text x="150" y="100" fill="#9a98b8" font-family="Inter, Arial, sans-serif" font-size="30">Fact-check WhatsApp forwards</text>
   </g>
 </svg>

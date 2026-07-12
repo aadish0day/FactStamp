@@ -11,7 +11,7 @@ export async function generateCard(claimId) {
     logging: false,
   });
   const link = document.createElement("a");
-  link.download = `whisperstop-factcheck-${claimId}.png`;
+  link.download = `factstamp-factcheck-${claimId}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
 }

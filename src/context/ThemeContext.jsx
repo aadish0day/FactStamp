@@ -10,7 +10,7 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     try {
-      localStorage.setItem("ws-theme", theme);
+      localStorage.setItem("fs-theme", theme);
     } catch (e) {}
   }, [theme]);
 

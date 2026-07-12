@@ -111,7 +111,7 @@ export default function AdminPanel() {
 
   return (
     <div className="ad-page container">
-    <Seo title="WhisperStop | Admin" description="WhisperStop admin tools to moderate claims, users and categories." />
+    <Seo title="FactStamp | Admin" description="FactStamp admin tools to moderate claims, users and categories." />
       <header className="ad-head">
         <div>
           <h2 className="ad-title display">

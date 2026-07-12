@@ -30,7 +30,7 @@ export default function Navbar() {
       <div className="navbar-inner container">
         <Link to="/" className="navbar-brand display">
           <ShieldAlert size={20} className="navbar-brand-icon" />
-          <span>WhisperStop</span>
+          <span>FactStamp</span>
         </Link>
 
         <div id="navbar-menu" className={clsx('navbar-menu', open && 'navbar-menu--open')}>

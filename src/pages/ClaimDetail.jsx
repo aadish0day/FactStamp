@@ -45,7 +45,7 @@ export default function ClaimDetail() {
   if (!claim) {
     return (
       <div className="cd-page container">
-    <Seo title="WhisperStop | Claim Details" description="Read the community verdict, confidence and sources behind this WhatsApp claim on WhisperStop." />
+    <Seo title="FactStamp | Claim Details" description="Read the community verdict, confidence and sources behind this WhatsApp claim on FactStamp." />
         <Link to="/verify" className="btn btn-ghost btn-sm">
           <ArrowLeft size={16} /> All Claims
         </Link>
@@ -90,8 +90,8 @@ export default function ClaimDetail() {
   return (
     <div className="cd-page container">
       <Seo
-        title={`WhisperStop | ${claim?.text?.slice(0, 48) || "Claim Details"}`}
-        description="Read the community verdict, confidence and sources behind this WhatsApp claim on WhisperStop."
+        title={`FactStamp | ${claim?.text?.slice(0, 48) || "Claim Details"}`}
+        description="Read the community verdict, confidence and sources behind this WhatsApp claim on FactStamp."
       />
       <Breadcrumbs
         items={[

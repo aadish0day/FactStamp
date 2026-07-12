@@ -56,7 +56,7 @@ export default function Profile() {
 
   return (
     <div className="pf-page container">
-    <Seo title="WhisperStop | Profile" description="View your WhisperStop profile, contributions and earned badges." />
+    <Seo title="FactStamp | Profile" description="View your FactStamp profile, contributions and earned badges." />
       <div className="pf-head-card">
         <Avatar name={user?.displayName || '?'} size={56} />
         <div className="pf-head-info">

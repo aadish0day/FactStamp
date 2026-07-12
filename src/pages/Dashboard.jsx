@@ -88,7 +88,7 @@ export default function Dashboard() {
 
   return (
     <div className="db-page container">
-    <Seo title="WhisperStop | Dashboard" description="Track your WhisperStop submissions, verifications and reputation from your dashboard." />
+    <Seo title="FactStamp | Dashboard" description="Track your FactStamp submissions, verifications and reputation from your dashboard." />
       <header className="db-head">
         <h2 className="db-title display">
           <BarChart3 size={26} /> Misinformation Dashboard

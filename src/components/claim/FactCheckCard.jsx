@@ -59,7 +59,7 @@ export default function FactCheckCard({ claim, verdicts = [] }) {
             letterSpacing: '0.18em',
           }}
         >
-          WHISPERSTOP
+          FACTSTAMP
         </span>
         <span style={{ flex: 1 }} />
         <span

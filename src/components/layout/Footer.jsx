@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="container footer-inner">
         <div className="footer-brand">
           <span className="footer-logo display">
-            <ShieldAlert size={20} className="footer-logo-icon" /> WhisperStop
+            <ShieldAlert size={20} className="footer-logo-icon" /> FactStamp
           </span>
           <p className="footer-tag">Verify before you forward. Stop misinformation one WhatsApp group at a time.</p>
         </div>
@@ -28,14 +28,14 @@ export default function Footer() {
           <div className="footer-col">
             <span className="footer-col-title">About</span>
             <a href="#how">How it works</a>
-            <a href="#why">Why WhisperStop</a>
+            <a href="#why">Why FactStamp</a>
             <span className="footer-muted">Beta · Made in India</span>
           </div>
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© 2026 WhisperStop · A community misinformation fact-checker</span>
-        <span className="mono footer-muted">whisper-stop.vercel.app</span>
+        <span>© 2026 FactStamp · A community misinformation fact-checker</span>
+        <span className="mono footer-muted">factstamp.vercel.app</span>
       </div>
     </footer>
   );

@@ -91,7 +91,7 @@ export default function VerifyDetail() {
   if (!claim) {
     return (
       <div className="vd-page container">
-    <Seo title="WhisperStop | Verify a Claim" description="Review evidence, pick a verdict and verify this WhatsApp claim on WhisperStop." />
+    <Seo title="FactStamp | Verify a Claim" description="Review evidence, pick a verdict and verify this WhatsApp claim on FactStamp." />
         <Link to="/verify" className="btn btn-ghost btn-sm"><ArrowLeft size={16} /> Back to Queue</Link>
         <div className="vd-missing">
           <h2 className="display">Claim Not Found</h2>

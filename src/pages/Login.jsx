@@ -81,14 +81,14 @@ export default function Login() {
 
   return (
     <div className="auth-page">
-    <Seo title="WhisperStop | Log In" description="Log in to WhisperStop to submit and verify WhatsApp claims with the community." />
+    <Seo title="FactStamp | Log In" description="Log in to FactStamp to submit and verify WhatsApp claims with the community." />
       <Link to="/" className="auth-back">
         <ArrowLeft size={16} /> Back to Home
       </Link>
 
       <div className="auth-card">
         <div className="auth-logo display">
-          <ShieldAlert size={22} className="auth-logo-icon" /> WhisperStop
+          <ShieldAlert size={22} className="auth-logo-icon" /> FactStamp
         </div>
         <p className="auth-tag">Verify before you forward.</p>
 

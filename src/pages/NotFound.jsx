@@ -6,7 +6,7 @@ import { ArrowLeft, Search } from "lucide-react";
 export default function NotFound() {
   return (
     <div className="nf-page">
-    <Seo title="WhisperStop | Page Not Found" description="The page you're looking for isn't on WhisperStop. Head back to verify the next forward." />
+    <Seo title="FactStamp | Page Not Found" description="The page you're looking for isn't on FactStamp. Head back to verify the next forward." />
       <div className="nf-bg">404</div>
       <div className="nf-content">
         <span className="nf-emoji"><Search size={64} /></span>

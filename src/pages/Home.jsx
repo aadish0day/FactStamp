@@ -28,7 +28,7 @@ const STEPS = [
 const COMPARISON = [
   { name: 'AltNews', accent: false, points: ['Expert-led only', 'Long wait times', 'No shareable cards', 'Web articles only'] },
   { name: 'Boom', accent: false, points: ['Expert-led only', 'Limited languages', 'No community input', 'No WhatsApp focus'] },
-  { name: 'WhisperStop', accent: true, points: ['Community verified', 'Shareable cards', 'Real-time queue', 'Built for WhatsApp'] },
+  { name: 'FactStamp', accent: true, points: ['Community verified', 'Shareable cards', 'Real-time queue', 'Built for WhatsApp'] },
 ];
 
 function ClaimCardSkeleton() {
@@ -65,7 +65,7 @@ export default function Home() {
 
   return (
     <div className="home">
-    <Seo title="WhisperStop | Fact-Check WhatsApp Forwards" />
+    <Seo title="FactStamp | Fact-Check WhatsApp Forwards" />
       <motion.section
         className="home-hero"
         initial={{ opacity: 0, y: 24 }}
@@ -82,7 +82,7 @@ export default function Home() {
             <br />One Forward at a Time.
           </h1>
           <p className="home-sub">
-            WhisperStop lets anyone in India check viral WhatsApp forwards in seconds —
+            FactStamp lets anyone in India check viral WhatsApp forwards in seconds —
             verified by a community of trusted reviewers, not algorithms alone.
           </p>
           <div className="home-cta">
@@ -165,7 +165,7 @@ export default function Home() {
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <div className="home-how-head">
-          <h2 className="home-how-title display">Why WhisperStop</h2>
+          <h2 className="home-how-title display">Why FactStamp</h2>
           <p className="home-how-sub">Built for the way misinformation actually spreads — inside group chats.</p>
         </div>
         <div className="home-compare">

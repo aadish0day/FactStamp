@@ -70,14 +70,14 @@ export default function Register() {
 
   return (
     <div className="auth-page">
-    <Seo title="WhisperStop | Create Account" description="Create a WhisperStop account to submit suspicious forwards and join community fact-checking." />
+    <Seo title="FactStamp | Create Account" description="Create a FactStamp account to submit suspicious forwards and join community fact-checking." />
       <Link to="/" className="auth-back">
         <ArrowLeft size={16} /> Back to Home
       </Link>
 
       <div className="auth-card auth-card--wide">
         <div className="auth-logo display">
-          <ShieldAlert size={22} className="auth-logo-icon" /> WhisperStop
+          <ShieldAlert size={22} className="auth-logo-icon" /> FactStamp
         </div>
         <p className="auth-tag">Join the fight against misinformation.</p>
 

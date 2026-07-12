@@ -1,12 +1,12 @@
-# WhisperStop
+# FactStamp
 
 An interactive UI/UX prototype of an India-focused WhatsApp misinformation fact-checker. **No backend, no API, no real data** — every screen is wired to in-memory mock data so the full product experience can be clicked through end to end.
 
-> Repository name: `FactStamp` · App name: `WhisperStop`
+> App name: `FactStamp`
 
 ## Features
 
-- **Dark & light themes**, first-class and persisted (`ws-theme` in `localStorage`)
+- **Dark & light themes**, first-class and persisted (`fs-theme` in `localStorage`)
 - Pixel-perfect, fully interactive flows: submit a claim, queue it for verification, verify it, browse the feed, view dashboards, and an admin panel
 - Animated **Verdict Stamp** (respects `prefers-reduced-motion`)
 - Mock data + React Context only — flip any value in `src/data/mockData.js` and the whole app reflects it
@@ -49,8 +49,8 @@ npm run preview               # serve the built bundle locally
 Or with Docker:
 
 ```bash
-docker build --target serve -t whisperstop .
-docker run -p 8080:80 whisperstop   # → http://localhost:8080
+docker build --target serve -t factstamp .
+docker run -p 8080:80 factstamp   # → http://localhost:8080
 ```
 
 ## Scripts
