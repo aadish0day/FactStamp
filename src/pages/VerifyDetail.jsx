@@ -145,6 +145,14 @@ export default function VerifyDetail() {
 
   return (
     <div className="vd-page container">
+      <Seo
+        title={`FactStamp | Verify${claim?.text ? `: ${claim.text.slice(0, 40)}` : " a Claim"}`}
+        description={
+          claim?.text
+            ? `Review the evidence and submit your verdict for "${claim.text.slice(0, 90)}" on FactStamp.`
+            : "Review evidence, pick a verdict and verify this WhatsApp claim on FactStamp."
+        }
+      />
       <Breadcrumbs
         items={[
           { label: "Home", to: "/" },

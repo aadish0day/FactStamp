@@ -28,7 +28,14 @@ const AdminPanel = lazy(() => import("./pages/AdminPanel.jsx"));
 function RouteFallback() {
   return (
     <div className="route-fallback" role="status" aria-label="Loading">
-      <span className="route-fallback-spinner" />
+      <div className="skeleton-page">
+        <div className="skeleton skeleton-hero" />
+        <div className="skeleton-grid">
+          <div className="skeleton skeleton-card" />
+          <div className="skeleton skeleton-card" />
+          <div className="skeleton skeleton-card" />
+        </div>
+      </div>
     </div>
   );
 }

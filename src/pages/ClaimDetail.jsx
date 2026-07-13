@@ -91,7 +91,11 @@ export default function ClaimDetail() {
     <div className="cd-page container">
       <Seo
         title={`FactStamp | ${claim?.text?.slice(0, 48) || "Claim Details"}`}
-        description="Read the community verdict, confidence and sources behind this WhatsApp claim on FactStamp."
+        description={
+          claim?.text
+            ? `Community verdict on "${claim.text.slice(0, 90)}" — see confidence, sources and explanations on FactStamp.`
+            : "Read the community verdict, confidence and sources behind this WhatsApp claim on FactStamp."
+        }
       />
       <Breadcrumbs
         items={[
