@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import Seo from "../components/Seo.jsx";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 import Modal from '../components/ui/Modal.jsx';
+import AuthLayout from '../components/layout/AuthLayout.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from "sonner";
-import './Login.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -80,60 +79,57 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page">
-    <Seo title="FactStamp | Log In" description="Log in to FactStamp to submit and verify WhatsApp claims with the community." />
-      <Link to="/" className="auth-back">
-        <ArrowLeft size={16} /> Back to Home
-      </Link>
+    <AuthLayout
+      heading="Welcome back"
+      subheading="Log in to verify claims and contribute to the community."
+    >
+      <Seo title="FactStamp | Log In" description="Log in to FactStamp to submit and verify WhatsApp claims with the community." />
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <Input
+          id="login-email"
+          label="Email Address"
+          type="email"
+          name="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={errors.email}
+        />
+        <Input
+          id="login-pass"
+          label="Password"
+          type="password"
+          name="password"
+          autoComplete="current-password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={errors.password}
+        />
+        {errors.login && <p className="auth-error-line">{errors.login}</p>}
 
-      <div className="auth-card">
-        <div className="auth-logo display">
-          <ShieldAlert size={22} className="auth-logo-icon" /> FactStamp
+        <div className="auth-row">
+          <span />
+          <button type="button" className="auth-link" onClick={() => setResetOpen(true)}>
+            Forgot password?
+          </button>
         </div>
-        <p className="auth-tag">Verify before you forward.</p>
 
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
-          <Input
-            id="login-email"
-            label="Email Address"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={errors.email}
-          />
-          <Input
-            id="login-pass"
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={errors.password}
-          />
-          {errors.login && <p className="auth-error-line">{errors.login}</p>}
-
-          <div className="auth-forgot">
-            <button type="button" className="auth-link" onClick={() => setResetOpen(true)}>
-              Forgot Password?
-            </button>
-          </div>
-
-          <Button variant="primary" size="xl" fullWidth type="submit" loading={loading}>
-            Sign In
-          </Button>
-        </form>
-
-        <div className="auth-divider"><span>OR</span></div>
-
-        <Button variant="secondary" size="xl" fullWidth onClick={handleGoogle}>
-          <GoogleIcon /> Continue with Google
+        <Button variant="primary" size="xl" fullWidth type="submit" loading={loading}>
+          Sign In
         </Button>
+      </form>
 
-        <p className="auth-foot">
-          Don't have an account? <Link to="/register" className="auth-foot-link">Register →</Link>
-        </p>
-      </div>
+      <div className="auth-divider"><span>OR</span></div>
+
+      <Button variant="secondary" size="xl" fullWidth onClick={handleGoogle}>
+        <GoogleIcon /> Continue with Google
+      </Button>
+
+      <p className="auth-foot">
+        Don't have an account? <Link to="/register" className="auth-foot-link">Register →</Link>
+      </p>
 
       <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Reset Password">
         <p className="auth-modal-desc">Enter your email and we'll send you a link to reset your password.</p>
@@ -141,6 +137,8 @@ export default function Login() {
           id="reset-email"
           label="Email Address"
           type="email"
+          name="email"
+          autoComplete="email"
           placeholder="you@example.com"
           value={resetEmail}
           onChange={(e) => setResetEmail(e.target.value)}
@@ -149,6 +147,6 @@ export default function Login() {
           Send Reset Link
         </Button>
       </Modal>
-    </div>
+    </AuthLayout>
   );
 }
