@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ShieldAlert, CheckCircle2, ShieldCheck } from "lucide-react";
+import ThemeToggle from "../ui/ThemeToggle.jsx";
 import "./AuthLayout.css";
 
 const BENEFITS = [
@@ -12,9 +13,14 @@ const BENEFITS = [
 export default function AuthLayout({ heading, subheading, children }) {
   return (
     <div className="auth">
+      <div className="auth-topbar">
+        <ThemeToggle />
+      </div>
+
       <div className="auth-split">
         <aside className="auth-aside">
           <div className="auth-aside-glow" aria-hidden="true" />
+          <div className="auth-aside-glow auth-aside-glow-2" aria-hidden="true" />
           <div className="auth-aside-inner">
             <Link to="/" className="auth-home-link">
               <ArrowLeft size={15} /> Back to Home
@@ -30,6 +36,30 @@ export default function AuthLayout({ heading, subheading, children }) {
               A community fact-checking layer for the forwards you receive
               every day.
             </p>
+
+            <div className="auth-preview" aria-hidden="true">
+              <div className="auth-preview-top">
+                <span className="auth-preview-verdict auth-preview-verdict--false">
+                  FALSE
+                </span>
+                <span className="auth-preview-badge">
+                  <ShieldCheck size={13} /> Community verified
+                </span>
+              </div>
+              <p className="auth-preview-claim">
+                “Hot water with lemon cures dengue fever completely.”
+              </p>
+              <div className="auth-preview-bar">
+                <span style={{ width: "92%" }} />
+              </div>
+              <div className="auth-preview-meta">
+                <span className="auth-preview-conf">92% confidence</span>
+                <span className="auth-preview-dots">
+                  <i /> <i /> <i />
+                </span>
+              </div>
+            </div>
+
             <ul className="auth-benefits">
               {BENEFITS.map((b) => (
                 <li key={b}>

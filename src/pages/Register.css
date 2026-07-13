@@ -1,23 +1,36 @@
 .pw-meter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  margin-top: 12px;
+}
+.pw-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  overflow: hidden;
+}
+.pw-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width var(--t-base), background var(--t-base);
+}
+.pw-reqs {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
   margin-top: 10px;
 }
-.pw-bars {
-  display: flex;
-  gap: 3px;
-}
-.pw-seg {
-  width: 24px;
-  height: 3px;
-  border-radius: 2px;
-  transition: background var(--t-fast);
-}
-.pw-label {
+.pw-reqs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: "Inter", sans-serif;
-  font-weight: 500;
   font-size: 12px;
+  color: var(--text-3);
+  transition: color var(--t-fast);
+}
+.pw-reqs li.met {
+  color: var(--v-true);
 }
 
 .auth-check {

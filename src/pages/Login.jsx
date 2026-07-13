@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Seo from "../components/Seo.jsx";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 import Modal from '../components/ui/Modal.jsx';
@@ -9,6 +10,11 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from "sonner";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const FIELDS = {
+  email: { label: 'Email Address', id: 'login-email' },
+  password: { label: 'Password', id: 'login-pass' },
+};
 
 function GoogleIcon() {
   return (
@@ -29,6 +35,8 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [resetOpen, setResetOpen] = useState(false);
@@ -37,18 +45,47 @@ export default function Login() {
 
   const from = location.state?.from?.pathname || '/';
 
-  const validate = () => {
-    const e = {};
-    if (!email.trim()) e.email = 'Email address is required';
-    else if (!EMAIL_RE.test(email)) e.email = 'Please enter a valid email address';
-    if (!password) e.password = 'Password is required';
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  useEffect(() => {
+    requestAnimationFrame(() => document.getElementById('login-email')?.focus());
+  }, []);
+
+  const fieldError = (name) => {
+    if (name === 'email') {
+      if (!email.trim()) return 'Email address is required';
+      if (!EMAIL_RE.test(email)) return 'Please enter a valid email address';
+    }
+    if (name === 'password') {
+      if (!password) return 'Password is required';
+    }
+    return '';
+  };
+
+  const revalidate = (name) => {
+    setErrors((p) => ({ ...p, [name]: fieldError(name) }));
+  };
+
+  const onChange = (name, value, setter) => {
+    setter(value);
+    if (touched[name]) revalidate(name);
+  };
+
+  const onBlur = (name) => {
+    setTouched((t) => ({ ...t, [name]: true }));
+    revalidate(name);
   };
 
   const handleSubmit = async (ev) => {
     ev.preventDefault();
-    if (!validate()) return;
+    setSubmitted(true);
+    setTouched({ email: true, password: true });
+    const e = {};
+    if (fieldError('email')) e.email = fieldError('email');
+    if (fieldError('password')) e.password = fieldError('password');
+    setErrors(e);
+    if (Object.keys(e).length) {
+      document.getElementById(e.email ? 'login-email' : 'login-pass')?.focus();
+      return;
+    }
     setLoading(true);
     try {
       await login(email, password);
@@ -78,6 +115,10 @@ export default function Login() {
     }, 1200);
   };
 
+  const summaryItems = Object.entries(errors)
+    .filter(([, msg]) => msg)
+    .map(([key, msg]) => ({ key, msg, field: FIELDS[key] }));
+
   return (
     <AuthLayout
       heading="Welcome back"
@@ -85,6 +126,25 @@ export default function Login() {
     >
       <Seo title="FactStamp | Log In" description="Log in to FactStamp to submit and verify WhatsApp claims with the community." />
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        {submitted && summaryItems.length > 0 && (
+          <div className="auth-summary" role="alert">
+            <strong>Please fix the following:</strong>
+            <ul>
+              {summaryItems.map((it) => (
+                <li key={it.key}>
+                  <button
+                    type="button"
+                    className="auth-summary-link"
+                    onClick={() => it.field?.id && document.getElementById(it.field.id)?.focus()}
+                  >
+                    {it.field?.label || it.key}: {it.msg}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <Input
           id="login-email"
           label="Email Address"
@@ -93,8 +153,10 @@ export default function Login() {
           autoComplete="email"
           placeholder="you@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={errors.email}
+          onChange={(e) => onChange('email', e.target.value, setEmail)}
+          onBlur={() => onBlur('email')}
+          error={touched.email ? errors.email : undefined}
+          success={touched.email && !errors.email && email ? 'Valid email' : undefined}
         />
         <Input
           id="login-pass"
@@ -104,8 +166,10 @@ export default function Login() {
           autoComplete="current-password"
           placeholder="••••••••"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={errors.password}
+          onChange={(e) => onChange('password', e.target.value, setPassword)}
+          onBlur={() => onBlur('password')}
+          error={touched.password ? errors.password : undefined}
+          success={touched.password && !errors.password && password ? 'Looks good' : undefined}
         />
         {errors.login && <p className="auth-error-line">{errors.login}</p>}
 
@@ -130,6 +194,13 @@ export default function Login() {
       <p className="auth-foot">
         Don't have an account? <Link to="/register" className="auth-foot-link">Register →</Link>
       </p>
+
+      <div className="auth-footnote">
+        <span className="auth-trust"><Lock size={13} /> Secured &amp; encrypted</span>
+        <span className="auth-legal">
+          <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link>
+        </span>
+      </div>
 
       <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Reset Password">
         <p className="auth-modal-desc">Enter your email and we'll send you a link to reset your password.</p>

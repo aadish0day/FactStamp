@@ -19,6 +19,8 @@ export default function Input({
   const isPassword = type === 'password';
   const inputType = isPassword ? (show ? 'text' : 'password') : type;
   const state = error ? 'error' : success ? 'success' : 'default';
+  const msgId = id ? `${id}-msg` : undefined;
+  const describedBy = error || success || helper ? msgId : undefined;
 
   return (
     <div className={clsx('input-wrap', className)}>
@@ -29,7 +31,14 @@ export default function Input({
       )}
       <div className={clsx('input-field', `input-field-${state}`)}>
         {prefix && <span className="input-affix input-prefix">{prefix}</span>}
-        <input id={id} type={inputType} className="input-el" {...rest} />
+        <input
+          id={id}
+          type={inputType}
+          className="input-el"
+          aria-invalid={error ? 'true' : undefined}
+          aria-describedby={describedBy}
+          {...rest}
+        />
         {isPassword && (
           <button
             type="button"
@@ -44,15 +53,15 @@ export default function Input({
         {suffix && !isPassword && <span className="input-affix input-suffix">{suffix}</span>}
       </div>
       {error ? (
-        <p className="input-msg input-msg-error">
+        <p id={msgId} className="input-msg input-msg-error" role="alert">
           <AlertTriangle size={12} /> {error}
         </p>
       ) : success ? (
-        <p className="input-msg input-msg-success">
+        <p id={msgId} className="input-msg input-msg-success">
           <Check size={12} /> {success}
         </p>
       ) : helper ? (
-        <p className="input-msg input-msg-helper">{helper}</p>
+        <p id={msgId} className="input-msg input-msg-helper">{helper}</p>
       ) : null}
     </div>
   );

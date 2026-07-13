@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Seo from "../components/Seo.jsx";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 import AuthLayout from '../components/layout/AuthLayout.jsx';
@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import './Register.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PW_RE = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 function GoogleIcon() {
   return (
@@ -21,15 +22,12 @@ function GoogleIcon() {
   );
 }
 
-function strengthOf(pw) {
-  if (!pw) return 0;
-  let score = 0;
-  if (pw.length >= 8) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (pw.length >= 12) score++;
-  return Math.min(4, score);
-}
+const PW_REQS = [
+  { label: 'At least 8 characters', test: (p) => p.length >= 8 },
+  { label: 'One uppercase letter', test: (p) => /[A-Z]/.test(p) },
+  { label: 'One number', test: (p) => /[0-9]/.test(p) },
+  { label: '12+ characters (strong)', test: (p) => p.length >= 12 },
+];
 
 const STR_META = [
   { label: '', color: 'var(--border-strong)' },
@@ -39,6 +37,14 @@ const STR_META = [
   { label: 'Strong', color: 'var(--v-true)' },
 ];
 
+const FIELDS = {
+  name: { label: 'Full Name', id: 'reg-name' },
+  email: { label: 'Email Address', id: 'reg-email' },
+  password: { label: 'Password', id: 'reg-pass' },
+  confirm: { label: 'Confirm Password', id: 'reg-confirm' },
+  agree: { label: 'Agreement', id: null },
+};
+
 export default function Register() {
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
@@ -47,29 +53,64 @@ export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [agree, setAgree] = useState(false);
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const from = location.state?.from?.pathname || '/';
-  const strength = strengthOf(form.password);
 
-  const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
+  useEffect(() => {
+    requestAnimationFrame(() => document.getElementById('reg-name')?.focus());
+  }, []);
 
-  const validate = () => {
-    const e = {};
-    if (form.name.trim().length < 2) e.name = 'Name must be at least 2 characters';
-    if (!form.email.trim()) e.email = 'Email address is required';
-    else if (!EMAIL_RE.test(form.email)) e.email = 'Please enter a valid email address';
-    if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(form.password))
-      e.password = 'Must be 8+ characters with 1 uppercase and 1 number';
-    if (form.confirm !== form.password) e.confirm = 'Passwords do not match';
-    if (!agree) e.agree = 'Please agree to verify honestly';
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const fieldError = (name) => {
+    if (name === 'name') {
+      if (form.name.trim().length < 2) return 'Name must be at least 2 characters';
+    }
+    if (name === 'email') {
+      if (!form.email.trim()) return 'Email address is required';
+      if (!EMAIL_RE.test(form.email)) return 'Please enter a valid email address';
+    }
+    if (name === 'password') {
+      if (!PW_RE.test(form.password)) return 'Must be 8+ characters with 1 uppercase and 1 number';
+    }
+    if (name === 'confirm') {
+      if (form.confirm !== form.password) return 'Passwords do not match';
+    }
+    if (name === 'agree') {
+      if (!agree) return 'Please agree to verify honestly';
+    }
+    return '';
+  };
+
+  const revalidate = (name) => setErrors((p) => ({ ...p, [name]: fieldError(name) }));
+
+  const onChange = (name, value, setter) => {
+    setter(value);
+    if (touched[name]) revalidate(name);
+  };
+
+  const onBlur = (name) => {
+    setTouched((t) => ({ ...t, [name]: true }));
+    revalidate(name);
   };
 
   const handleSubmit = async (ev) => {
     ev.preventDefault();
-    if (!validate()) return;
+    setSubmitted(true);
+    setTouched({ name: true, email: true, password: true, confirm: true, agree: true });
+    const e = {};
+    ['name', 'email', 'password', 'confirm', 'agree'].forEach((k) => {
+      const msg = fieldError(k);
+      if (msg) e[k] = msg;
+    });
+    setErrors(e);
+    if (Object.keys(e).length) {
+      const firstBadKey = ['name', 'email', 'password', 'confirm', 'agree'].find((k) => e[k]);
+      const firstId = FIELDS[firstBadKey]?.id;
+      if (firstId) document.getElementById(firstId)?.focus();
+      return;
+    }
     setLoading(true);
     await register(form.name, form.email, form.password);
     navigate(from, { replace: true });
@@ -80,6 +121,14 @@ export default function Register() {
     navigate(from, { replace: true });
   };
 
+  const metCount = PW_REQS.filter((r) => r.test(form.password)).length;
+  const pwPct = (metCount / PW_REQS.length) * 100;
+  const pwColor = STR_META[metCount].color;
+
+  const summaryItems = Object.entries(errors)
+    .filter(([, msg]) => msg)
+    .map(([key, msg]) => ({ key, msg, field: FIELDS[key] }));
+
   return (
     <AuthLayout
       heading="Create your account"
@@ -87,6 +136,25 @@ export default function Register() {
     >
       <Seo title="FactStamp | Create Account" description="Create a FactStamp account to submit suspicious forwards and join community fact-checking." />
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        {submitted && summaryItems.length > 0 && (
+          <div className="auth-summary" role="alert">
+            <strong>Please fix the following:</strong>
+            <ul>
+              {summaryItems.map((it) => (
+                <li key={it.key}>
+                  <button
+                    type="button"
+                    className="auth-summary-link"
+                    onClick={() => it.field?.id && document.getElementById(it.field.id)?.focus()}
+                  >
+                    {it.field?.label || it.key}: {it.msg}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <Input
           id="reg-name"
           label="Full Name"
@@ -94,8 +162,10 @@ export default function Register() {
           autoComplete="name"
           placeholder="Your full name"
           value={form.name}
-          onChange={set('name')}
-          error={errors.name}
+          onChange={(e) => onChange('name', e.target.value, (v) => setForm((p) => ({ ...p, name: v })))}
+          onBlur={() => onBlur('name')}
+          error={touched.name ? errors.name : undefined}
+          success={touched.name && !errors.name && form.name ? 'Looks good' : undefined}
         />
         <Input
           id="reg-email"
@@ -105,8 +175,10 @@ export default function Register() {
           autoComplete="email"
           placeholder="you@example.com"
           value={form.email}
-          onChange={set('email')}
-          error={errors.email}
+          onChange={(e) => onChange('email', e.target.value, (v) => setForm((p) => ({ ...p, email: v })))}
+          onBlur={() => onBlur('email')}
+          error={touched.email ? errors.email : undefined}
+          success={touched.email && !errors.email && form.email ? 'Valid email' : undefined}
         />
         <div>
           <Input
@@ -117,23 +189,25 @@ export default function Register() {
             autoComplete="new-password"
             placeholder="••••••••"
             value={form.password}
-            onChange={set('password')}
-            error={errors.password}
+            onChange={(e) => onChange('password', e.target.value, (v) => setForm((p) => ({ ...p, password: v })))}
+            onBlur={() => onBlur('password')}
+            error={touched.password ? errors.password : undefined}
           />
           {form.password && (
             <div className="pw-meter">
-              <div className="pw-bars">
-                {[1, 2, 3, 4].map((i) => (
-                  <span
-                    key={i}
-                    className="pw-seg"
-                    style={{ background: i <= strength ? STR_META[strength].color : 'var(--border-strong)' }}
-                  />
-                ))}
+              <div className="pw-bar">
+                <span className="pw-bar-fill" style={{ width: `${pwPct}%`, background: pwColor }} />
               </div>
-              <span className="pw-label" style={{ color: STR_META[strength].color }}>
-                {STR_META[strength].label}
-              </span>
+              <ul className="pw-reqs">
+                {PW_REQS.map((r) => {
+                  const met = r.test(form.password);
+                  return (
+                    <li key={r.label} className={met ? 'met' : ''}>
+                      <Check size={12} strokeWidth={3} /> {r.label}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           )}
         </div>
@@ -145,15 +219,20 @@ export default function Register() {
           autoComplete="new-password"
           placeholder="••••••••"
           value={form.confirm}
-          onChange={set('confirm')}
-          error={errors.confirm}
+          onChange={(e) => onChange('confirm', e.target.value, (v) => setForm((p) => ({ ...p, confirm: v })))}
+          onBlur={() => onBlur('confirm')}
+          error={touched.confirm ? errors.confirm : undefined}
+          success={touched.confirm && !errors.confirm && form.confirm ? 'Passwords match' : undefined}
         />
 
         <label className="auth-check">
           <input
             type="checkbox"
             checked={agree}
-            onChange={(e) => setAgree(e.target.checked)}
+            onChange={(e) => {
+              setAgree(e.target.checked);
+              if (touched.agree) revalidate('agree');
+            }}
           />
           <span className="auth-check-box" aria-hidden="true">
             {agree && <Check size={13} strokeWidth={3} />}
@@ -178,6 +257,13 @@ export default function Register() {
       <p className="auth-foot">
         Already have an account? <Link to="/login" className="auth-foot-link">Sign In →</Link>
       </p>
+
+      <div className="auth-footnote">
+        <span className="auth-trust"><Lock size={13} /> Secured &amp; encrypted</span>
+        <span className="auth-legal">
+          <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link>
+        </span>
+      </div>
     </AuthLayout>
   );
 }

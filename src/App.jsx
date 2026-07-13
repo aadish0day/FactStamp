@@ -24,6 +24,8 @@ const VerifyDetail = lazy(() => import("./pages/VerifyDetail.jsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.jsx"));
 const Profile = lazy(() => import("./pages/Profile.jsx"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel.jsx"));
+const Terms = lazy(() => import("./pages/Terms.jsx"));
+const Privacy = lazy(() => import("./pages/Privacy.jsx"));
 
 function RouteFallback() {
   return (
@@ -146,6 +148,8 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
