@@ -20,7 +20,7 @@
 .btn-full { width: 100%; }
 
 .btn-icon { flex-shrink: 0; }
-.btn-label { display: inline-block; }
+.btn-label { display: inline-block; color: inherit; }
 
 .btn-spinner {
   width: 16px; height: 16px;
@@ -38,10 +38,10 @@
 .btn-xl { padding: 18px 36px; font-size: 16px; border-radius: var(--r-lg); }
 
 /* PRIMARY */
-.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 0 32px rgba(108,99,255,0.20); }
+.btn-primary { background: var(--accent); color: #ffffff !important; box-shadow: 0 0 32px rgba(108,99,255,0.20); }
 .btn-primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 0 32px rgba(108,99,255,0.45); transform: translateY(-1px); }
 .btn-primary:active:not(:disabled) { background: var(--accent-press); box-shadow: none; }
-.btn-primary:disabled { background: rgba(108,99,255,0.35); color: rgba(255,255,255,0.5); box-shadow: none; }
+.btn-primary:disabled { background: rgba(108,99,255,0.35); color: rgba(255,255,255,0.5) !important; box-shadow: none; }
 
 /* SECONDARY */
 .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); }

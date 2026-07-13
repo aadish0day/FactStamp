@@ -37,6 +37,9 @@
   font-family: 'Inter', sans-serif;
   font-size: 14px;
 }
+.input-el:focus-visible {
+  outline: none;
+}
 .input-el::placeholder { color: var(--text-3); }
 
 .input-affix { display: flex; align-items: center; color: var(--text-3); font-size: 14px; }
