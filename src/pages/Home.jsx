@@ -176,8 +176,8 @@ export default function Home() {
                 {c.points.map((p) => {
                   const isNo = p.startsWith('No ') || p.startsWith('Limited') || p.startsWith('Expert') || p.startsWith('Web') || p.startsWith('Long');
                   return (
-                    <li key={p} className={clsx('home-compare-item', c.accent ? (isNo ? 'home-compare-no' : 'home-compare-yes') : '')}>
-                      {c.accent ? (isNo ? <X size={14} /> : <Check size={14} />) : '•'} {p}
+                    <li key={p} className={clsx('home-compare-item', isNo ? 'home-compare-no' : 'home-compare-yes')}>
+                      {isNo ? <X size={14} /> : <Check size={14} />} {p}
                     </li>
                   );
                 })}
