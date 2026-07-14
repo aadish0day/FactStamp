@@ -32,9 +32,9 @@ const PW_REQS = [
 const STR_META = [
   { label: '', color: 'var(--border-strong)' },
   { label: 'Weak', color: 'var(--v-false)' },
-  { label: 'Fair', color: 'var(--v-misleading)' },
-  { label: 'Good', color: 'var(--v-pending)' },
-  { label: 'Strong', color: 'var(--v-true)' },
+  { label: 'Flimsy', color: 'var(--v-misleading)' },
+  { label: 'Solid', color: 'var(--v-pending)' },
+  { label: 'Bulletproof', color: 'var(--v-true)' },
 ];
 
 const FIELDS = {
@@ -195,6 +195,12 @@ export default function Register() {
           />
           {form.password && (
             <div className="pw-meter">
+              <div className="pw-meter-head">
+                <span className="pw-meter-label">Stamp confidence</span>
+                <span className="pw-meter-tag" style={{ color: pwColor }}>
+                  {STR_META[metCount].label || '—'}
+                </span>
+              </div>
               <div className="pw-bar">
                 <span className="pw-bar-fill" style={{ width: `${pwPct}%`, background: pwColor }} />
               </div>
