@@ -231,6 +231,15 @@
   color: var(--accent);
   flex-shrink: 0;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-aside-glow,
+  .auth-benefits li,
+  .auth-card {
+    animation: none !important;
+  }
+  .auth-benefits li { opacity: 1; }
+}
 .auth-copyright {
   position: relative;
   z-index: 1;
@@ -384,6 +393,46 @@
   color: var(--text-3);
   font-size: 12px;
 }
+.auth-divider span {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Branded social button — sits above the generic secondary */
+.auth-google {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.auth-google:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.auth-google:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+/* Entrance orchestration for the form card */
+.auth-card-head,
+.auth-form,
+.auth-divider,
+.auth-google,
+.auth-foot,
+.auth-footnote {
+  animation: fadeUp 360ms ease-out both;
+}
+.auth-card-head { animation-delay: 60ms; }
+.auth-form { animation-delay: 120ms; }
+.auth-divider { animation-delay: 180ms; }
+.auth-google { animation-delay: 220ms; }
+.auth-foot { animation-delay: 260ms; }
+.auth-footnote { animation-delay: 300ms; }
 .auth-divider::before,
 .auth-divider::after {
   content: "";
@@ -465,12 +514,27 @@
     top: -140px;
     right: -100px;
   }
-  .auth-aside-center,
+  .auth-aside-center {
+    max-width: 520px;
+    gap: 0;
+  }
+  .auth-benefits,
   .auth-copyright {
     display: none;
   }
+  .auth-headline {
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .auth-aside-sub {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .auth-stage {
+    margin-bottom: 18px;
+  }
   .auth-home-link {
-    margin-bottom: 0;
+    margin-bottom: 12px;
   }
   .auth-main {
     padding: 28px 20px 44px;

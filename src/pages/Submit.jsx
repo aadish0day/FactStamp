@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import Seo from "../components/Seo.jsx";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   CheckCircle, CheckCircle2, UploadCloud, X, ChevronDown, Search,
@@ -31,9 +31,10 @@ const SAMPLE_TEXT =
 export default function Submit() {
   const { claims, addClaim } = useData();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [tab, setTab] = useState('text');
-  const [text, setText] = useState('');
+  const [text, setText] = useState(location.state?.prefill || '');
   const [category, setCategory] = useState('health');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null); // null | 'duplicate' | 'success'

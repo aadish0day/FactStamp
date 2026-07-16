@@ -187,7 +187,7 @@ export default function Login() {
 
       <div className="auth-divider"><span>OR</span></div>
 
-      <Button variant="secondary" size="xl" fullWidth onClick={handleGoogle}>
+      <Button variant="secondary" size="xl" fullWidth onClick={handleGoogle} className="auth-google">
         <GoogleIcon /> Continue with Google
       </Button>
 
