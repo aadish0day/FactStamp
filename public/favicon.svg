@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="favBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1714"/>
+      <stop offset="100%" stop-color="#0d0b0a"/>
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer rounded squircle base -->
+  <rect width="32" height="32" rx="7.5" fill="url(#favBg)"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7" fill="none" stroke="#ea580c" stroke-opacity="0.4" stroke-width="1"/>
+
+  <!-- Shield emblem -->
+  <path d="M16 4.5L25 8.2v6.8c0 5.6-4.2 10.4-9 12.5-4.8-2.1-9-6.9-9-12.5V8.2L16 4.5z" fill="url(#shieldGrad)"/>
+
+  <!-- Inner stamp mark: Checkmark + Exclamation dot -->
+  <path d="M11.5 15.5l3.2 3.2 6.3-6.4" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

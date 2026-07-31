@@ -1,7 +1,23 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ShieldCheck, ArrowUpDown, Clock, Users, Star, ArrowRight, Timer, RotateCcw } from 'lucide-react'
+import {
+  ShieldCheck,
+  ArrowUpDown,
+  Clock,
+  Users,
+  Star,
+  ArrowRight,
+  Timer,
+  RotateCcw,
+  Search,
+  CheckCircle2,
+  Sparkles,
+  Zap,
+  ShieldAlert,
+  Flame,
+  Filter
+} from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Badge } from '@/components/ui/Badge'
@@ -17,24 +33,17 @@ import type { Claim } from '@/lib/types'
 type SortMode = 'newest' | 'closest' | 'reputation'
 
 const SORT_OPTIONS: { value: SortMode; label: string }[] = [
-  { value: 'newest', label: 'Newest' },
-  { value: 'closest', label: 'Closest to resolving' },
-  { value: 'reputation', label: 'Best rep match' },
+  { value: 'newest', label: 'Newest Submissions' },
+  { value: 'closest', label: 'Closest to Resolving' },
+  { value: 'reputation', label: 'Best Rep Match' },
 ]
 
 const FILTERS = ['All', 'Health', 'Political', 'Religious', 'Financial', 'Other']
 
-/* ── Mock "reputation match" — how well this claim's needs fit the user ── */
 function repMatchLabel(count: number): { label: string; level: 'high' | 'medium' | 'low' } {
   if (count >= 2) return { label: 'Strong match', level: 'high' }
   if (count === 1) return { label: 'Good match', level: 'medium' }
   return { label: 'Fair match', level: 'low' }
-}
-
-const levelStyles = {
-  high: 'text-[var(--color-v-true)]',
-  medium: 'text-[var(--color-accent)]',
-  low: 'text-[var(--color-fg-muted)]',
 }
 
 const itemVariants = {
@@ -48,16 +57,20 @@ export function VerifyQueue() {
   const { user } = useAuth()
   const [activeFilter, setActiveFilter] = useState('all')
   const [sortMode, setSortMode] = useState<SortMode>('newest')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const pendingClaims = getPendingClaims()
 
   const filteredClaims = useMemo(() => {
     let list = pendingClaims.filter((claim) => {
-      if (activeFilter === 'all') return true
-      return claim.category === activeFilter
+      if (activeFilter !== 'all' && claim.category !== activeFilter) return false
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase()
+        return claim.text.toLowerCase().includes(q) || claim.category.toLowerCase().includes(q)
+      }
+      return true
     })
 
-    // Sort
     switch (sortMode) {
       case 'newest':
         list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -66,7 +79,6 @@ export function VerifyQueue() {
         list.sort((a, b) => b.verificationCount - a.verificationCount)
         break
       case 'reputation':
-        // "Best rep match" = prefer claims with avg verifier rep close to user's rep
         list.sort((a, b) => {
           const userRep = user?.reputation ?? 50
           const aDiff = Math.abs((a.avgVerifierReputation ?? 50) - userRep)
@@ -77,61 +89,94 @@ export function VerifyQueue() {
     }
 
     return list
-  }, [pendingClaims, activeFilter, sortMode, user])
+  }, [pendingClaims, activeFilter, sortMode, searchQuery, user])
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
       <Seo title="Verification Queue" description="Help fact-check these claims by researching and submitting your verdict with sources." />
       <Breadcrumbs />
 
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+      {/* Header Banner */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 bg-gradient-to-r from-[var(--color-surface-2)] via-[var(--color-surface)] to-[var(--color-surface-2)] p-6 lg:p-8 rounded-[var(--radius-xl)] border border-[var(--color-border)] shadow-[var(--shadow-md)]">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--color-fg)] mb-1">
-            Verification queue
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] mb-3">
+            <Zap className="w-3.5 h-3.5" />
+            <span>Earn +2 Reputation Per Verified Claim</span>
+          </div>
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-[var(--color-fg)] tracking-tight mb-2">
+            Verification Queue
           </h1>
-          <p className="text-sm text-[var(--color-fg-2)]">
-            Help fact-check these claims by researching and submitting your verdict with sources.
+          <p className="text-sm lg:text-base text-[var(--color-fg-2)] max-w-xl leading-relaxed">
+            Review viral WhatsApp claims, inspect sources, and cast your verdict to protect the community.
           </p>
         </div>
 
-        {/* Sort dropdown */}
-        <div className="flex items-center gap-2">
-          <ArrowUpDown className="w-3.5 h-3.5 text-[var(--color-fg-muted)]" aria-hidden="true" />
-          <select
-            value={sortMode}
-            onChange={(e) => setSortMode(e.target.value as SortMode)}
-            className="text-sm rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-fg)] px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-subtle)] focus:border-[var(--color-accent)]"
-            aria-label="Sort claims"
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+        <div className="flex items-center gap-4 flex-shrink-0 bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] p-4 rounded-[var(--radius-lg)]">
+          <div className="w-10 h-10 rounded-full bg-[var(--color-brand-subtle)] flex items-center justify-center text-[var(--color-brand)] font-bold text-lg">
+            {pendingClaims.length}
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]">Pending Claims</p>
+            <p className="text-[11px] text-[var(--color-fg-muted)]">Awaiting consensus verification</p>
+          </div>
         </div>
       </div>
 
-      {/* Filter pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-3 -mx-4 px-4 mb-6 snap-x scrollbar-none">
-        {FILTERS.map((filter) => {
-          const value = filter.toLowerCase()
-          return (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(value)}
-              className={cn(
-                'flex-shrink-0 px-4 py-2 rounded-full font-medium text-sm transition-colors snap-start',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]',
-                activeFilter === value
-                  ? 'bg-[var(--color-brand)] text-[var(--color-brand-fg)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border)]'
-              )}
+      {/* Controls Bar: Search + Category Filters + Sort */}
+      <div className="space-y-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          {/* Search Field */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-fg-muted)]" />
+            <input
+              type="text"
+              placeholder="Search pending claims text or keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 text-xs lg:text-sm rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[var(--color-brand-subtle)] shadow-[var(--shadow-xs)]"
+            />
+          </div>
+
+          {/* Sort Selector */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs font-bold text-[var(--color-fg-2)] uppercase tracking-wider hidden sm:inline">Sort:</span>
+            <select
+              value={sortMode}
+              onChange={(e) => setSortMode(e.target.value as SortMode)}
+              className="text-xs font-bold rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-fg)] px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-subtle)] focus:border-[var(--color-brand)] shadow-[var(--shadow-xs)] cursor-pointer"
+              aria-label="Sort claims"
             >
-              {filter}
-            </button>
-          )
-        })}
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {FILTERS.map((filter) => {
+            const value = filter.toLowerCase()
+            const isSelected = activeFilter === value
+            return (
+              <button
+                key={filter}
+                type="button"
+                onClick={() => setActiveFilter(value)}
+                className={cn(
+                  'flex-shrink-0 px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer select-none',
+                  isSelected
+                    ? 'bg-[var(--color-brand)] text-white shadow-[var(--shadow-sm)]'
+                    : 'bg-[var(--color-surface)] text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border-soft)]'
+                )}
+              >
+                {filter}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Loading state */}
@@ -140,7 +185,7 @@ export function VerifyQueue() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-16 rounded-[var(--radius-md)] animate-shimmer"
+              className="h-20 rounded-[var(--radius-xl)] bg-[var(--color-surface)] animate-shimmer"
               aria-hidden="true"
             />
           ))}
@@ -148,32 +193,34 @@ export function VerifyQueue() {
       ) : filteredClaims.length === 0 ? (
         <EmptyState
           icon={ShieldCheck}
-          title="You're caught up — no claims need your verification right now"
-          description="The community has cleared all pending claims. Check back later or submit a new claim for the community to verify."
+          title="No claims match your search or filter"
+          description="Try adjusting your search keywords or switching category filters to view pending claims."
           action={{
-            label: 'Submit a claim',
-            onClick: () => navigate('/submit'),
+            label: 'Clear Filters',
+            onClick: () => {
+              setActiveFilter('all')
+              setSearchQuery('')
+            },
           }}
         />
       ) : (
         <>
-          {/* ── Desktop: Table layout ── */}
-          <div className="hidden sm:block">
-            <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
-              {/* Table header */}
-              <div className="grid grid-cols-[1fr_100px_100px_110px_80px] gap-3 px-5 py-3 bg-[var(--color-surface-2)]/60 border-b border-[var(--color-border)] text-xs font-semibold uppercase tracking-wider text-[var(--color-fg-muted)]">
-                <span>Claim</span>
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-md)] overflow-hidden">
+              <div className="grid grid-cols-[1.8fr_110px_120px_110px_90px] gap-4 px-6 py-3.5 bg-[var(--color-surface-2)]/70 border-b border-[var(--color-border-soft)] text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]">
+                <span>Claim Content</span>
                 <span className="text-center">Category</span>
                 <span className="text-center">Consensus</span>
                 <span className="text-center">Deadline</span>
                 <span className="text-right">Action</span>
               </div>
 
-              {/* Table body */}
               <motion.div
                 initial="hidden"
                 animate="show"
                 variants={{ show: { transition: { staggerChildren: 0.04 } } }}
+                className="divide-y divide-[var(--color-border-soft)]"
               >
                 {filteredClaims.map((claim) => (
                   <WorklistRowDesktop
@@ -186,18 +233,18 @@ export function VerifyQueue() {
               </motion.div>
             </div>
 
-            {/* Result count */}
-            <p className="mt-3 text-xs text-[var(--color-fg-muted)] text-center">
-              {filteredClaims.length} claim{filteredClaims.length !== 1 ? 's' : ''} awaiting verification
+            <p className="mt-4 text-xs font-mono font-bold text-[var(--color-fg-muted)] text-center">
+              Showing {filteredClaims.length} claim{filteredClaims.length !== 1 ? 's' : ''} awaiting community verification
             </p>
           </div>
 
-          {/* ── Mobile: Tight card list ── */}
-          <div className="sm:hidden space-y-3">
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
             <motion.div
               initial="hidden"
               animate="show"
               variants={{ show: { transition: { staggerChildren: 0.04 } } }}
+              className="space-y-3"
             >
               {filteredClaims.map((claim) => (
                 <WorklistRowMobile
@@ -209,8 +256,8 @@ export function VerifyQueue() {
               ))}
             </motion.div>
 
-            <p className="text-xs text-[var(--color-fg-muted)] text-center pt-2">
-              {filteredClaims.length} claim{filteredClaims.length !== 1 ? 's' : ''} awaiting verification
+            <p className="text-xs font-mono font-bold text-[var(--color-fg-muted)] text-center pt-2">
+              Showing {filteredClaims.length} claim{filteredClaims.length !== 1 ? 's' : ''} awaiting verification
             </p>
           </div>
         </>
@@ -219,34 +266,30 @@ export function VerifyQueue() {
   )
 }
 
-/* ── Consensus Track — 3-dot verifier progress indicator ── */
-
 function ConsensusTrack({ count, max = 3 }: { count: number; max?: number }) {
   const close = count === max - 1
   return (
     <div className="inline-flex items-center gap-2">
-      <div className="flex items-center gap-[5px]" role="img" aria-label={`${count} of ${max} verifiers`}>
+      <div className="flex items-center gap-1.5" role="img" aria-label={`${count} of ${max} verifiers`}>
         {Array.from({ length: max }).map((_, i) => (
           <span
             key={i}
             className={cn(
-              'w-[10px] h-[10px] rounded-full transition-all duration-300',
-              i < count && 'bg-[var(--color-brand)] border border-[var(--color-brand)]',
+              'w-3 h-3 rounded-full transition-all duration-300',
+              i < count && 'bg-[var(--color-brand)] border border-[var(--color-brand)] shadow-[0_0_6px_var(--color-brand)]',
               i === count && close && 'border-2 border-dashed border-[var(--color-brand)] animate-pulse',
               i === count && !close && 'border-2 border-dashed border-[var(--color-border-strong)]',
-              i > count && 'bg-[var(--color-surface-2)] border border-[var(--color-border-strong)]'
+              i > count && 'bg-[var(--color-surface-2)] border border-[var(--color-border-soft)]'
             )}
           />
         ))}
       </div>
-      <span className={cn('text-[11px] font-mono tabular-nums', close ? 'text-[var(--color-brand)] font-semibold' : 'text-[var(--color-fg-muted)]')}>
+      <span className={cn('text-xs font-mono font-bold tabular-nums', close ? 'text-[var(--color-brand)]' : 'text-[var(--color-fg-muted)]')}>
         {count}/{max}
       </span>
     </div>
   )
 }
-
-/* ── Desktop row ── */
 
 function WorklistRowDesktop({
   claim,
@@ -257,93 +300,79 @@ function WorklistRowDesktop({
   userRep: number
   onVerify: () => void
 }) {
-  const match = repMatchLabel(claim.verificationCount)
-  const repDiff = Math.abs((claim.avgVerifierReputation ?? 50) - userRep)
-  const showRepHint = repDiff <= 15
   const deadline = timeRemaining(claim.consensusDeadline)
 
   return (
     <motion.div
       variants={itemVariants}
       className={cn(
-        'grid grid-cols-[1fr_100px_100px_110px_80px] gap-3 px-5 py-3.5 items-center border-b border-[var(--color-border-soft)] last:border-b-0 transition-colors',
-        deadline.urgent ? 'bg-[var(--color-v-mislead-bg)]/30 hover:bg-[var(--color-v-mislead-bg)]/50' : 'hover:bg-[var(--color-surface-2)]/40'
+        'grid grid-cols-[1.8fr_110px_120px_110px_90px] gap-4 px-6 py-4 items-center transition-colors',
+        deadline.urgent ? 'bg-[var(--color-v-mislead-bg)]/20 hover:bg-[var(--color-v-mislead-bg)]/40' : 'hover:bg-[var(--color-surface-2)]/60'
       )}
     >
-      {/* Claim excerpt */}
       <div className="min-w-0">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-1.5">
           <CategoryBadge category={claim.category} />
           {claim.verificationCount > 0 && (
-            <Badge variant="info" size="sm">
-              {claim.verificationCount}/3
-            </Badge>
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--color-brand-subtle)] text-[var(--color-brand)] border border-[var(--color-brand-subtle)]">
+              {claim.verificationCount}/3 Verifiers
+            </span>
           )}
           {deadline.urgent && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--color-v-mislead)]">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-v-mislead)] bg-[var(--color-v-mislead-bg)] px-2 py-0.5 rounded-full border border-[var(--color-v-mislead-border)]">
               <Timer className="w-3 h-3" aria-hidden="true" />
               Urgent
             </span>
           )}
         </div>
-        <p className="text-sm text-[var(--color-fg)] truncate leading-relaxed">
+        <p className="text-xs lg:text-sm font-medium text-[var(--color-fg)] truncate leading-relaxed">
           &ldquo;{claim.text}&rdquo;
         </p>
-        <p className="text-[11px] text-[var(--color-fg-muted)] font-mono tabular-nums mt-0.5">
-          <Clock className="w-3 h-3 inline-block -mt-0.5 me-0.5" aria-hidden="true" />
-          {formatDistanceToNow(new Date(claim.createdAt), { addSuffix: true })}
+        <p className="text-[11px] text-[var(--color-fg-muted)] font-mono tabular-nums mt-1">
+          Submitted {formatDistanceToNow(new Date(claim.createdAt), { addSuffix: true })}
         </p>
       </div>
 
-      {/* Category */}
       <div className="text-center">
-        <span className="text-xs text-[var(--color-fg-2)] capitalize">{claim.category}</span>
+        <span className="text-xs font-bold text-[var(--color-fg-2)] capitalize">{claim.category}</span>
       </div>
 
-      {/* Consensus Track indicator */}
       <div className="flex justify-center">
         <ConsensusTrack count={claim.verificationCount} />
       </div>
 
-      {/* Deadline column */}
       <div className="text-center">
         {deadline.expired ? (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-v-contested)]">
-            <RotateCcw className="w-3 h-3" aria-hidden="true" />
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-v-contested)]">
+            <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
             Expired
           </span>
         ) : (
           <div className="flex flex-col items-center">
             <span className={cn(
-              'text-xs font-mono tabular-nums',
-              deadline.urgent ? 'text-[var(--color-v-mislead)] font-semibold' : 'text-[var(--color-fg-2)]'
+              'text-xs font-mono font-bold tabular-nums',
+              deadline.urgent ? 'text-[var(--color-v-mislead)]' : 'text-[var(--color-fg-2)]'
             )}>
               {deadline.label}
             </span>
-            {showRepHint && claim.avgVerifierReputation !== undefined && (
-              <span className="text-[10px] text-[var(--color-fg-muted)] mt-0.5">
-                Rep: ~{claim.avgVerifierReputation}%
-              </span>
-            )}
           </div>
         )}
       </div>
 
-      {/* Action */}
       <div className="text-right">
-        <button
+        <Button
+          intent="primary"
+          size="sm"
           onClick={onVerify}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-md)] font-semibold text-xs bg-[var(--color-brand)] text-[var(--color-brand-fg)] hover:bg-[var(--color-brand-hover)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+          className="font-bold shadow-[var(--shadow-xs)]"
         >
           Verify
-          <ArrowRight className="w-3 h-3" aria-hidden="true" />
-        </button>
+          <ArrowRight className="w-3.5 h-3.5 me-1" aria-hidden="true" />
+        </Button>
       </div>
     </motion.div>
   )
 }
-
-/* ── Helper: compute remaining time until a deadline ── */
 
 function timeRemaining(deadline: string): { label: string; urgent: boolean; expired: boolean } {
   const now = new Date()
@@ -367,8 +396,6 @@ function timeRemaining(deadline: string): { label: string; urgent: boolean; expi
   return { label: `${minutes}m left`, urgent: true, expired: false }
 }
 
-/* ── Mobile row ── */
-
 function WorklistRowMobile({
   claim,
   userRep,
@@ -378,68 +405,58 @@ function WorklistRowMobile({
   userRep: number
   onVerify: () => void
 }) {
-  const match = repMatchLabel(claim.verificationCount)
   const deadline = timeRemaining(claim.consensusDeadline)
 
   return (
     <motion.div
       variants={itemVariants}
       className={cn(
-        'hairline-card p-4',
-        deadline.urgent && 'border-[var(--color-v-mislead-border)]'
+        'p-5 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)]',
+        deadline.urgent && 'border-[var(--color-v-mislead-border)] bg-[var(--color-v-mislead-bg)]/10'
       )}
     >
       <button
+        type="button"
         onClick={onVerify}
-        className="w-full text-left no-underline text-inherit cursor-pointer bg-transparent border-none p-0"
+        className="w-full text-left cursor-pointer bg-transparent border-none p-0"
       >
-        {/* Top row: category + consensus dots */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-3">
           <CategoryBadge category={claim.category} />
           <ConsensusTrack count={claim.verificationCount} />
         </div>
 
-        {/* Claim text */}
-        <p className="text-sm text-[var(--color-fg)] line-clamp-2 leading-relaxed mb-2">
+        <p className="text-xs lg:text-sm text-[var(--color-fg)] font-medium line-clamp-2 leading-relaxed mb-3">
           &ldquo;{claim.text}&rdquo;
         </p>
 
-        {/* Bottom info row */}
-        <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--color-border-soft)]">
           <span className="text-[var(--color-fg-muted)] font-mono tabular-nums">
-            <Clock className="w-3 h-3 inline-block -mt-0.5 me-0.5" aria-hidden="true" />
             {formatDistanceToNow(new Date(claim.createdAt), { addSuffix: true })}
           </span>
-          <div className="flex items-center gap-2">
+          <div>
             {deadline.urgent && (
-              <span className="inline-flex items-center gap-1 text-[var(--color-v-mislead)] font-semibold">
-                <Timer className="w-3 h-3" aria-hidden="true" />
+              <span className="inline-flex items-center gap-1 text-[var(--color-v-mislead)] font-bold">
+                <Timer className="w-3.5 h-3.5" />
                 {deadline.label}
               </span>
             )}
             {!deadline.urgent && !deadline.expired && (
-              <span className="font-mono text-[var(--color-fg-muted)] tabular-nums">
+              <span className="font-mono text-[var(--color-fg-2)] font-bold">
                 {deadline.label}
-              </span>
-            )}
-            {deadline.expired && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-v-contested)]">
-                <RotateCcw className="w-3 h-3" aria-hidden="true" />
-                Expired
               </span>
             )}
           </div>
         </div>
       </button>
 
-      {/* Verify CTA */}
-      <button
+      <Button
+        intent="primary"
+        className="mt-4 w-full font-bold"
         onClick={onVerify}
-        className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-[var(--radius-md)] font-semibold text-sm bg-[var(--color-brand)] text-[var(--color-brand-fg)] hover:bg-[var(--color-brand-hover)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
       >
-        {deadline.expired ? 'View expired claim' : 'Verify this claim'}
-        <ArrowRight className="w-4 h-4" aria-hidden="true" />
-      </button>
+        {deadline.expired ? 'View Expired Claim' : 'Verify This Claim'}
+        <ArrowRight className="w-4 h-4 me-1" aria-hidden="true" />
+      </Button>
     </motion.div>
   )
 }

@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Lock, Mail, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { Lock, Mail, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthLayout } from '@/components/AuthLayout'
 import { useAuth } from '@/contexts/AuthContext'
-import { MOCK_USERS } from '@/lib/types'
-import { cn } from '@/lib/utils'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -115,22 +113,24 @@ export function SignIn() {
 
   return (
     <AuthLayout
+      mode="signin"
       heading="Welcome back"
-      subheading="Sign in to submit claims and help verify misinformation."
+      subheading="Sign in to your account to submit claims and participate in fact-checks."
     >
       <Seo title="Sign In" description="Sign in to FactStamp to submit claims and help verify WhatsApp misinformation." />
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         {/* Error summary */}
         {submitted && summaryItems.length > 0 && (
           <div
-            className="p-3 rounded-[var(--radius-md)] border mb-1 animate-pop-in"
+            className="p-3.5 rounded-[var(--radius-md)] border mb-1 animate-pop-in shadow-[var(--shadow-xs)]"
             style={{
               backgroundColor: 'var(--color-v-false-bg)',
               borderColor: 'color-mix(in srgb, var(--color-v-false) 35%, transparent)',
             }}
             role="alert"
           >
-            <strong className="block text-xs font-semibold text-[var(--color-v-false)] mb-1.5">
+            <strong className="block text-xs font-bold text-[var(--color-v-false)] mb-1.5 flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
               Please fix the following:
             </strong>
             <ul className="flex flex-col gap-1">
@@ -150,7 +150,7 @@ export function SignIn() {
         )}
 
         <div>
-          <label htmlFor="signin-email" className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
+          <label htmlFor="signin-email" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
             Email Address
           </label>
           <Input
@@ -173,81 +173,79 @@ export function SignIn() {
             aria-describedby={errors.email ? 'signin-email-error' : undefined}
           />
           {touched.email && !errors.email && email && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-medium">Valid email address</p>
+            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold flex items-center gap-1">
+              ✓ Valid email format
+            </p>
           )}
           {errors.email && (
-            <p id="signin-email-error" className="mt-1 text-[11px] text-[var(--color-v-false)]">{errors.email}</p>
+            <p id="signin-email-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.email}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="signin-password" className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
-            Password
-          </label>
-          <div className="relative">
-          <Input
-            id="signin-password"
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="current-password"
-            placeholder="••••••••"
-            leftIcon={<Lock className="w-4 h-4 text-[var(--color-fg-muted)]" />}
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value)
-              if (touched.password) {
-                setErrors((prev) => ({ ...prev, password: fieldError('password'), form: '' }))
-              }
-            }}
-            onBlur={() => onBlur('password')}
-            error={!!errors.password}
-            aria-invalid={!!errors.password}
-            aria-describedby={errors.password ? 'signin-password-error' : undefined}
-            className="pr-10"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-transparent border-none cursor-pointer text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors"
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-            tabIndex={-1}
-          >
-            {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
-          </button>
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor="signin-password" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]">
+              Password
+            </label>
+            <button
+              type="button"
+              className="bg-transparent border-none text-xs font-semibold text-[var(--color-brand)] hover:text-[var(--color-brand-hover)] cursor-pointer transition-colors"
+              onClick={() => {
+                toast('Reset Password', {
+                  description: 'Password reset is simulated in demo mode. Select a demo user below to log in instantly.',
+                })
+              }}
+            >
+              Forgot password?
+            </button>
           </div>
-          {touched.password && !errors.password && password && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)]">Looks good</p>
-          )}
+          <div className="relative">
+            <Input
+              id="signin-password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              placeholder="••••••••"
+              leftIcon={<Lock className="w-4 h-4 text-[var(--color-fg-muted)]" />}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                if (touched.password) {
+                  setErrors((prev) => ({ ...prev, password: fieldError('password'), form: '' }))
+                }
+              }}
+              onBlur={() => onBlur('password')}
+              error={!!errors.password}
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? 'signin-password-error' : undefined}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-transparent border-none cursor-pointer text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
+            </button>
+          </div>
           {errors.password && (
-            <p id="signin-password-error" className="mt-1 text-[11px] text-[var(--color-v-false)]">{errors.password}</p>
+            <p id="signin-password-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.password}</p>
           )}
         </div>
 
         {/* Form-level error */}
         {errors.form && (
-          <p className="text-xs font-medium text-[var(--color-v-false)] animate-pop-in">
+          <p className="text-xs font-semibold text-[var(--color-v-false)] animate-pop-in">
             {errors.form}
           </p>
         )}
-
-        <div className="flex items-center justify-end">
-          <button
-            type="button"
-            className="bg-transparent border-none text-xs font-medium text-[var(--color-brand)] hover:text-[var(--color-brand-hover)] cursor-pointer transition-colors"
-            onClick={() => {
-              toast('Reset password', {
-                description: 'Password reset is not available in demo mode. Use a demo account to sign in.',
-              })
-            }}
-          >
-            Forgot password?
-          </button>
-        </div>
 
         <Button
           type="submit"
           intent="primary"
           size="lg"
-          className="w-full"
+          className="w-full mt-1 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all cursor-pointer font-bold"
           loading={loading}
         >
           Sign In
@@ -255,9 +253,9 @@ export function SignIn() {
       </form>
 
       {/* OR divider */}
-      <div className="flex items-center gap-3 my-5">
+      <div className="flex items-center gap-3 my-4">
         <div className="flex-1 h-px bg-[var(--color-border)]" />
-        <span className="text-xs font-semibold tracking-widest uppercase text-[var(--color-fg-muted)]">OR</span>
+        <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--color-fg-muted)]">OR</span>
         <div className="flex-1 h-px bg-[var(--color-border)]" />
       </div>
 
@@ -265,68 +263,12 @@ export function SignIn() {
       <Button
         intent="secondary"
         size="lg"
-        className="w-full"
+        className="w-full font-semibold border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
         onClick={handleGoogle}
       >
         <GoogleIcon />
         Continue with Google
       </Button>
-
-      <p className="text-center text-sm text-[var(--color-fg-2)] mt-5">
-        Don&apos;t have an account?{' '}
-        <Link to="/signup" className="font-medium text-[var(--color-brand)] hover:underline">
-          Create one
-        </Link>
-      </p>
-
-      {/* Demo accounts */}
-      <details className="mt-4 group">
-        <summary className="text-xs font-medium text-[var(--color-fg-muted)] cursor-pointer hover:text-[var(--color-fg-2)] transition-colors list-none flex items-center gap-1">
-          <ArrowRight className="w-3 h-3 group-open:rotate-90 transition-transform" aria-hidden="true" />
-          Quick demo login
-        </summary>
-        <div className="mt-3 flex flex-col gap-1">
-          {MOCK_USERS.map((u) => (
-            <button
-              key={u.uid}
-              type="button"
-              disabled={loading}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 rounded-[var(--radius-md)] text-left text-sm transition-colors',
-                'hover:bg-[var(--color-brand-subtle)]',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]'
-              )}
-              onClick={async () => {
-                setLoading(true)
-                try {
-                  await login(u.email)
-                  toast.success('Signed in', {
-                    description: `Welcome back, ${u.displayName}.`,
-                  })
-                  const from = (location.state as { from?: { pathname: string } })?.from?.pathname
-                  navigate(from || '/')
-                } catch (err) {
-                  const message = err instanceof Error ? err.message : 'Sign in failed'
-                  toast.error('Sign in failed', {
-                    description: message,
-                  })
-                } finally {
-                  setLoading(false)
-                }
-              }}
-            >
-              <div className="w-7 h-7 rounded-full bg-[var(--color-brand)] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                {u.displayName.charAt(0)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-[var(--color-fg)] truncate">{u.displayName}</p>
-                <p className="text-[10px] text-[var(--color-fg-muted)]">{u.email}</p>
-              </div>
-              <span className="text-[10px] font-mono tabular-nums text-[var(--color-brand)]">{u.reputation}%</span>
-            </button>
-          ))}
-        </div>
-      </details>
     </AuthLayout>
   )
 }

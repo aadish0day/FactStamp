@@ -149,22 +149,23 @@ export function SignUp() {
 
   return (
     <AuthLayout
+      mode="signup"
       heading="Create your account"
-      subheading="Join the community and help stop misinformation."
+      subheading="Join our community of verifiers and stop WhatsApp misinformation."
     >
       <Seo title="Create Account" description="Join FactStamp's community fact-checkers to help stop WhatsApp misinformation in India." />
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
+      <form className="flex flex-col gap-3.5" onSubmit={handleSubmit} noValidate>
         {/* Error summary */}
         {submitted && summaryItems.length > 0 && (
           <div
-            className="p-3 rounded-[var(--radius-md)] border mb-1 animate-pop-in"
+            className="p-3.5 rounded-[var(--radius-md)] border mb-1 animate-pop-in shadow-[var(--shadow-xs)]"
             style={{
               backgroundColor: 'var(--color-v-false-bg)',
               borderColor: 'color-mix(in srgb, var(--color-v-false) 35%, transparent)',
             }}
             role="alert"
           >
-            <strong className="block text-xs font-semibold text-[var(--color-v-false)] mb-1.5">
+            <strong className="block text-xs font-bold text-[var(--color-v-false)] mb-1.5">
               Please fix the following:
             </strong>
             <ul className="flex flex-col gap-1">
@@ -185,14 +186,14 @@ export function SignUp() {
 
         {/* Full Name */}
         <div>
-          <label htmlFor="reg-name" className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
+          <label htmlFor="reg-name" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
             Full Name
           </label>
           <Input
             id="reg-name"
             type="text"
             autoComplete="name"
-            placeholder="Your full name"
+            placeholder="e.g. Ananya Gupta"
             leftIcon={<User className="w-4 h-4 text-[var(--color-fg-muted)]" />}
             value={form.name}
             onChange={(e) => {
@@ -205,14 +206,14 @@ export function SignUp() {
             aria-describedby={errors.name ? 'reg-name-error' : undefined}
           />
           {touched.name && !errors.name && form.name && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-medium">Looks good</p>
+            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold">✓ Looks good</p>
           )}
-          {errors.name && <p id="reg-name-error" className="mt-1 text-[11px] text-[var(--color-v-false)]">{errors.name}</p>}
+          {errors.name && <p id="reg-name-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.name}</p>}
         </div>
 
         {/* Email */}
         <div>
-          <label htmlFor="reg-email" className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
+          <label htmlFor="reg-email" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
             Email Address
           </label>
           <Input
@@ -233,75 +234,75 @@ export function SignUp() {
             aria-describedby={errors.email ? 'reg-email-error' : undefined}
           />
           {touched.email && !errors.email && form.email && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-medium">Valid email address</p>
+            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold">✓ Valid email format</p>
           )}
-          {errors.email && <p id="reg-email-error" className="mt-1 text-[11px] text-[var(--color-v-false)]">{errors.email}</p>}
+          {errors.email && <p id="reg-email-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.email}</p>}
         </div>
 
         {/* Password */}
         <div>
-          <label htmlFor="reg-pass" className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
+          <label htmlFor="reg-pass" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
             Password
           </label>
           <div className="relative">
-          <Input
-            id="reg-pass"
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="new-password"
-            placeholder="••••••••"
-            leftIcon={<Lock className="w-4 h-4 text-[var(--color-fg-muted)]" />}
-            value={form.password}
-            onChange={(e) => {
-              setForm((prev) => ({ ...prev, password: e.target.value }))
-              if (touched.password) revalidate('password')
-            }}
-            onBlur={() => onBlur('password')}
-            error={!!errors.password}
-            aria-invalid={!!errors.password}
-            aria-describedby={errors.password ? 'reg-pass-error' : undefined}
-            className="pr-10"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-transparent border-none cursor-pointer text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors"
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-            tabIndex={-1}
-          >
-            {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
-          </button>
+            <Input
+              id="reg-pass"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="new-password"
+              placeholder="••••••••"
+              leftIcon={<Lock className="w-4 h-4 text-[var(--color-fg-muted)]" />}
+              value={form.password}
+              onChange={(e) => {
+                setForm((prev) => ({ ...prev, password: e.target.value }))
+                if (touched.password) revalidate('password')
+              }}
+              onBlur={() => onBlur('password')}
+              error={!!errors.password}
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? 'reg-pass-error' : undefined}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-transparent border-none cursor-pointer text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
+            </button>
           </div>
-          {errors.password && <p id="reg-pass-error" className="mt-1 text-[11px] text-[var(--color-v-false)]">{errors.password}</p>}
+          {errors.password && <p id="reg-pass-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.password}</p>}
 
           {/* Password strength meter */}
           {form.password && (
-            <div className="mt-3 animate-pop-in">
-              <div className="flex items-baseline justify-between mb-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-fg-muted)]">
-                  Stamp confidence
+            <div className="mt-3 p-2.5 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] animate-pop-in">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-fg-muted)]">
+                  Password Strength
                 </span>
-                <span className="text-xs font-bold tracking-tight" style={{ color: pwColor }}>
+                <span className="text-xs font-bold" style={{ color: pwColor }}>
                   {STR_META[metCount].label || '\u2014'}
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
+              <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
                 <span
                   className="block h-full rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${pwPct}%`, background: pwColor }}
                 />
               </div>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2.5">
+              <ul className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2">
                 {PW_REQS.map((r) => {
                   const met = r.test(form.password)
                   return (
                     <li
                       key={r.label}
                       className={cn(
-                        'inline-flex items-center gap-1.5 text-[11px] transition-colors',
+                        'inline-flex items-center gap-1 text-[11px] font-medium transition-colors',
                         met ? 'text-[var(--color-v-true)]' : 'text-[var(--color-fg-muted)]'
                       )}
                     >
-                      <Check className="w-2.5 h-2.5 stroke-[3]" aria-hidden="true" />
+                      <Check className="w-3 h-3 stroke-[3]" aria-hidden="true" />
                       {r.label}
                     </li>
                   )
@@ -313,45 +314,45 @@ export function SignUp() {
 
         {/* Confirm Password */}
         <div>
-          <label htmlFor="reg-confirm" className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
+          <label htmlFor="reg-confirm" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
             Confirm Password
           </label>
           <div className="relative">
-          <Input
-            id="reg-confirm"
-            type={showConfirm ? 'text' : 'password'}
-            autoComplete="new-password"
-            placeholder="••••••••"
-            leftIcon={<Lock className="w-4 h-4 text-[var(--color-fg-muted)]" />}
-            value={form.confirm}
-            onChange={(e) => {
-              setForm((prev) => ({ ...prev, confirm: e.target.value }))
-              if (touched.confirm) revalidate('confirm')
-            }}
-            onBlur={() => onBlur('confirm')}
-            error={!!errors.confirm}
-            aria-invalid={!!errors.confirm}
-            aria-describedby={errors.confirm ? 'reg-confirm-error' : undefined}
-            className="pr-10"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirm(!showConfirm)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-transparent border-none cursor-pointer text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors"
-            aria-label={showConfirm ? 'Hide password' : 'Show password'}
-            tabIndex={-1}
-          >
-            {showConfirm ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
-          </button>
+            <Input
+              id="reg-confirm"
+              type={showConfirm ? 'text' : 'password'}
+              autoComplete="new-password"
+              placeholder="••••••••"
+              leftIcon={<Lock className="w-4 h-4 text-[var(--color-fg-muted)]" />}
+              value={form.confirm}
+              onChange={(e) => {
+                setForm((prev) => ({ ...prev, confirm: e.target.value }))
+                if (touched.confirm) revalidate('confirm')
+              }}
+              onBlur={() => onBlur('confirm')}
+              error={!!errors.confirm}
+              aria-invalid={!!errors.confirm}
+              aria-describedby={errors.confirm ? 'reg-confirm-error' : undefined}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-transparent border-none cursor-pointer text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors"
+              aria-label={showConfirm ? 'Hide password' : 'Show password'}
+              tabIndex={-1}
+            >
+              {showConfirm ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
+            </button>
           </div>
           {touched.confirm && !errors.confirm && form.confirm && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)]">Passwords match</p>
+            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold">✓ Passwords match</p>
           )}
-          {errors.confirm && <p id="reg-confirm-error" className="mt-1 text-[11px] text-[var(--color-v-false)]">{errors.confirm}</p>}
+          {errors.confirm && <p id="reg-confirm-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.confirm}</p>}
         </div>
 
         {/* Agreement checkbox */}
-        <label className="flex items-start gap-2.5 cursor-pointer select-none mt-1">
+        <label className="flex items-start gap-2.5 cursor-pointer select-none mt-1 p-2 rounded-[var(--radius-md)] hover:bg-[var(--color-surface-2)]/60 transition-colors">
           <input
             type="checkbox"
             checked={agree}
@@ -365,7 +366,7 @@ export function SignUp() {
           />
           <span
             className={cn(
-              'flex-shrink-0 w-[18px] h-[18px] rounded-[var(--radius-sm)] border flex items-center justify-center text-white transition-colors mt-0.5',
+              'flex-shrink-0 w-[18px] h-[18px] rounded-[var(--radius-sm)] border flex items-center justify-center text-white transition-all mt-0.5 shadow-xs',
               'peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-accent)] peer-focus-visible:ring-offset-2',
               agree
                 ? 'bg-[var(--color-brand)] border-[var(--color-brand)]'
@@ -376,16 +377,16 @@ export function SignUp() {
             {agree && <Check className="w-3 h-3 stroke-[3]" />}
           </span>
           <span className="text-xs text-[var(--color-fg-2)] leading-relaxed">
-            I agree to verify claims honestly and provide credible sources.
+            I agree to verify claims honestly with credible sources and follow FactStamp guidelines.
           </span>
         </label>
-        {errors.agree && <p id="reg-agree-error" className="text-[11px] text-[var(--color-v-false)] mt-0.5">{errors.agree}</p>}
+        {errors.agree && <p id="reg-agree-error" className="text-[11px] text-[var(--color-v-false)] font-medium mt-0.5">{errors.agree}</p>}
 
         <Button
           type="submit"
           intent="primary"
           size="lg"
-          className="w-full mt-2"
+          className="w-full mt-2 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all cursor-pointer font-bold"
           loading={loading}
         >
           Create Account
@@ -393,9 +394,9 @@ export function SignUp() {
       </form>
 
       {/* OR divider */}
-      <div className="flex items-center gap-3 my-5">
+      <div className="flex items-center gap-3 my-4">
         <div className="flex-1 h-px bg-[var(--color-border)]" />
-        <span className="text-xs font-semibold tracking-widest uppercase text-[var(--color-fg-muted)]">OR</span>
+        <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--color-fg-muted)]">OR</span>
         <div className="flex-1 h-px bg-[var(--color-border)]" />
       </div>
 
@@ -403,24 +404,17 @@ export function SignUp() {
       <Button
         intent="secondary"
         size="lg"
-        className="w-full"
+        className="w-full font-semibold border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
         onClick={() => {
-          toast.info('Google sign-in', {
-            description: 'Use the sign-in page to access demo accounts.',
-            duration: 3000,
+          toast.info('Google Sign-in', {
+            description: 'Google OAuth is simulated. Switch to Sign In tab for 1-click demo logins.',
+            duration: 3500,
           })
         }}
       >
         <GoogleIcon />
         Continue with Google
       </Button>
-
-      <p className="text-center text-sm text-[var(--color-fg-2)] mt-5">
-        Already have an account?{' '}
-        <Link to="/signin" className="font-medium text-[var(--color-brand)] hover:underline">
-          Sign in
-        </Link>
-      </p>
     </AuthLayout>
   )
 }

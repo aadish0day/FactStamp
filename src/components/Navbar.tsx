@@ -136,10 +136,11 @@ export function Navbar() {
                 </Button>
               </Link>
 
-              {/* User indicator — desktop */}
-              <div
-                className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border-soft)]"
-                title={`${user.displayName} — ${user.reputation}% reputation`}
+              {/* User indicator — desktop link to profile */}
+              <Link
+                to="/profile"
+                className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] hover:bg-[var(--color-brand-subtle)] hover:border-[var(--color-brand-subtle)] transition-all cursor-pointer"
+                title={`${user.displayName} — ${user.reputation}% reputation (View Profile)`}
               >
                 <Avatar initials={user.displayName.charAt(0)} size="sm" />
                 <div className="flex flex-col leading-tight">
@@ -151,7 +152,7 @@ export function Navbar() {
                     {user.reputation}%
                   </span>
                 </div>
-              </div>
+              </Link>
 
               <Button
                 intent="ghost"
@@ -248,8 +249,13 @@ export function Navbar() {
         {/* Bottom section — user info + actions */}
         {user && (
           <div className="border-t border-[var(--color-border-soft)] px-4 py-5 space-y-4 flex-shrink-0">
-            {/* User info */}
-            <div className="flex items-center gap-3">
+            {/* User info link */}
+            <Link
+              to="/profile"
+              onClick={closeMobile}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
+              title="View Profile"
+            >
               <Avatar initials={user.displayName.charAt(0)} size="md" online />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-[var(--color-fg)] truncate">
@@ -260,7 +266,7 @@ export function Navbar() {
                   {user.reputation}% — {user.totalVerifications} checks
                 </p>
               </div>
-            </div>
+            </Link>
 
             {/* Mobile Submit CTA */}
             <Link to="/submit" onClick={closeMobile}>

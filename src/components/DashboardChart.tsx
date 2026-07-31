@@ -1,11 +1,11 @@
 import { useState, useEffect, type JSX } from 'react'
 
 const CATEGORY_COLORS: Record<string, string> = {
-  health: 'oklch(0.48 0.16 25)',
-  political: 'oklch(0.44 0.10 195)',
-  religious: 'oklch(0.62 0.13 65)',
-  financial: 'oklch(0.42 0.12 145)',
-  other: 'oklch(0.55 0.014 55)',
+  health: '#16a34a',     // Emerald Green
+  political: '#dc2626',  // Crimson Red
+  financial: '#d97706',  // Warm Amber
+  religious: '#7c3aed',  // Royal Purple
+  other: '#0284c7',      // Vibrant Blue
 }
 
 interface DashboardChartProps {
@@ -47,29 +47,53 @@ export function DashboardChart({ categoryData }: DashboardChartProps) {
   const { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } = PieComp
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={categoryData}
-          dataKey="count"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          innerRadius={60}
-          outerRadius={100}
-          label={({ name, percent }: { name: string; percent: number }) =>
-            `${name} ${(percent * 100).toFixed(0)}%`
-          }
-        >
-          {categoryData.map((entry: { name: string }) => (
-            <Cell
-              key={entry.name}
-              fill={CATEGORY_COLORS[entry.name.toLowerCase()] || '#888'}
-            />
-          ))}
-        </Pie>
-        <Tooltip />
-      </PieChart>
-    </ResponsiveContainer>
+    <div className="flex flex-col items-center">
+      <ResponsiveContainer width="100%" height={240}>
+        <PieChart>
+          <Pie
+            data={categoryData}
+            dataKey="count"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            innerRadius={55}
+            outerRadius={90}
+            paddingAngle={3}
+            stroke="var(--color-surface)"
+            strokeWidth={2}
+          >
+            {categoryData.map((entry: { name: string }) => (
+              <Cell
+                key={entry.name}
+                fill={CATEGORY_COLORS[entry.name.toLowerCase()] || '#888'}
+              />
+            ))}
+          </Pie>
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'var(--color-surface)',
+              borderColor: 'var(--color-border-soft)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--color-fg)',
+              boxShadow: 'var(--shadow-md)',
+            }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+
+      {/* Visual Category Legend */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 w-full mt-3 pt-3 border-t border-[var(--color-border-soft)]">
+        {categoryData.map((item) => {
+          const color = CATEGORY_COLORS[item.name.toLowerCase()] || '#888'
+          return (
+            <div key={item.name} className="flex items-center gap-2 text-xs">
+              <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+              <span className="text-[var(--color-fg-2)] truncate">{item.name}</span>
+              <span className="font-mono font-bold text-[var(--color-fg)] me-auto">{item.count}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
