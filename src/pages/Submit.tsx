@@ -31,6 +31,8 @@ import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { findDuplicate } from '@/lib/duplicateDetection'
 import { cn } from '@/lib/utils'
+import { uploadScreenshot } from '@/services/firebaseService'
+import { isFirebaseConfigured } from '@/lib/firebase'
 import type { ClaimCategory } from '@/lib/types'
 
 type Tab = 'text' | 'image'
@@ -62,6 +64,7 @@ export function Submit() {
   const [loading, setLoading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null)
   const [extracting, setExtracting] = useState(false)
   const [ocrProgress, setOcrProgress] = useState(0)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -73,6 +76,7 @@ export function Submit() {
     setErrors({})
     setDuplicateFound(null)
     setUploadedImage(null)
+    setScreenshotUrl(null)
     setActiveTab('text')
   }, [])
 
@@ -115,11 +119,12 @@ export function Submit() {
     setLoading(true)
     await new Promise((r) => setTimeout(r, 900))
 
-    const newClaim = addClaim({
+    const newClaim = await addClaim({
       text: claimText.trim(),
       category,
       submittedBy: user?.uid || 'u1',
       submittedByName: user?.displayName || 'Anonymous',
+      imageUrl: screenshotUrl || undefined,
     })
 
     setLoading(false)
@@ -158,6 +163,20 @@ export function Submit() {
     const reader = new FileReader()
     reader.onload = (e) => {
       setUploadedImage(e.target?.result as string)
+      // Upload the screenshot to Firebase Storage so it lives on the claim.
+      // uploadScreenshot never rejects — it returns null on failure (so the
+      // claim is never persisted with a session-scoped blob URL as imageUrl).
+      // The local preview is `uploadedImage`, independent of this persisted URL.
+      if (isFirebaseConfigured) {
+        uploadScreenshot(file).then((url) => {
+          setScreenshotUrl(url)
+          if (!url) {
+            toast.warning('Screenshot not saved to storage', {
+              description: 'The image will only exist as a local preview — the claim text can still be submitted.',
+            })
+          }
+        })
+      }
       simulateExtraction()
     }
     reader.readAsDataURL(file)
@@ -497,6 +516,7 @@ export function Submit() {
                         size="sm"
                         onClick={() => {
                           setUploadedImage(null)
+                          setScreenshotUrl(null)
                           setExtracting(false)
                           setClaimText('')
                         }}
@@ -537,6 +557,7 @@ export function Submit() {
                     size="lg"
                     onClick={() => {
                       setUploadedImage(null)
+                      setScreenshotUrl(null)
                       setClaimText('')
                       setDragActive(false)
                       toast('Image removed', {

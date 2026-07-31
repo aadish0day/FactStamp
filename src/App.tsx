@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ClaimsProvider } from '@/contexts/ClaimsContext'
+import { UsersProvider } from '@/contexts/UsersContext'
+import { NotificationsProvider } from '@/contexts/NotificationsContext'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Navbar } from '@/components/Navbar'
 import { OnlineStatusBar } from '@/components/OnlineStatusBar'
@@ -31,8 +33,10 @@ export default function App() {
     >
       <ThemeProvider>
         <AuthProvider>
-          <ClaimsProvider>
-            <ErrorBoundary>
+          <UsersProvider>
+            <NotificationsProvider>
+            <ClaimsProvider>
+              <ErrorBoundary>
               <AppShell />
               <Toaster
                 position="top-right"
@@ -51,7 +55,9 @@ export default function App() {
                 }}
               />
             </ErrorBoundary>
-          </ClaimsProvider>
+            </ClaimsProvider>
+            </NotificationsProvider>
+          </UsersProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
@@ -94,7 +100,8 @@ function AppShell() {
                     <Route path="/claim/:claimId" element={<ClaimDetail />} />
                     <Route path="/verify" element={<ProtectedRoute><VerifyQueue /></ProtectedRoute>} />
                     <Route path="/verify/:claimId" element={<ProtectedRoute><VerifyDetail /></ProtectedRoute>} />
-                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    {/* Public dashboard — Module 7: all users can view without auth */}
+                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>

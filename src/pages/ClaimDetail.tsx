@@ -209,12 +209,14 @@ export function ClaimDetail() {
       return
     }
 
-    // Force the card to a fixed 540px width for high-res capture.
-    // At scale: 2, the PNG will be 1080px wide; height auto-sizes to content.
+    // Force the card to a fixed 540px square for high-res capture.
+    // At scale: 2, the PNG is exactly 1080×1080px (WhatsApp-compatible).
     const origWidth = wrapper.style.width
     const origMaxWidth = wrapper.style.maxWidth
+    const origHeight = wrapper.style.height
     wrapper.style.width = '540px'
     wrapper.style.maxWidth = '540px'
+    wrapper.style.height = '540px'
 
     // Patch stylesheet rules to convert oklch/oklab → rgb so html2canvas's
     // internal CSS parser doesn't crash when it encounters them
@@ -232,9 +234,10 @@ export function ClaimDetail() {
         onclone: (clonedDoc) => {
           const card = clonedDoc.getElementById('whatsapp-fact-check-card')
           if (card) {
-            // Force fixed width on the clone too
+            // Force a fixed 540px square on the clone too (→ 1080×1080 PNG)
             ;(card as HTMLElement).style.width = '540px'
             ;(card as HTMLElement).style.maxWidth = '540px'
+            ;(card as HTMLElement).style.height = '540px'
           }
 
           // Convert all oklch/oklab in <style> tags in clonedDoc
@@ -331,6 +334,7 @@ export function ClaimDetail() {
       // Restore the card's original dimensions
       wrapper.style.width = origWidth
       wrapper.style.maxWidth = origMaxWidth
+      wrapper.style.height = origHeight
       restore()
       setIsDownloading(false)
     }
@@ -350,11 +354,13 @@ export function ClaimDetail() {
     try {
       const element = document.getElementById('whatsapp-fact-check-card')
       if (element && navigator.share && navigator.canShare) {
-        // Force fixed width for high-res capture
+        // Force a fixed 540px square for high-res capture (1080×1080 PNG)
         const origW = element.style.width
         const origMW = element.style.maxWidth
+        const origH = element.style.height
         element.style.width = '540px'
         element.style.maxWidth = '540px'
+        element.style.height = '540px'
 
         const restore = patchStyleSheets()
         let canvas
@@ -407,6 +413,7 @@ export function ClaimDetail() {
         } finally {
           element.style.width = origW
           element.style.maxWidth = origMW
+          element.style.height = origH
           restore()
         }
 
@@ -477,6 +484,23 @@ export function ClaimDetail() {
           <p className="text-lg text-[var(--color-fg)] leading-relaxed mb-6">
             {claim.text}
           </p>
+
+          {/* Attached screenshot (uploaded via Firebase Storage) */}
+          {claim.imageUrl && (
+            <a
+              href={claim.imageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block mb-6 rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border-soft)] hover:border-[var(--color-brand)] transition-colors"
+            >
+              <img
+                src={claim.imageUrl}
+                alt="Screenshot attached with this claim"
+                className="w-full max-h-80 object-contain bg-[var(--color-surface-2)]"
+                loading="lazy"
+              />
+            </a>
+          )}
 
           {/* Verdict Stamp */}
           {claim.verdict && (

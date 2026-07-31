@@ -12,5 +12,8 @@ npm-debug.log*
 .idea
 .DS_Store
 *.local
-.env
+# NOTE: `.env` is intentionally included in the build context so the Vite
+# production build can inline the real Firebase web config (VITE_* vars are
+# public by design). `.env.example` and other per-environment variants stay
+# excluded.
 .env.*

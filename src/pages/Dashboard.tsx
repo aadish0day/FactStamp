@@ -15,7 +15,10 @@ import {
   Plus,
   Award,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Flag,
+  CalendarDays,
+  ShieldAlert
 } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -26,35 +29,58 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { Button } from '@/components/ui/Button'
 import { DashboardChart } from '@/components/DashboardChart'
 import { ContrastChecker } from '@/components/ContrastChecker'
+import { computeWeeklyReport } from '@/lib/weeklyReport'
 import { useClaims } from '@/contexts/ClaimsContext'
-import { MOCK_TRENDING, MOCK_LEADERBOARD } from '@/lib/types'
+import { useUsers } from '@/contexts/UsersContext'
+import { useAuth } from '@/contexts/AuthContext'
+
+const CATEGORY_COLOR_MAP: Record<string, string> = {
+  health: '#16a34a',
+  political: '#dc2626',
+  financial: '#d97706',
+  religious: '#7c3aed',
+  other: '#0284c7',
+}
 
 export function Dashboard() {
-  const { claims } = useClaims()
+  const { claims, flagClaim } = useClaims()
+  const { users, isLoading: usersLoading } = useUsers()
+  const { user } = useAuth()
 
   const verifiedClaims = claims.filter((c) => c.status === 'verified')
   const falseClaims = verifiedClaims.filter((c) => c.verdict === 'FALSE')
 
+  // Module 7 — weekly trending report computed live from the claims feed
+  const weekly = useMemo(() => computeWeeklyReport(claims), [claims])
+
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Category distribution data
+  // Category distribution data — real counts from Firestore claims
   const categories = ['health', 'political', 'religious', 'financial', 'other'] as const
   const categoryData = categories.map((cat) => ({
     name: cat.charAt(0).toUpperCase() + cat.slice(1),
-    count: verifiedClaims.filter((c) => c.category === cat).length || Math.floor(Math.random() * 5) + 1,
+    count: verifiedClaims.filter((c) => c.category === cat).length,
   }))
 
-  // Stale data detection
-  useEffect(() => {
-    const weekStart = new Date(MOCK_TRENDING.weekStart)
-    const daysOld = Math.floor((Date.now() - weekStart.getTime()) / (1000 * 60 * 60 * 24))
-    if (daysOld > 7) {
-      toast.info('Data may be stale', {
-        description: `The weekly trends shown are from ${daysOld} days ago. Data may not reflect the latest activity.`,
-        duration: 6000,
-      })
-    }
-  }, [])
+  // Average confidence across verified claims (real data)
+  const avgConfidence = verifiedClaims.length
+    ? Math.round(
+        verifiedClaims.reduce((sum, c) => sum + (c.confidenceScore ?? 0), 0) / verifiedClaims.length
+      )
+    : 0
+
+  // Top verifiers — sourced directly from the Firestore `users` collection
+  // (already ordered by reputation desc by the realtime subscription).
+  const leaderboard = useMemo(
+    () =>
+      users.slice(0, 5).map((u) => ({
+        uid: u.uid,
+        name: u.displayName,
+        reputation: u.reputation,
+        verifications: u.totalVerifications,
+      })),
+    [users]
+  )
 
   // Sort toggle
   type SortMode = 'count' | 'recent'
@@ -106,6 +132,19 @@ export function Dashboard() {
     }
   }, [mostDebunked.length, verifiedClaims.length, searchQuery])
 
+  // Admin expedite toggle for pending claims
+  const pendingClaims = claims.filter((c) => c.status === 'pending')
+  const toggleFlag = (claimId: string, currentlyFlagged: boolean) => {
+    flagClaim(claimId, !currentlyFlagged).then(() => {
+      toast(currentlyFlagged ? 'Flag removed' : 'Claim flagged for expedited review', {
+        description: currentlyFlagged
+          ? 'The claim returned to the normal verification queue.'
+          : 'The claim will surface first in the verification queue.',
+        icon: <Flag className="w-5 h-5 text-[var(--color-brand)]" />,
+      })
+    })
+  }
+
   // Dev contrast checker toggle
   const [showContrast, setShowContrast] = useState(false)
 
@@ -130,7 +169,7 @@ export function Dashboard() {
     },
     {
       label: 'Avg Consensus Score',
-      value: MOCK_TRENDING.avgConfidence,
+      value: avgConfidence,
       icon: TrendingUp,
       suffix: '%',
       color: '#ea580c',
@@ -210,6 +249,116 @@ export function Dashboard() {
         })}
       </div>
 
+      {/* Weekly Trending Misinformation Report — Module 7 */}
+      <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)] mb-10">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] mb-2">
+              <CalendarDays className="w-3.5 h-3.5" />
+              <span>Weekly Trending Report</span>
+            </div>
+            <h2 className="text-lg font-bold text-[var(--color-fg)]">Misinformation trends — {weekly.weekLabel}</h2>
+            <p className="text-xs text-[var(--color-fg-2)]">
+              {weekly.weeklyClaimCount} claim{weekly.weeklyClaimCount !== 1 ? 's' : ''} submitted this week · computed live from Firestore
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-[var(--color-fg-muted)] bg-[var(--color-surface-2)]/70 border border-[var(--color-border-soft)] px-3 py-1.5 rounded-full">
+            <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand)]" />
+            <span>Auto-generated Monday 00:00 IST</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Top categories this week */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-3">Most submitted categories</h3>
+            <div className="space-y-3">
+              {weekly.categoryCounts.map((c) => {
+                const max = weekly.categoryCounts[0]?.count || 1
+                return (
+                  <div key={c.category}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-[var(--color-fg)] capitalize">{c.category}</span>
+                      <span className="text-xs font-mono tabular-nums text-[var(--color-fg-muted)]">{c.count}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${(c.count / max) * 100}%`, backgroundColor: CATEGORY_COLOR_MAP[c.category] }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Five most debunked claims this week */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-3">Most debunked claims</h3>
+            {weekly.debunkedClaims.length === 0 ? (
+              <p className="text-xs text-[var(--color-fg-muted)] py-8 text-center">
+                No claims debunked this week yet 🎉
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {weekly.debunkedClaims.map((c) => (
+                  <Link
+                    key={c.id}
+                    to={`/claim/${c.id}`}
+                    className="flex items-start gap-2.5 p-3 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] hover:border-[var(--color-v-false-border)] transition-colors group"
+                  >
+                    <XCircle className="w-4 h-4 text-[var(--color-v-false)] flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-[var(--color-fg)] line-clamp-2 group-hover:text-[var(--color-v-false)] transition-colors leading-relaxed">
+                        &ldquo;{c.text}&rdquo;
+                      </p>
+                      <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-mono font-bold text-[var(--color-fg-muted)]">
+                        <VerdictPill verdict={c.verdict!} size="sm" />
+                        <span>{c.verificationCount} verifications</span>
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Top verifiers by count + accuracy */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-3">Top verifiers by accuracy</h3>
+            {weekly.topVerifiers.length === 0 ? (
+              <p className="text-xs text-[var(--color-fg-muted)] py-8 text-center">
+                No verifications recorded yet
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {weekly.topVerifiers.map((v, i) => (
+                  <div
+                    key={v.name}
+                    className="flex items-center gap-3 p-3 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)]"
+                  >
+                    <span className={`text-sm font-bold font-mono w-5 text-center ${i < 3 ? '' : 'text-[var(--color-fg-muted)]'}`}>
+                      {['🥇', '🥈', '🥉'][i] || i + 1}
+                    </span>
+                    <Avatar initials={v.name[0]} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-[var(--color-fg)] truncate">{v.name}</p>
+                      <p className="text-[10px] text-[var(--color-fg-muted)] font-medium mt-0.5">
+                        {v.verifications} verification{v.verifications !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    <span className="text-xs font-mono tabular-nums font-bold text-[var(--color-v-true)] bg-[var(--color-v-true-bg)] px-2 py-0.5 rounded-full border border-[var(--color-v-true-border)]">
+                      {v.accuracy}% acc
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Charts & Leaderboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 mb-10">
         {/* Category Distribution Chart Card */}
@@ -239,8 +388,30 @@ export function Dashboard() {
             </div>
           </div>
 
+          {leaderboard.length === 0 ? (
+            usersLoading ? (
+              <p className="text-xs text-[var(--color-fg-muted)] text-center py-8 animate-pulse">
+                Loading verifiers…
+              </p>
+            ) : user ? (
+              <p className="text-xs text-[var(--color-fg-muted)] text-center py-8">
+                No verifiers yet
+              </p>
+            ) : (
+              <div className="py-8 text-center">
+                <p className="text-xs text-[var(--color-fg-muted)] mb-3">
+                  Sign in to see the verifier leaderboard
+                </p>
+                <Link to="/signin">
+                  <Button intent="outline" size="sm">
+                    Sign in
+                  </Button>
+                </Link>
+              </div>
+            )
+          ) : (
           <div className="space-y-3">
-            {MOCK_LEADERBOARD.map((verifier, index) => {
+            {leaderboard.map((verifier, index) => {
               const ranks = ['🥇', '🥈', '🥉', '4', '5']
               const isTop3 = index < 3
               return (
@@ -271,6 +442,7 @@ export function Dashboard() {
               )
             })}
           </div>
+          )}
         </div>
       </div>
 
@@ -377,6 +549,72 @@ export function Dashboard() {
           </table>
         </div>
       </div>
+
+      {/* Admin Panel — Expedite Review (Module 7) */}
+      {user?.isAdmin && pendingClaims.length > 0 && (
+        <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-brand)] shadow-[var(--shadow-md)] mb-10">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--color-brand-subtle)] flex items-center justify-center">
+                <ShieldAlert className="w-5 h-5 text-[var(--color-brand)]" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-[var(--color-fg)]">Admin Panel — Expedited Review</h2>
+                <p className="text-xs text-[var(--color-fg-2)]">
+                  Flag pending claims to surface them first in the verification queue.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2.5 py-1 rounded-full border border-[var(--color-brand-subtle)]">
+              Admin only
+            </span>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {pendingClaims.map((c) => (
+              <div
+                key={c.id}
+                className={`flex items-start gap-3 p-4 rounded-[var(--radius-lg)] border transition-colors ${
+                  c.adminFlagged
+                    ? 'bg-[var(--color-brand-subtle)]/40 border-[var(--color-brand-subtle)]'
+                    : 'bg-[var(--color-surface-2)]/60 border-[var(--color-border-soft)]'
+                }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <CategoryBadge category={c.category} />
+                    {c.adminFlagged && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2 py-0.5 rounded-full border border-[var(--color-brand-subtle)]">
+                        <Flag className="w-3 h-3" aria-hidden="true" />
+                        Expedited
+                      </span>
+                    )}
+                  </div>
+                  <Link
+                    to={`/claim/${c.id}`}
+                    className="text-xs font-medium text-[var(--color-fg)] line-clamp-2 hover:text-[var(--color-brand)] hover:underline transition-colors leading-relaxed"
+                  >
+                    &ldquo;{c.text}&rdquo;
+                  </Link>
+                  <p className="text-[10px] text-[var(--color-fg-muted)] font-mono mt-1.5">
+                    {c.verificationCount}/3 verifications · submitted {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true })}
+                  </p>
+                </div>
+                <Button
+                  intent={c.adminFlagged ? 'secondary' : 'primary'}
+                  size="sm"
+                  className="flex-shrink-0 h-8 px-3"
+                  onClick={() => toggleFlag(c.id, !!c.adminFlagged)}
+                  title={c.adminFlagged ? 'Remove expedited flag' : 'Flag for expedited review'}
+                >
+                  <Flag className="w-3.5 h-3.5 me-1" aria-hidden="true" />
+                  {c.adminFlagged ? 'Unflag' : 'Flag'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent Activity Timeline Card */}
       <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)] mb-10">

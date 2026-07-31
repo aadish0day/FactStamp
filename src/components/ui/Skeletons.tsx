@@ -17,6 +17,23 @@ export function ClaimCardSkeleton() {
   )
 }
 
+export function NotificationListSkeleton() {
+  return (
+    <div className="p-2 animate-shimmer" aria-hidden="true">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="flex items-start gap-3.5 p-3">
+          <div className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] flex-shrink-0" />
+          <div className="flex-1 min-w-0 pt-1 space-y-2">
+            <div className="h-3 w-1/2 rounded bg-[var(--color-surface-2)]" />
+            <div className="h-3 w-full rounded bg-[var(--color-surface-2)]" />
+            <div className="h-2.5 w-2/3 rounded bg-[var(--color-surface-2)]" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function ClaimDetailSkeleton() {
   return (
     <div className="container mx-auto px-4 py-8">

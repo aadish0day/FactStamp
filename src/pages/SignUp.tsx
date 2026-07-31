@@ -40,7 +40,7 @@ const STR_META = [
 
 export function SignUp() {
   const navigate = useNavigate()
-  const { signup } = useAuth()
+  const { signup, loginWithGoogle } = useAuth()
 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
   const [showPassword, setShowPassword] = useState(false)
@@ -112,7 +112,7 @@ export function SignUp() {
 
     setLoading(true)
     try {
-      await signup(form.name.trim(), form.email.trim())
+      await signup(form.name.trim(), form.email.trim(), form.password)
       toast.success('Account created', {
         description: `Welcome to FactStamp, ${form.name.trim()}!`,
         icon: <Shield className="w-5 h-5 text-[var(--color-v-true)]" />,
@@ -405,11 +405,21 @@ export function SignUp() {
         intent="secondary"
         size="lg"
         className="w-full font-semibold border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
-        onClick={() => {
-          toast.info('Google Sign-in', {
-            description: 'Google OAuth is simulated. Switch to Sign In tab for 1-click demo logins.',
-            duration: 3500,
-          })
+        onClick={async () => {
+          try {
+            setLoading(true)
+            await loginWithGoogle()
+            toast.success('Signed in with Google', {
+              description: 'Successfully authenticated via Google OAuth.',
+            })
+            navigate('/dashboard')
+          } catch (err: any) {
+            toast.error('Google sign-in failed', {
+              description: err.message || 'Failed to authenticate.',
+            })
+          } finally {
+            setLoading(false)
+          }
         }}
       >
         <GoogleIcon />

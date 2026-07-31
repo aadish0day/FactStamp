@@ -38,7 +38,26 @@ export function Home() {
 function HomeInner() {
   const navigate = useNavigate()
   const { claims } = useClaims()
-  const verifiedClaims = claims.filter((c) => c.status === 'verified').slice(0, 6)
+
+  // Real stats computed from Firestore claims
+  const verifiedClaims = claims.filter((c) => c.status === 'verified')
+  const avgConfidence = verifiedClaims.length
+    ? Math.round(
+        verifiedClaims.reduce((sum, c) => sum + (c.confidenceScore ?? 0), 0) / verifiedClaims.length
+      )
+    : 0
+  const activeVerifiers = new Set(
+    claims.flatMap((c) => c.verifications.map((v) => v.verifierId))
+  ).size
+
+  const stats = [
+    { value: claims.length, label: 'Claims verified', icon: CheckCircle2 },
+    { value: avgConfidence, label: 'Avg confidence', icon: TrendingUp, suffix: '%' },
+    { value: activeVerifiers, label: 'Active verifiers', icon: Users },
+  ]
+
+  // Feed shows the 6 most recent verified claims
+  const feedClaims = verifiedClaims.slice(0, 6)
 
   // Interactive hero transformation state
   const [transformed, setTransformed] = useState(false)
@@ -47,12 +66,6 @@ function HomeInner() {
     const timer = setTimeout(() => setTransformed(true), 1200)
     return () => clearTimeout(timer)
   }, [])
-
-  const stats = [
-    { value: 1247, label: 'Claims verified', icon: CheckCircle2 },
-    { value: 94, label: 'Avg confidence', icon: TrendingUp, suffix: '%' },
-    { value: 342, label: 'Active verifiers', icon: Users },
-  ]
 
   const steps = [
     {
@@ -306,7 +319,7 @@ function HomeInner() {
           viewport={{ once: true, margin: '-40px' }}
           variants={containerVariants}
         >
-          {verifiedClaims.map((claim) => (
+          {feedClaims.map((claim) => (
             <motion.div key={claim.id} variants={itemVariants}>
               <ClaimCard claim={claim} to={`/claim/${claim.id}`} />
             </motion.div>

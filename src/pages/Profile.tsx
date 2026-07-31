@@ -118,7 +118,7 @@ function computeVerifierStats(verifications: Verification[], claimVerdicts: Map<
 
 export function Profile() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
   const { claims } = useClaims()
 
   const [historySearch, setHistorySearch] = useState('')
@@ -190,11 +190,12 @@ export function Profile() {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [editName, setEditName] = useState(user?.displayName || '')
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (editName.trim().length < 2) {
       toast.error('Name must be at least 2 characters')
       return
     }
+    await updateUser({ displayName: editName.trim() })
     toast.success('Profile updated successfully', {
       description: `Display name changed to "${editName.trim()}".`,
     })

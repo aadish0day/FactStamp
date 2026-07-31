@@ -24,7 +24,7 @@ function GoogleIcon() {
 export function SignIn() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { login, loginWithGoogle, resetPassword, isFirebaseConfigured } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -78,7 +78,7 @@ export function SignIn() {
 
     setLoading(true)
     try {
-      await login(email.trim())
+      await login(email.trim(), password)
       toast.success('Welcome back!', {
         description: 'Signed in successfully.',
       })
@@ -96,11 +96,21 @@ export function SignIn() {
     }
   }
 
-  const handleGoogle = () => {
-    toast.info('Google sign-in', {
-      description: 'Use the demo accounts below instead.',
-      duration: 3000,
-    })
+  const handleGoogle = async () => {
+    try {
+      setLoading(true)
+      await loginWithGoogle()
+      toast.success('Signed in with Google', {
+        description: 'Successfully authenticated via Google OAuth.',
+      })
+      navigate('/dashboard')
+    } catch (err: any) {
+      toast.error('Google sign-in failed', {
+        description: err.message || 'Failed to authenticate.',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const summaryItems = Object.entries(errors)
@@ -190,10 +200,26 @@ export function SignIn() {
             <button
               type="button"
               className="bg-transparent border-none text-xs font-semibold text-[var(--color-brand)] hover:text-[var(--color-brand-hover)] cursor-pointer transition-colors"
-              onClick={() => {
-                toast('Reset Password', {
-                  description: 'Password reset is simulated in demo mode. Select a demo user below to log in instantly.',
-                })
+              onClick={async () => {
+                if (!email.trim()) {
+                  toast.error('Enter your email first', {
+                    description: 'Please type your registered email to receive a reset link.',
+                  })
+                  document.getElementById('signin-email')?.focus()
+                  return
+                }
+                try {
+                  await resetPassword(email.trim())
+                  toast.success('Reset link sent', {
+                    description: isFirebaseConfigured
+                      ? `Password reset instructions sent to ${email.trim()}.`
+                      : 'Password reset is simulated in demo mode. Select a demo user below to log in instantly.',
+                  })
+                } catch (err) {
+                  toast.error('Reset link failed', {
+                    description: err instanceof Error ? err.message : 'Please try again.',
+                  })
+                }
               }}
             >
               Forgot password?

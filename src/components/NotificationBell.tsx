@@ -1,84 +1,22 @@
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, BellOff, ClipboardCheck, Star, BarChart3, Scale, Check, Sparkles, ExternalLink, X, type LucideIcon } from 'lucide-react'
+import { Bell, BellOff, ClipboardCheck, Star, BarChart3, Scale, Check, ExternalLink, X, type LucideIcon } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
+import type { AppNotification, NotificationType } from '@/lib/types'
+import { useNotifications } from '@/contexts/NotificationsContext'
+import { NotificationListSkeleton } from '@/components/ui/Skeletons'
 
-export interface NotificationItem {
-  id: string
-  type: 'claim_verified' | 'reputation_update' | 'weekly_report' | 'verdict_submitted'
-  title: string
-  message: string
-  createdAt: string
-  isRead: boolean
-  claimId?: string
-  badgeText?: string
-  badgeColor?: string
+/** Per-type icon + color + badge label — the only notification mapping. */
+const TYPE_CONFIG: Record<NotificationType, { icon: LucideIcon; color: string; badge: string }> = {
+  claim_verified: { icon: ClipboardCheck, color: '#dc2626', badge: 'DEBUNKED' },
+  reputation_update: { icon: Star, color: '#16a34a', badge: '+REP' },
+  weekly_report: { icon: BarChart3, color: '#ea580c', badge: 'DIGEST' },
+  verdict_submitted: { icon: Scale, color: '#7c3aed', badge: 'VERDICT' },
 }
-
-const TYPE_CONFIG: Record<
-  NotificationItem['type'],
-  { icon: LucideIcon; color: string; bgColor: string }
-> = {
-  claim_verified: {
-    icon: ClipboardCheck,
-    color: '#dc2626',
-    bgColor: 'rgba(220, 38, 38, 0.12)',
-  },
-  reputation_update: {
-    icon: Star,
-    color: '#16a34a',
-    bgColor: 'rgba(22, 163, 74, 0.12)',
-  },
-  weekly_report: {
-    icon: BarChart3,
-    color: '#ea580c',
-    bgColor: 'rgba(234, 88, 12, 0.12)',
-  },
-  verdict_submitted: {
-    icon: Scale,
-    color: '#7c3aed',
-    bgColor: 'rgba(124, 58, 237, 0.12)',
-  },
-}
-
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'n1',
-    type: 'claim_verified',
-    title: 'Consensus Reached: FALSE',
-    message: 'Claim #c1 has reached 3 verifications and reached a final consensus verdict.',
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    isRead: false,
-    claimId: 'c1',
-    badgeText: 'DEBUNKED',
-    badgeColor: '#dc2626',
-  },
-  {
-    id: 'n2',
-    type: 'reputation_update',
-    title: 'Reputation Score Boost',
-    message: 'Your reputation score increased (+5) for casting an accurate consensus verdict.',
-    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-    isRead: false,
-    badgeText: '+5 REP',
-    badgeColor: '#16a34a',
-  },
-  {
-    id: 'n3',
-    type: 'weekly_report',
-    title: 'Weekly Misinfo Digest',
-    message: 'Weekly community report is ready. 42 WhatsApp claims debunked this week across India.',
-    createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-    isRead: true,
-    claimId: 'c2',
-    badgeText: 'DIGEST',
-    badgeColor: '#ea580c',
-  },
-]
 
 export function NotificationBell() {
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS)
+  const { notifications, markRead, markAllRead, isLoading } = useNotifications()
   const [open, setOpen] = useState(false)
   const [activeFilter, setActiveFilter] = useState<'all' | 'unread'>('all')
   const ref = useRef<HTMLDivElement>(null)
@@ -100,14 +38,8 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', onDown)
   }, [open])
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-  }
-
-  const handleItemClick = (n: NotificationItem) => {
-    setNotifications((prev) =>
-      prev.map((item) => (item.id === n.id ? { ...item, isRead: true } : item))
-    )
+  const handleItemClick = (n: AppNotification) => {
+    markRead(n.id)
     setOpen(false)
     if (n.claimId) {
       navigate(`/claim/${n.claimId}`)
@@ -126,7 +58,9 @@ export function NotificationBell() {
         className="relative p-2.5 rounded-[var(--radius-md)] text-[var(--color-fg-2)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] cursor-pointer select-none"
       >
         <Bell className="w-5 h-5" aria-hidden="true" />
-        {unreadCount > 0 && (
+        {/* Badge only mounts once notifications finish loading, so the
+            pop-in animation runs as the real count first appears. */}
+        {!isLoading && unreadCount > 0 && (
           <span className="absolute top-1 right-1 flex items-center justify-center min-w-4 h-4 px-1 text-[9px] font-mono font-bold text-white bg-[var(--color-brand)] rounded-full animate-pop-in shadow-xs">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
@@ -201,7 +135,9 @@ export function NotificationBell() {
           </div>
 
           {/* Notification List */}
-          {filteredNotifications.length === 0 ? (
+          {isLoading && notifications.length === 0 ? (
+            <NotificationListSkeleton />
+          ) : filteredNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center text-xs text-[var(--color-fg-muted)]">
               <BellOff className="w-7 h-7 mb-2 text-[var(--color-fg-muted)]" />
               <p className="font-semibold text-[var(--color-fg)]">No notifications here</p>
@@ -210,7 +146,7 @@ export function NotificationBell() {
           ) : (
             <div className="max-h-84 overflow-y-auto divide-y divide-[var(--color-border-soft)]">
               {filteredNotifications.map((n) => {
-                const config = TYPE_CONFIG[n.type] || TYPE_CONFIG.claim_verified
+                const config = TYPE_CONFIG[n.type] ?? TYPE_CONFIG.claim_verified
                 const Icon = config.icon
 
                 return (
@@ -232,7 +168,7 @@ export function NotificationBell() {
 
                     <div
                       className="w-9 h-9 rounded-[var(--radius-md)] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs"
-                      style={{ backgroundColor: config.bgColor, color: config.color }}
+                      style={{ backgroundColor: `${config.color}1a`, color: config.color }}
                     >
                       <Icon className="w-4 h-4" aria-hidden="true" />
                     </div>
@@ -242,18 +178,16 @@ export function NotificationBell() {
                         <span className="text-xs font-bold text-[var(--color-fg)] truncate">
                           {n.title}
                         </span>
-                        {n.badgeText && (
-                          <span
-                            className="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded uppercase"
-                            style={{
-                              backgroundColor: `${n.badgeColor}18`,
-                              color: n.badgeColor,
-                              border: `1px solid ${n.badgeColor}30`,
-                            }}
-                          >
-                            {n.badgeText}
-                          </span>
-                        )}
+                        <span
+                          className="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded uppercase flex-shrink-0"
+                          style={{
+                            backgroundColor: `${config.color}18`,
+                            color: config.color,
+                            border: `1px solid ${config.color}30`,
+                          }}
+                        >
+                          {config.badge}
+                        </span>
                       </div>
                       <p className="text-xs text-[var(--color-fg-2)] leading-relaxed line-clamp-2">
                         {n.message}

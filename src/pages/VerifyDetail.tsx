@@ -180,7 +180,7 @@ export function VerifyDetail() {
       verdict: verdict!,
       sourceUrl: sourceUrl.trim(),
       explanation: explanation.trim(),
-      verifierId: user?.uid || 'u1',
+      verifierId: user?.uid || '',
       verifierName: user?.displayName || 'Anonymous',
       verifierReputation: user?.reputation || 50,
     })

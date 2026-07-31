@@ -16,7 +16,8 @@ import {
   Zap,
   ShieldAlert,
   Flame,
-  Filter
+  Filter,
+  Flag
 } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -87,6 +88,9 @@ export function VerifyQueue() {
         })
         break
     }
+
+    // Admin-flagged claims surface first for expedited review
+    list.sort((a, b) => (b.adminFlagged ? 1 : 0) - (a.adminFlagged ? 1 : 0))
 
     return list
   }, [pendingClaims, activeFilter, sortMode, searchQuery, user])
@@ -313,6 +317,12 @@ function WorklistRowDesktop({
       <div className="min-w-0">
         <div className="flex items-center gap-2 mb-1.5">
           <CategoryBadge category={claim.category} />
+          {claim.adminFlagged && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2 py-0.5 rounded-full border border-[var(--color-brand-subtle)]">
+              <Flag className="w-3 h-3" aria-hidden="true" />
+              Expedited
+            </span>
+          )}
           {claim.verificationCount > 0 && (
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--color-brand-subtle)] text-[var(--color-brand)] border border-[var(--color-brand-subtle)]">
               {claim.verificationCount}/3 Verifiers

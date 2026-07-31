@@ -1,4 +1,4 @@
-import { ShieldAlert, Download, CheckCircle2, XCircle, AlertTriangle, HelpCircle, Scale } from 'lucide-react'
+import { ShieldAlert, Download, CheckCircle2, XCircle, AlertTriangle, HelpCircle, Scale, Users, Globe } from 'lucide-react'
 import { VERDICT_META, type Claim } from '@/lib/types'
 
 interface FactCheckCardProps {
@@ -37,36 +37,61 @@ const SOURCE_QUALITY_COLORS: Record<string, string> = {
   low: '#dc2626',
 }
 
+/** Truncate claim text to 100 chars for the share card. */
+function truncateClaim(text: string, max = 100): string {
+  if (text.length <= max) return text
+  return text.slice(0, max - 1).trimEnd() + '…'
+}
+
+/** Collect every unique source domain cited across verifications. */
+function collectSourceDomains(claim: Claim): string[] {
+  const domains = new Set<string>()
+  for (const v of claim.verifications) {
+    try {
+      const host = new URL(v.sourceUrl).hostname.replace(/^www\./, '')
+      domains.add(host)
+    } catch {
+      // Ignore malformed URLs
+    }
+  }
+  return [...domains].slice(0, 3)
+}
+
 export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: FactCheckCardProps) {
   if (!claim.verdict) return null
 
   const meta = VERDICT_META[claim.verdict]
   const Icon = VERDICT_ICONS[claim.verdict]
   const topVerification = claim.verifications?.[0]
+  const sourceDomains = collectSourceDomains(claim)
+
+  // One-line explanation: collapse whitespace and truncate to a single line
+  const oneLineExplanation = topVerification
+    ? topVerification.explanation.replace(/\s+/g, ' ').trim()
+    : ''
 
   return (
     <div className="space-y-4">
-      {/*
-        Export card — 1:1 square with all colors hardcoded as hex so
-        html2canvas never encounters oklch/oklab.
-        We use inline styles for every visual property to guarantee
-        pixel-perfect rendering in the PNG.
-      */}
+      {/* Export card — exactly 540px tall in the DOM and exported at scale 2,
+          producing a true 1080×1080px PNG for WhatsApp compatibility.
+          All colors are hardcoded hex so html2canvas never sees oklch/oklab. */}
       <div
         id={id}
         style={{
           width: '100%',
           maxWidth: '540px',
+          aspectRatio: '1 / 1',
           margin: '0 auto',
-          padding: '32px',
+          padding: '28px',
           borderRadius: '20px',
           backgroundColor: CARD_PALETTE.bg,
           border: `2px solid ${meta.hexBorder}`,
           boxShadow: `0 8px 32px -4px ${meta.thudColor}, 0 0 0 1px rgba(0,0,0,0.03)`,
           display: 'flex',
           flexDirection: 'column' as const,
-          gap: '12px',
+          gap: '10px',
           position: 'relative' as const,
+          overflow: 'hidden',
           userSelect: 'none' as const,
           fontFamily: '"DM Sans", ui-sans-serif, system-ui, sans-serif',
         }}
@@ -79,7 +104,7 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
           opacity: 0.03,
           pointerEvents: 'none',
         }}>
-          <ShieldAlert style={{ width: '240px', height: '240px', color: CARD_PALETTE.fg }} />
+          <ShieldAlert style={{ width: '220px', height: '220px', color: CARD_PALETTE.fg }} />
         </div>
 
         {/* ── Header ── */}
@@ -88,7 +113,7 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: `1px solid ${CARD_PALETTE.border}`,
-          paddingBottom: '14px',
+          paddingBottom: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
@@ -141,7 +166,7 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
           </div>
         </div>
 
-        {/* ── Claim Text ── */}
+        {/* ── Claim Text (truncated to 100 chars) ── */}
         <div>
           <div style={{
             fontSize: '9px',
@@ -150,28 +175,31 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
             letterSpacing: '0.12em',
             color: CARD_PALETTE.fgMuted,
             fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-            marginBottom: '6px',
+            marginBottom: '5px',
           }}>
             CLAIM FORWARDED:
           </div>
           <div style={{
-            fontSize: '13px',
+            fontSize: '12px',
             fontWeight: 500,
             color: CARD_PALETTE.fg,
-            lineHeight: 1.55,
+            lineHeight: 1.5,
             fontStyle: 'italic',
             backgroundColor: CARD_PALETTE.surface,
-            padding: '12px 14px',
+            padding: '10px 12px',
             borderRadius: '10px',
             border: `1px solid ${CARD_PALETTE.border}`,
+            minHeight: '54px',
+            display: 'flex',
+            alignItems: 'center',
           }}>
-            &ldquo;{claim.text}&rdquo;
+            &ldquo;{truncateClaim(claim.text)}&rdquo;
           </div>
         </div>
 
         {/* ── Central Verdict Stamp ── */}
         <div style={{
-          padding: '20px 16px',
+          padding: '14px 16px',
           borderRadius: '14px',
           border: `2.5px solid ${meta.hexBorder}`,
           backgroundColor: meta.hexBg,
@@ -179,16 +207,12 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '4px',
+          gap: '2px',
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}>
-            <Icon style={{ width: '40px', height: '40px', color: meta.hexColor }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Icon style={{ width: '36px', height: '36px', color: meta.hexColor }} />
             <span style={{
-              fontSize: '32px',
+              fontSize: '30px',
               fontWeight: 800,
               textTransform: 'uppercase',
               letterSpacing: '-0.02em',
@@ -199,16 +223,12 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
             </span>
           </div>
           {claim.confidenceScore !== undefined && (
-            <div style={{ textAlign: 'center', marginTop: '4px' }}>
-              <span style={{
-                fontSize: '12px',
-                fontWeight: 500,
-                color: CARD_PALETTE.fgSecondary,
-              }}>
+            <div style={{ textAlign: 'center', marginTop: '2px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 500, color: CARD_PALETTE.fgSecondary }}>
                 Confidence:{' '}
               </span>
               <span style={{
-                fontSize: '18px',
+                fontSize: '16px',
                 fontWeight: 700,
                 fontFamily: '"JetBrains Mono", ui-monospace, monospace',
                 fontVariantNumeric: 'tabular-nums',
@@ -218,40 +238,78 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
               </span>
             </div>
           )}
+
+          {/* Verifier count */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            fontSize: '10px',
+            fontWeight: 600,
+            color: CARD_PALETTE.fgSecondary,
+            marginTop: '2px',
+          }}>
+            <Users style={{ width: '11px', height: '11px', color: CARD_PALETTE.brand }} />
+            {claim.verificationCount} community verifier{claim.verificationCount !== 1 ? 's' : ''}
+          </div>
         </div>
 
-        {/* ── Verification Explanation ── */}
-        {topVerification && (
+        {/* ── One-line Explanation ── */}
+        {oneLineExplanation && (
           <div style={{
             fontSize: '11px',
-            lineHeight: 1.5,
+            lineHeight: 1.4,
             color: CARD_PALETTE.fgSecondary,
             backgroundColor: CARD_PALETTE.surface,
-            padding: '10px 12px',
+            padding: '8px 12px',
             borderRadius: '8px',
             border: `1px solid ${CARD_PALETTE.border}`,
+            display: '-webkit-box',
+            WebkitLineClamp: 1,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
           }}>
             <span style={{ fontWeight: 600, color: CARD_PALETTE.fg }}>Why: </span>
-            {topVerification.explanation}
+            {oneLineExplanation}
+          </div>
+        )}
+
+        {/* ── Source Domains ── */}
+        {sourceDomains.length > 0 && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            fontSize: '9px',
+            color: CARD_PALETTE.fgMuted,
+            fontFamily: '"JetBrains Mono", ui-monospace, monospace',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>
+            <Globe style={{ width: '10px', height: '10px', flexShrink: 0, color: CARD_PALETTE.brand }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {sourceDomains.join(' · ')}
+            </span>
           </div>
         )}
 
         {/* ── Footer ── */}
         <div style={{
-          paddingTop: '12px',
+          marginTop: 'auto',
+          paddingTop: '10px',
           borderTop: `1px solid ${CARD_PALETTE.border}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          fontSize: '10px',
+          fontSize: '9px',
           color: CARD_PALETTE.fgMuted,
-
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            maxWidth: '220px',
+            gap: '5px',
+            maxWidth: '60%',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
