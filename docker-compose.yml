@@ -1,7 +1,5 @@
 services:
   # ── Development (Vite dev server + hot reload) ──
-  #   docker compose up -d        → http://localhost:5173
-  # Source is bind-mounted, so edits reload live (HMR) — no rebuild needed.
   dev:
     build:
       context: .
@@ -17,4 +15,16 @@ services:
       - /app/node_modules
     ports:
       - "5173:5173"
+    restart: unless-stopped
+
+  # ── Production (nginx serve) ──
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: serve
+    image: factstamp:latest
+    container_name: factstamp-prod
+    ports:
+      - "8080:80"
     restart: unless-stopped
