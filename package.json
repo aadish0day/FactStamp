@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "clsx": "^2.1.0",
-    "date-fns": "^4.4.0",
     "firebase": "^12.17.0",
     "framer-motion": "^12.42.2",
     "html2canvas": "^1.4.1",

@@ -351,7 +351,7 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
       {onDownload && (
         <button
           onClick={onDownload}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-[var(--radius-md)] font-semibold text-sm bg-[var(--color-brand)] text-[var(--color-brand-fg)] hover:bg-[var(--color-brand-hover)] shadow-[var(--shadow-sm)] transition-all cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-[var(--radius-md)] font-semibold text-sm bg-[var(--color-brand)] text-[var(--color-brand-fg)] hover:bg-[var(--color-brand-hover)] active:scale-[0.97] shadow-[var(--shadow-sm)] transition-all duration-150 ease-out cursor-pointer"
         >
           <Download className="w-4 h-4" />
           Download WhatsApp Card (PNG)

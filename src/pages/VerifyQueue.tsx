@@ -28,7 +28,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/lib/utils'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from '@/lib/utils'
 import type { Claim } from '@/lib/types'
 
 type SortMode = 'newest' | 'closest' | 'reputation'
@@ -170,7 +170,7 @@ export function VerifyQueue() {
                 type="button"
                 onClick={() => setActiveFilter(value)}
                 className={cn(
-                  'flex-shrink-0 px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer select-none',
+                  'flex-shrink-0 px-4 py-2 rounded-full font-bold text-xs transition-all duration-150 ease-out active:scale-[0.97] cursor-pointer select-none',
                   isSelected
                     ? 'bg-[var(--color-brand)] text-white shadow-[var(--shadow-sm)]'
                     : 'bg-[var(--color-surface)] text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border-soft)]'

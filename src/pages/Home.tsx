@@ -51,9 +51,9 @@ function HomeInner() {
   ).size
 
   const stats = [
-    { value: claims.length, label: 'Claims verified', icon: CheckCircle2 },
-    { value: avgConfidence, label: 'Avg confidence', icon: TrendingUp, suffix: '%' },
-    { value: activeVerifiers, label: 'Active verifiers', icon: Users },
+    { value: claims.length, label: 'Claims verified', icon: CheckCircle2, color: 'text-[var(--color-v-true)]', bg: 'bg-[var(--color-v-true-bg)]' },
+    { value: avgConfidence, label: 'Avg confidence', icon: TrendingUp, suffix: '%', color: 'text-[var(--color-brand)]', bg: 'bg-[var(--color-brand-subtle)]' },
+    { value: activeVerifiers, label: 'Active verifiers', icon: Users, color: 'text-[var(--color-accent)]', bg: 'bg-[var(--color-accent-subtle)]' },
   ]
 
   // Feed shows the 6 most recent verified claims
@@ -95,7 +95,7 @@ function HomeInner() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column: Text */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-brand-subtle)] border border-[var(--color-brand)]/20 animate-stamp-bounce">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-brand-subtle)] border border-[var(--color-brand)]/20 animate-stamp-press">
               <ShieldCheck className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" />
               <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-brand)]">
                 WhatsApp Misinformation Debunker
@@ -170,7 +170,7 @@ function HomeInner() {
                     </p>
 
                     {/* Signature Rotated Seal Overlay */}
-                    <div className="my-4 py-4 rounded-lg bg-[var(--color-v-false-bg)] border border-[var(--color-v-false-border)] flex items-center justify-center gap-3 animate-stamp-bounce">
+                    <div className="my-4 py-4 rounded-lg bg-[var(--color-v-false-bg)] border border-[var(--color-v-false-border)] flex items-center justify-center gap-3 animate-stamp-press">
                       <XCircle className="w-8 h-8 text-[var(--color-v-false)]" />
                       <div className="text-left">
                         <span className="text-2xl font-black uppercase text-[var(--color-v-false)] tracking-tight block leading-none">
@@ -210,8 +210,8 @@ function HomeInner() {
             const Icon = stat.icon
             return (
               <div key={stat.label} className="pt-4 sm:pt-0 sm:px-6 first:px-0 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--color-brand-subtle)] flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-[var(--color-brand)]" aria-hidden="true" />
+                <div className={`w-10 h-10 rounded-[var(--radius-md)] ${stat.bg} flex items-center justify-center flex-shrink-0`}>
+                  <Icon className={`w-5 h-5 ${stat.color}`} aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold font-mono tabular-nums text-[var(--color-fg)]">

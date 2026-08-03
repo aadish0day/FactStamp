@@ -36,9 +36,12 @@ export function Breadcrumbs({ className, currentLabel }: BreadcrumbsProps) {
     // Try label map first, then use the segment itself (capitalized)
     let label = LABEL_MAP[segment] || segment.charAt(0).toUpperCase() + segment.slice(1)
 
-    // If it's a claim/verify ID like "c1" or "v1", use a generic label
-    if (segment.startsWith('c') || segment.startsWith('v')) {
-      label = isLast && currentLabel ? currentLabel : `#${segment}`
+    // Detect if this segment is a dynamic claim or verification ID (e.g., Firebase ID or demo ID)
+    const parentSegment = index > 0 ? segments[index - 1] : ''
+    const isIdSegment = parentSegment === 'claim' || parentSegment === 'verify' || segment.startsWith('c') || segment.startsWith('v')
+
+    if (isIdSegment) {
+      label = isLast && currentLabel ? currentLabel : parentSegment === 'verify' ? 'Submit Verdict' : 'Claim Details'
     }
 
     return { href, label, isLast }

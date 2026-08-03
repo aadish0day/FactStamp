@@ -19,7 +19,9 @@ import {
   Coins,
   HelpCircle,
   Forward,
-  ScanLine
+  ScanLine,
+  Lightbulb,
+  Check,
 } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -31,18 +33,17 @@ import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { findDuplicate } from '@/lib/duplicateDetection'
 import { cn } from '@/lib/utils'
-import { uploadScreenshot } from '@/services/firebaseService'
-import { isFirebaseConfigured } from '@/lib/firebase'
+import { compressImageToDataUrl } from '@/lib/imageCompression'
 import type { ClaimCategory } from '@/lib/types'
 
 type Tab = 'text' | 'image'
 
 const CATEGORY_OPTIONS: { id: ClaimCategory; label: string; desc: string; icon: typeof HeartPulse; color: string }[] = [
-  { id: 'health', label: 'Health & Medical', desc: 'Home remedies, cures, diseases', icon: HeartPulse, color: '#16a34a' },
-  { id: 'political', label: 'Political & Govt', desc: 'Elections, policies, laws', icon: Landmark, color: '#dc2626' },
-  { id: 'financial', label: 'Financial & Loans', desc: 'Bank schemes, free money, UPI', icon: Coins, color: '#d97706' },
-  { id: 'religious', label: 'Religious & Culture', desc: 'Festivals, heritage, beliefs', icon: Flame, color: '#7c3aed' },
-  { id: 'other', label: 'Other Topics', desc: 'Scams, tech, general viral news', icon: HelpCircle, color: '#0284c7' },
+  { id: 'health', label: 'Health & Medical', desc: 'Home remedies, cures, diseases', icon: HeartPulse, color: 'var(--color-v-true)' },
+  { id: 'political', label: 'Political & Govt', desc: 'Elections, policies, laws', icon: Landmark, color: 'var(--color-v-false)' },
+  { id: 'financial', label: 'Financial & Loans', desc: 'Bank schemes, free money, UPI', icon: Coins, color: 'var(--color-v-mislead)' },
+  { id: 'religious', label: 'Religious & Culture', desc: 'Festivals, heritage, beliefs', icon: Flame, color: 'var(--color-accent)' },
+  { id: 'other', label: 'Other Topics', desc: 'Scams, tech, general viral news', icon: HelpCircle, color: 'var(--color-brand)' },
 ]
 
 const SAMPLE_FORWARDS = [
@@ -163,20 +164,19 @@ export function Submit() {
     const reader = new FileReader()
     reader.onload = (e) => {
       setUploadedImage(e.target?.result as string)
-      // Upload the screenshot to Firebase Storage so it lives on the claim.
-      // uploadScreenshot never rejects — it returns null on failure (so the
-      // claim is never persisted with a session-scoped blob URL as imageUrl).
-      // The local preview is `uploadedImage`, independent of this persisted URL.
-      if (isFirebaseConfigured) {
-        uploadScreenshot(file).then((url) => {
-          setScreenshotUrl(url)
-          if (!url) {
-            toast.warning('Screenshot not saved to storage', {
-              description: 'The image will only exist as a local preview — the claim text can still be submitted.',
-            })
-          }
-        })
-      }
+      // Compress the screenshot client-side into a base64 data URL and store
+      // it on the claim document — no paid Firebase Storage tier required.
+      // On failure we return null so the claim is simply persisted without an
+      // image (the extracted text still goes through). The local preview is
+      // `uploadedImage`, independent of this persisted URL.
+      compressImageToDataUrl(file).then((dataUrl) => {
+        setScreenshotUrl(dataUrl)
+        if (!dataUrl) {
+          toast.warning('Screenshot not saved', {
+            description: 'The image will only exist as a local preview — the claim text can still be submitted.',
+          })
+        }
+      })
       simulateExtraction()
     }
     reader.readAsDataURL(file)
@@ -335,7 +335,8 @@ export function Submit() {
                   </span>
                   {claimText.length >= 20 && claimText.length <= 500 && (
                     <span className="text-xs text-[var(--color-v-true)] font-semibold flex items-center gap-1 animate-pop-in">
-                      ✓ Valid forward length
+                      <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
+                      Valid forward length
                     </span>
                   )}
                 </div>
@@ -348,15 +349,16 @@ export function Submit() {
 
               {/* Sample Forward Quick Pills */}
               <div className="mt-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-fg-muted)] block mb-2">
-                  💡 Or try a sample viral forward:
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-fg-muted)] flex items-center gap-1 mb-2">
+                  <Lightbulb className="w-3.5 h-3.5 text-[var(--color-brand)]" aria-hidden="true" />
+                  Or try a sample viral forward:
                 </span>
                 <div className="flex flex-col gap-1.5">
                   {SAMPLE_FORWARDS.map((f, i) => (
                     <button
                       key={i}
                       type="button"
-                      className="text-left text-xs p-2.5 rounded-[var(--radius-md)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] text-[var(--color-fg-2)] hover:text-[var(--color-fg)] hover:border-[var(--color-brand-subtle)] hover:bg-[var(--color-brand-subtle)] transition-all cursor-pointer truncate"
+                      className="text-left text-xs p-2.5 rounded-[var(--radius-md)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] text-[var(--color-fg-2)] hover:text-[var(--color-fg)] hover:border-[var(--color-brand-subtle)] hover:bg-[var(--color-brand-subtle)] active:scale-[0.98] transition-all duration-150 ease-out cursor-pointer truncate"
                       onClick={() => {
                         setClaimText(f)
                         setErrors({})

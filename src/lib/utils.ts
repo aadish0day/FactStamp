@@ -5,46 +5,31 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-/* ── APCA Contrast Check ── */
+/* ── Relative Time Formatter ── */
 
-/**
- * Calculate APCA (Accessible Perceptual Contrast Algorithm) contrast.
- * Uses the simplified SAPC (S-LUV) method from the APCA spec.
- *
- * Usage:
- *   const lc = apcaContrast('#ffffff', '#1a1a1a')
- *   // lc >= 75 → body text OK
- *   // lc >= 60 → large text OK
- *   // lc >= 45 → non-text UI OK
- */
-export function apcaContrast(fg: string, bg: string): number {
-  const sRGBtoLin = (ch: number) => {
-    const v = ch / 255
-    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
-  }
+export function formatDistanceToNow(
+  dateInput: string | Date | number,
+  _options?: { addSuffix?: boolean }
+): string {
+  const date = new Date(dateInput)
+  const diffMs = Date.now() - date.getTime()
+  const diffSec = Math.floor(diffMs / 1000)
+  const diffMin = Math.floor(diffSec / 60)
+  const diffHour = Math.floor(diffMin / 60)
+  const diffDay = Math.floor(diffHour / 24)
 
-  const hexToLuminance = (hex: string): number => {
-    const clean = hex.replace('#', '')
-    const r = parseInt(clean.slice(0, 2), 16)
-    const g = parseInt(clean.slice(2, 4), 16)
-    const b = parseInt(clean.slice(4, 6), 16)
-    return 0.2126 * sRGBtoLin(r) + 0.7152 * sRGBtoLin(g) + 0.0722 * sRGBtoLin(b)
-  }
-
-  const lFG = hexToLuminance(fg)
-  const lBG = hexToLuminance(bg)
-
-  // Determine text polarity: light-on-dark or dark-on-light
-  const lighter = Math.max(lFG, lBG)
-  const darker = Math.min(lFG, lBG)
-  const isLightOnDark = lBG > lFG
-
-  // SAPC (S-LUV) base
-  const sapc = Math.pow(lighter, 0.56) - Math.pow(darker, 0.57)
-
-  // Scale and return (light-on-dark positive, dark-on-light negative)
-  const raw = sapc * 114 * (isLightOnDark ? 1 : -1)
-  return Math.round(Math.abs(raw) * 10) / 10 * (isLightOnDark ? 1 : -1)
+  if (diffSec < 60) return 'less than a minute ago'
+  if (diffMin === 1) return '1 minute ago'
+  if (diffMin < 60) return `${diffMin} minutes ago`
+  if (diffHour === 1) return 'about 1 hour ago'
+  if (diffHour < 24) return `about ${diffHour} hours ago`
+  if (diffDay === 1) return '1 day ago'
+  if (diffDay < 30) return `${diffDay} days ago`
+  const diffMonth = Math.floor(diffDay / 30)
+  if (diffMonth === 1) return '1 month ago'
+  if (diffMonth < 12) return `${diffMonth} months ago`
+  const diffYear = Math.floor(diffDay / 365)
+  return `${diffYear} year${diffYear > 1 ? 's' : ''} ago`
 }
 
 /**

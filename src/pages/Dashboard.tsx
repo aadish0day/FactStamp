@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
   ShieldCheck,
@@ -18,7 +18,8 @@ import {
   ExternalLink,
   Flag,
   CalendarDays,
-  ShieldAlert
+  ShieldAlert,
+  Trophy
 } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -153,18 +154,18 @@ export function Dashboard() {
       label: 'Total Claims Verified',
       value: verifiedClaims.length,
       icon: ShieldCheck,
-      color: '#16a34a',
-      bgColor: 'rgba(22, 163, 74, 0.12)',
-      borderColor: 'rgba(22, 163, 74, 0.25)',
+      color: 'var(--color-v-true)',
+      bgColor: 'var(--color-v-true-bg)',
+      borderColor: 'var(--color-v-true-border)',
       trend: '+12% this week',
     },
     {
       label: 'False Claims Debunked',
       value: falseClaims.length,
       icon: XCircle,
-      color: '#dc2626',
-      bgColor: 'rgba(220, 38, 38, 0.12)',
-      borderColor: 'rgba(220, 38, 38, 0.25)',
+      color: 'var(--color-v-false)',
+      bgColor: 'var(--color-v-false-bg)',
+      borderColor: 'var(--color-v-false-border)',
       trend: '84% of submissions',
     },
     {
@@ -172,9 +173,9 @@ export function Dashboard() {
       value: avgConfidence,
       icon: TrendingUp,
       suffix: '%',
-      color: '#ea580c',
-      bgColor: 'rgba(234, 88, 12, 0.12)',
-      borderColor: 'rgba(234, 88, 12, 0.25)',
+      color: 'var(--color-brand)',
+      bgColor: 'var(--color-brand-subtle)',
+      borderColor: 'var(--color-brand-subtle)',
       trend: 'High confidence',
     },
   ]
@@ -298,7 +299,7 @@ export function Dashboard() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-3">Most debunked claims</h3>
             {weekly.debunkedClaims.length === 0 ? (
               <p className="text-xs text-[var(--color-fg-muted)] py-8 text-center">
-                No claims debunked this week yet 🎉
+                No claims debunked this week yet
               </p>
             ) : (
               <div className="space-y-2.5">
@@ -335,11 +336,11 @@ export function Dashboard() {
               <div className="space-y-2.5">
                 {weekly.topVerifiers.map((v, i) => (
                   <div
-                    key={v.name}
+                    key={`${v.name}-${i}`}
                     className="flex items-center gap-3 p-3 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)]"
                   >
-                    <span className={`text-sm font-bold font-mono w-5 text-center ${i < 3 ? '' : 'text-[var(--color-fg-muted)]'}`}>
-                      {['🥇', '🥈', '🥉'][i] || i + 1}
+                    <span className={`text-xs font-bold font-mono w-5 text-center flex items-center justify-center ${i < 3 ? 'text-[var(--color-brand)]' : 'text-[var(--color-fg-muted)]'}`}>
+                      {i === 0 ? <Trophy className="w-3.5 h-3.5 text-[var(--color-brand)]" aria-hidden="true" /> : `#${i + 1}`}
                     </span>
                     <Avatar initials={v.name[0]} size="sm" />
                     <div className="flex-1 min-w-0">
@@ -412,15 +413,15 @@ export function Dashboard() {
           ) : (
           <div className="space-y-3">
             {leaderboard.map((verifier, index) => {
-              const ranks = ['🥇', '🥈', '🥉', '4', '5']
+              const ranks = ['#1', '#2', '#3', '#4', '#5']
               const isTop3 = index < 3
               return (
                 <div
-                  key={verifier.uid}
+                  key={`${verifier.uid}-${index}`}
                   className="flex items-center gap-3.5 p-3 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] hover:border-[var(--color-brand-subtle)] transition-all"
                 >
-                  <span className={`text-sm font-bold font-mono w-6 text-center ${isTop3 ? 'text-base' : 'text-[var(--color-fg-muted)]'}`}>
-                    {ranks[index]}
+                  <span className={`text-xs font-bold font-mono w-6 text-center flex items-center justify-center ${isTop3 ? 'text-[var(--color-brand)]' : 'text-[var(--color-fg-muted)]'}`}>
+                    {index === 0 ? <Trophy className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" /> : ranks[index]}
                   </span>
                   <Avatar initials={verifier.name[0]} size="md" />
                   <div className="flex-1 min-w-0">

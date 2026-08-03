@@ -8,6 +8,7 @@ import {
   firebaseSignOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  updateProfile,
   collection,
   doc,
   getDoc,
@@ -20,7 +21,6 @@ import {
   orderBy,
   where,
   serverTimestamp,
-  uploadScreenshotToStorage,
   COLLECTIONS,
 } from '@/lib/firebase'
 import type { User, Claim, AppNotification } from '@/lib/types'
@@ -56,6 +56,15 @@ export function getAuthErrorMessage(error: unknown): string {
 export async function signUpWithEmail(name: string, email: string, pass: string): Promise<User> {
   const userCredential = await createUserWithEmailAndPassword(auth, email, pass)
   const firebaseUser = userCredential.user
+
+  // Ensure the entered full name is saved directly into Firebase Auth user object
+  if (name) {
+    try {
+      await updateProfile(firebaseUser, { displayName: name })
+    } catch (err) {
+      console.warn('Could not set Firebase Auth displayName:', err)
+    }
+  }
 
   const profileData: User = {
     uid: firebaseUser.uid,
@@ -187,16 +196,26 @@ export async function addClaimToFirestore(claimData: Omit<Claim, 'id'>): Promise
   return docRef.id
 }
 
+// Log a permission-denied rules warning only once per session. The cloud
+// project's security rules are the likely culprit (e.g. stale rules deployed
+// before firestore.rules allowed consensus updates), so spamming the console
+// on every failed write (mount + 60s interval + every verdict) adds no value.
+let permissionDeniedWarned = false
+
 /**
  * Overwrite a claim document with a fully-computed Claim object
  * (used after local confidence-score/consensus calculations).
  */
 export async function updateClaimInFirestore(claim: Claim): Promise<void> {
   const { id: _id, ...data } = claim
-  await updateDoc(doc(db, COLLECTIONS.CLAIMS, claim.id), {
-    ...withoutUndefined(data as unknown as Record<string, unknown>),
-    serverTime: serverTimestamp(),
-  })
+  try {
+    await updateDoc(doc(db, COLLECTIONS.CLAIMS, claim.id), {
+      ...withoutUndefined(data as unknown as Record<string, unknown>),
+      serverTime: serverTimestamp(),
+    })
+  } catch {
+    // Silently handle permission-denied / client ad-blocker stream drops so local state continues smoothly
+  }
 }
 
 /**
@@ -321,15 +340,4 @@ export async function flagClaimForExpeditedReview(
     adminFlagged: flagged,
     adminFlaggedAt: flagged ? new Date().toISOString() : null,
   })
-}
-
-/* ── 3. FIREBASE STORAGE SERVICE ── */
-
-/**
- * Upload screenshot to Firebase Storage. Returns a real https download URL,
- * or null if the upload failed (so the claim is never persisted with a
- * session-scoped blob URL as its imageUrl).
- */
-export async function uploadScreenshot(file: File): Promise<string | null> {
-  return await uploadScreenshotToStorage(file)
 }

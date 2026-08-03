@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Check, Lock, Mail, User, Shield, Eye, EyeOff } from 'lucide-react'
+import { Check, Lock, Mail, User, Shield, Eye, EyeOff, Zap } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -154,6 +154,13 @@ export function SignUp() {
       subheading="Join our community of verifiers and stop WhatsApp misinformation."
     >
       <Seo title="Create Account" description="Join FactStamp's community fact-checkers to help stop WhatsApp misinformation in India." />
+
+      {/* Starting Reputation Bonus Callout */}
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] mb-1.5 self-start">
+        <Zap className="w-3.5 h-3.5" aria-hidden="true" />
+        <span>Start with 50 Verifier Reputation Points</span>
+      </div>
+
       <form className="flex flex-col gap-3.5" onSubmit={handleSubmit} noValidate>
         {/* Error summary */}
         {submitted && summaryItems.length > 0 && (
@@ -206,7 +213,10 @@ export function SignUp() {
             aria-describedby={errors.name ? 'reg-name-error' : undefined}
           />
           {touched.name && !errors.name && form.name && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold">✓ Looks good</p>
+            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold flex items-center gap-1">
+              <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
+              Looks good
+            </p>
           )}
           {errors.name && <p id="reg-name-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.name}</p>}
         </div>
@@ -234,7 +244,10 @@ export function SignUp() {
             aria-describedby={errors.email ? 'reg-email-error' : undefined}
           />
           {touched.email && !errors.email && form.email && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold">✓ Valid email format</p>
+            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold flex items-center gap-1">
+              <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
+              Valid email format
+            </p>
           )}
           {errors.email && <p id="reg-email-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.email}</p>}
         </div>
@@ -346,7 +359,10 @@ export function SignUp() {
             </button>
           </div>
           {touched.confirm && !errors.confirm && form.confirm && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold">✓ Passwords match</p>
+            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold flex items-center gap-1">
+              <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
+              Passwords match
+            </p>
           )}
           {errors.confirm && <p id="reg-confirm-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.confirm}</p>}
         </div>

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from '@/lib/utils'
 import { AlertCircle, CheckCircle2, XCircle, AlertTriangle, HelpCircle, RefreshCw, type LucideIcon } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'

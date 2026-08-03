@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, BellOff, ClipboardCheck, Star, BarChart3, Scale, Check, ExternalLink, X, type LucideIcon } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { AppNotification, NotificationType } from '@/lib/types'
 import { useNotifications } from '@/contexts/NotificationsContext'
@@ -71,7 +71,7 @@ export function NotificationBell() {
         <div
           role="dialog"
           aria-label="Notifications menu"
-          className="absolute right-0 mt-2 w-80 sm:w-96 rounded-[var(--radius-xl)] bg-[var(--color-surface)]/95 backdrop-blur-md border border-[var(--color-border)] shadow-[var(--shadow-xl)] z-50 overflow-hidden animate-dropdown-slide"
+          className="absolute right-0 mt-2 w-80 sm:w-96 rounded-[var(--radius-xl)] bg-[var(--color-surface)]/95 backdrop-blur-md border border-[var(--color-border)] shadow-[var(--shadow-xl)] z-50 overflow-hidden origin-top-right animate-dropdown-slide"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--color-border-soft)]">

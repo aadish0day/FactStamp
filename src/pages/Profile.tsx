@@ -35,15 +35,15 @@ import { AnimatedCounter } from '@/components/AnimatedCounter'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useAuth } from '@/contexts/AuthContext'
 import { useClaims } from '@/contexts/ClaimsContext'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from '@/lib/utils'
 import type { Verification, Verdict } from '@/lib/types'
 
 /* ── Reputation level helper ── */
 function repLevel(rep: number): { label: string; icon: typeof Sprout; color: string; perk: string } {
-  if (rep <= 30) return { label: 'Novice Verifier', icon: Sprout, color: '#dc2626', perk: 'Standard 1.0× Vote Weight' }
-  if (rep <= 60) return { label: 'Trusted Analyst', icon: Star, color: '#d97706', perk: 'Standard 1.0× Vote Weight' }
-  if (rep <= 85) return { label: 'Expert Fact-Checker', icon: Gem, color: '#16a34a', perk: 'Elevated 1.25× Vote Weight' }
-  return { label: 'Elite Guardian', icon: Trophy, color: '#7c3aed', perk: 'Maximal 1.5× Consensus Vote Weight' }
+  if (rep <= 30) return { label: 'Novice Verifier', icon: Sprout, color: 'var(--color-v-false)', perk: 'Standard 1.0× Vote Weight' }
+  if (rep <= 60) return { label: 'Trusted Analyst', icon: Star, color: 'var(--color-v-mislead)', perk: 'Standard 1.0× Vote Weight' }
+  if (rep <= 85) return { label: 'Expert Fact-Checker', icon: Gem, color: 'var(--color-v-true)', perk: 'Elevated 1.25× Vote Weight' }
+  return { label: 'Elite Guardian', icon: Trophy, color: 'var(--color-accent)', perk: 'Maximal 1.5× Consensus Vote Weight' }
 }
 
 /* ── Sparkline SVG ── */

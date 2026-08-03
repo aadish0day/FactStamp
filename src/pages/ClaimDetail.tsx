@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Download, ShieldCheck, Share2, Plus, RefreshCw, ChevronDown } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -11,7 +11,6 @@ import { VerdictPill } from '@/components/ui/VerdictPill'
 import { Avatar } from '@/components/ui/Avatar'
 import { SourceQualityDot } from '@/components/ui/SourceQualityDot'
 import { VerdictStamp } from '@/components/VerdictStamp'
-import { ConfidenceBreakdown } from '@/components/ConfidenceBreakdown'
 import { FactCheckCard } from '@/components/FactCheckCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -453,8 +452,8 @@ export function ClaimDetail() {
       confidenceLine,
       '',
       '━━━━━━━━━━━━━━━━━━',
-      `🔍 Verify this claim: ${window.location.origin}/claim/${claim.id}`,
-      '🛡️ factstamp.app — India\'s community fact-checker',
+      `Verify this claim: ${window.location.origin}/claim/${claim.id}`,
+      'factstamp.app — India\'s community fact-checker',
     ].filter(Boolean).join('\n')
 
     const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
@@ -830,11 +829,34 @@ export function ClaimDetail() {
 
             {/* Confidence Breakdown */}
             {claim.agreementRatio !== undefined && (
-              <ConfidenceBreakdown
-                agreementRatio={claim.agreementRatio}
-                avgReputation={claim.avgVerifierReputation ?? 0}
-                sourceQuality={claim.sourceQualityScore ?? 0}
-              />
+              <div className="hairline-card p-6">
+                <h3 className="font-semibold mb-4 text-sm">Confidence breakdown</h3>
+                <div className="space-y-4">
+                  {[
+                    { label: 'Verifier agreement', value: claim.agreementRatio, weight: '40%' },
+                    { label: 'Avg verifier reputation', value: claim.avgVerifierReputation ?? 0, weight: '30%' },
+                    { label: 'Source quality', value: claim.sourceQualityScore ?? 0, weight: '30%' },
+                  ].map((item) => (
+                    <div key={item.label}>
+                      <div className="flex items-center justify-between mb-1.5 text-xs">
+                        <span className="text-[var(--color-fg)]">{item.label}</span>
+                        <span className="font-mono text-[var(--color-fg-muted)]">{item.weight} weight</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-2 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-500"
+                            style={{ width: `${Math.min(100, Math.max(0, item.value))}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-mono font-medium text-[var(--color-fg)] min-w-[3ch] text-right">
+                          {Math.round(item.value)}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </>
         )}

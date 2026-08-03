@@ -1,4 +1,3 @@
-import { subDays, startOfDay, endOfDay } from 'date-fns'
 import type { Claim } from './types'
 
 export interface WeeklyCategoryCount {
@@ -33,8 +32,8 @@ const CATEGORY_ORDER = ['health', 'political', 'religious', 'financial', 'other'
  */
 export function computeWeeklyReport(claims: Claim[]): WeeklyReport {
   const now = new Date()
-  const weekStart = startOfDay(subDays(now, 6))
-  const weekEnd = endOfDay(now)
+  const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0, 0)
+  const weekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
 
   const weekClaims = claims.filter((c) => {
     const d = new Date(c.createdAt)

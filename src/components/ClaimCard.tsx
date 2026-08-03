@@ -5,7 +5,7 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { VerdictPill } from '@/components/ui/VerdictPill'
 import { VerdictStamp } from '@/components/VerdictStamp'
 import type { Claim } from '@/lib/types'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from '@/lib/utils'
 
 interface ClaimCardProps {
   claim: Claim

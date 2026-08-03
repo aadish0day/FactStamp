@@ -59,44 +59,14 @@ export function calculateConfidenceScore(
  * Determine source quality from URL domain
  * Returns: 'high' | 'medium' | 'low'
  */
+const HQ_DOMAINS = new Set(['who.int', 'nih.gov', 'ncbi.nlm.nih.gov', 'pib.gov.in', 'eci.gov.in', 'mohfw.gov.in', 'icmr.gov.in', 'ayush.gov.in', 'ceodelhi.gov.in', 'wikipedia.org', 'indiacode.nic.in', 'rbi.org.in'])
+const MQ_DOMAINS = new Set(['timesofindia.indiatimes.com', 'indianexpress.com', 'thehindu.com', 'bbc.com', 'bbc.in', 'reuters.com', 'apnews.com', 'ndtv.com', 'economictimes.com', 'factcheck.org', 'iitm.org', 'snopes.com'])
+
 export function determineSourceQuality(url: string): 'high' | 'medium' | 'low' {
   try {
     const domain = new URL(url).hostname.toLowerCase()
-
-    // High-quality sources
-    const highQuality = [
-      'who.int',
-      'nih.gov',
-      'ncbi.nlm.nih.gov',
-      'pib.gov.in',
-      'eci.gov.in',
-      'mohfw.gov.in',
-      'icmr.gov.in',
-      'ayush.gov.in',
-      'ceodelhi.gov.in',
-      'wikipedia.org',
-      'indiacode.nic.in',
-      'rbi.org.in',
-    ]
-
-    // Medium-quality sources
-    const mediumQuality = [
-      'timesofindia.indiatimes.com',
-      'indianexpress.com',
-      'thehindu.com',
-      'bbc.com',
-      'bbc.in',
-      'reuters.com',
-      'apnews.com',
-      'ndtv.com',
-      'economictimes.com',
-      'factcheck.org',
-      'iitm.org',
-      'snopes.com',
-    ]
-
-    if (highQuality.some((hq) => domain.includes(hq))) return 'high'
-    if (mediumQuality.some((mq) => domain.includes(mq))) return 'medium'
+    if (Array.from(HQ_DOMAINS).some((hq) => domain.includes(hq))) return 'high'
+    if (Array.from(MQ_DOMAINS).some((mq) => domain.includes(mq))) return 'medium'
     return 'low'
   } catch {
     return 'low'

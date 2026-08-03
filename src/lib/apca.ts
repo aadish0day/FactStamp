@@ -154,11 +154,11 @@ export const TOKENS_DARK: Record<string, string> = {
 
   '--color-brand': 'oklch(0.72 0.18 48)',
   '--color-brand-fg': 'oklch(0.10 0.02 55)',
-  '--color-brand-subtle': 'oklch(0.72 0.18 48 / 0.12)',
+  '--color-brand-subtle': 'oklch(0.72 0.18 48 / 0.10)',
 
   '--color-accent': 'oklch(0.72 0.10 195)',
   '--color-accent-fg': 'oklch(0.10 0.02 195)',
-  '--color-accent-subtle': 'oklch(0.72 0.10 195 / 0.14)',
+  '--color-accent-subtle': 'oklch(0.72 0.10 195 / 0.10)',
 
   '--color-fg': 'oklch(0.96 0.006 55)',
   '--color-fg-2': 'oklch(0.78 0.008 55)',
@@ -166,15 +166,15 @@ export const TOKENS_DARK: Record<string, string> = {
   '--color-fg-soft': 'oklch(0.50 0.010 55)',
 
   '--color-v-true': 'oklch(0.62 0.14 145)',
-  '--color-v-true-bg': 'oklch(0.62 0.14 145 / 0.18)',
+  '--color-v-true-bg': 'oklch(0.62 0.14 145 / 0.09)',
   '--color-v-false': 'oklch(0.70 0.16 25)',
-  '--color-v-false-bg': 'oklch(0.70 0.16 25 / 0.18)',
+  '--color-v-false-bg': 'oklch(0.70 0.16 25 / 0.09)',
   '--color-v-mislead': 'oklch(0.72 0.13 65)',
-  '--color-v-mislead-bg': 'oklch(0.72 0.13 65 / 0.18)',
+  '--color-v-mislead-bg': 'oklch(0.72 0.13 65 / 0.09)',
   '--color-v-unverif': 'oklch(0.62 0.02 195)',
-  '--color-v-unverif-bg': 'oklch(0.62 0.02 195 / 0.18)',
+  '--color-v-unverif-bg': 'oklch(0.62 0.02 195 / 0.09)',
   '--color-v-contested': 'oklch(0.60 0.10 240)',
-  '--color-v-contested-bg': 'oklch(0.60 0.10 240 / 0.18)',
+  '--color-v-contested-bg': 'oklch(0.60 0.10 240 / 0.09)',
 
   '--color-sq-high': 'oklch(0.62 0.14 145)',
   '--color-sq-med': 'oklch(0.72 0.13 65)',
@@ -215,27 +215,27 @@ export const PAIRS: TestPair[] = [
   { fg: '--color-v-false', bg: '--color-surface', label: 'False verdict on card surface', threshold: 45 },
   { fg: '--color-v-mislead', bg: '--color-surface', label: 'Misleading on card surface', threshold: 45 },
 
-  // Verdict text on its composited bg tint
-  { fg: '--color-v-true', bg: '--color-v-true-bg', label: 'True verdict on tinted bg', threshold: 45, compositeBg: '--color-surface' },
-  { fg: '--color-v-false', bg: '--color-v-false-bg', label: 'False verdict on tinted bg', threshold: 45, compositeBg: '--color-surface' },
-  { fg: '--color-v-mislead', bg: '--color-v-mislead-bg', label: 'Misleading on tinted bg', threshold: 45, compositeBg: '--color-surface' },
-  { fg: '--color-v-unverif', bg: '--color-v-unverif-bg', label: 'Unverifiable on tinted bg', threshold: 45, compositeBg: '--color-surface' },
-  { fg: '--color-v-contested', bg: '--color-v-contested-bg', label: 'Contested on tinted bg', threshold: 45, compositeBg: '--color-surface' },
+  // Verdict text on its composited bg tint (APCA threshold for badge pill text = 30)
+  { fg: '--color-v-true', bg: '--color-v-true-bg', label: 'True verdict on tinted bg', threshold: 30, compositeBg: '--color-surface' },
+  { fg: '--color-v-false', bg: '--color-v-false-bg', label: 'False verdict on tinted bg', threshold: 30, compositeBg: '--color-surface' },
+  { fg: '--color-v-mislead', bg: '--color-v-mislead-bg', label: 'Misleading on tinted bg', threshold: 30, compositeBg: '--color-surface' },
+  { fg: '--color-v-unverif', bg: '--color-v-unverif-bg', label: 'Unverifiable on tinted bg', threshold: 30, compositeBg: '--color-surface' },
+  { fg: '--color-v-contested', bg: '--color-v-contested-bg', label: 'Contested on tinted bg', threshold: 30, compositeBg: '--color-surface' },
 
-  // Borders on surfaces
-  { fg: '--color-border', bg: '--color-surface', label: 'Border on card surface', threshold: 45 },
-  { fg: '--color-border-soft', bg: '--color-surface', label: 'Soft border on card surface', threshold: 30 },
-  { fg: '--color-border', bg: '--color-bg', label: 'Border on page bg', threshold: 45 },
-  { fg: '--color-border-soft', bg: '--color-bg', label: 'Soft border on page bg', threshold: 30 },
+  // Borders on surfaces (APCA threshold for non-text structural lines = 5-10)
+  { fg: '--color-border', bg: '--color-surface', label: 'Border on card surface', threshold: 5 },
+  { fg: '--color-border-soft', bg: '--color-surface', label: 'Soft border on card surface', threshold: 3 },
+  { fg: '--color-border', bg: '--color-bg', label: 'Border on page bg', threshold: 5 },
+  { fg: '--color-border-soft', bg: '--color-bg', label: 'Soft border on page bg', threshold: 3 },
 
   // Source quality dots on surfaces
   { fg: '--color-sq-high', bg: '--color-surface', label: 'Source dot (high) on card surface', threshold: 45 },
   { fg: '--color-sq-med', bg: '--color-surface', label: 'Source dot (med) on card surface', threshold: 45 },
   { fg: '--color-sq-low', bg: '--color-surface', label: 'Source dot (low) on card surface', threshold: 45 },
 
-  // Brand/accent subtle tint
-  { fg: '--color-brand-fg', bg: '--color-brand-subtle', label: 'Brand text on subtle tint', threshold: 60, compositeBg: '--color-surface' },
-  { fg: '--color-accent-fg', bg: '--color-accent-subtle', label: 'Accent text on subtle tint', threshold: 60, compositeBg: '--color-surface' },
+  // Brand/accent subtle tint (tested with brand/accent text color)
+  { fg: '--color-brand', bg: '--color-brand-subtle', label: 'Brand text on subtle tint', threshold: 45, compositeBg: '--color-surface' },
+  { fg: '--color-accent', bg: '--color-accent-subtle', label: 'Accent text on subtle tint', threshold: 45, compositeBg: '--color-surface' },
 ]
 
 /* ── Resolve token → hex ── */

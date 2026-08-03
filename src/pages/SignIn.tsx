@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Lock, Mail, AlertCircle, Eye, EyeOff } from 'lucide-react'
+import { Lock, Mail, AlertCircle, Eye, EyeOff, Check } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -184,7 +184,8 @@ export function SignIn() {
           />
           {touched.email && !errors.email && email && (
             <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold flex items-center gap-1">
-              ✓ Valid email format
+              <Check className="w-3 h-3 text-[var(--color-v-true)]" aria-hidden="true" />
+              Valid email format
             </p>
           )}
           {errors.email && (
