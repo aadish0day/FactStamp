@@ -1,7 +1,5 @@
 services:
   # ── Development (Vite dev server + hot reload) ──
-  #   docker compose up -d        → http://localhost:5173
-  # Source is bind-mounted, so edits reload live (HMR) — no rebuild needed.
   dev:
     build:
       context: .
@@ -10,11 +8,34 @@ services:
     image: factstamp:dev
     container_name: factstamp-dev
     command: npm run dev -- --host 0.0.0.0 --port 5173
+    # `.env` is optional (only `.env.example` ships in git). `required: false`
+    # keeps fresh clones working with demo fallback keys.
+    env_file:
+      - path: .env
+        required: false
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - .:/app
       - /app/node_modules
     ports:
-      - "5173:5173"
+      - "5174:5173"
+    restart: unless-stopped
+
+  # ── Production (nginx serve) ──
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: serve
+    image: factstamp:latest
+    container_name: factstamp-prod
+    # .env is in the build context so Vite inlines VITE_* into the bundle;
+    # env_file is optional (required: false) so fresh clones without a local
+    # .env still build and run with demo fallback keys.
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "8080:80"
     restart: unless-stopped

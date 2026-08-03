@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ── Verifier Profiles ──
+    // Any signed-in user can read profiles (names/reputations appear on
+    // claim cards); only the owner can create/update/delete their own doc.
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ── Admin helper ──
+    // An admin is a signed-in user whose own profile doc carries isAdmin == true.
+    // Used to gate expedite-flag writes on claims below.
+    function isAdmin() {
+      return request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // ── Claims ──
+    // Read is public (home feed + share cards are viewable signed-out).
+    // Create requires a signed-in submitter. Consensus updates are allowed
+    // for any signed-in verifier, but the claim's identity fields (text,
+    // category, submitter, timestamps) are immutable so nobody can rewrite
+    // someone else's claim. Deletes are disabled entirely.
+    match /claims/{claimId} {
+      allow read: if true;
+      // Any signed-in user may submit a claim. The submitter's uid is still
+      // recorded on the doc (submittedBy) for display, and the create rule is
+      // intentionally auth-only so the client-side demo seed can populate a
+      // fresh project after the first sign-in.
+      allow create: if request.auth != null
+        && request.resource.data.verificationCount == 0;
+      // Signed-in verifiers may update a claim, but only consensus fields:
+      // identity fields are immutable, and the verification count may never
+      // decrease (prevents users wiping or forging verdict history).
+      allow update: if request.auth != null
+        // Only admins may change the expedite flag; everyone else must leave it untouched
+        && (request.resource.data.adminFlagged == resource.data.adminFlagged || isAdmin())
+        && request.resource.data.verificationCount >= resource.data.verificationCount
+        && request.resource.data.text == resource.data.text
+        && request.resource.data.category == resource.data.category
+        && request.resource.data.submittedBy == resource.data.submittedBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.consensusDeadline == resource.data.consensusDeadline;
+      allow delete: if false;
+
+      // ── Verdicts subcollection ──
+      // Any signed-in user can add a verdict to a claim, but it must carry
+      // their own uid; only the author can edit their own verdict.
+      match /verdicts/{verdictId} {
+        allow read: if true;
+        allow create: if request.auth != null
+          && request.resource.data.verifierId == request.auth.uid;
+        allow update: if request.auth != null
+          && resource.data.verifierId == request.auth.uid;
+        allow delete: if false;
+      }
+    }
+
+    // ── Notifications ──
+    // Users can only read/write their own notification docs; the userId field
+    // must always match the authenticated user.
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
+      allow delete: if false;
+    }
+  }
+}

@@ -1,26 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#6c63ff" />
-    <meta name="description" content="FactStamp helps Indians verify viral WhatsApp forwards with transparent, community-driven fact-checks and clear verdicts." />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <meta name="theme-color" content="#ea580c" />
+    <meta name="description" content="FactStamp helps Indians verify viral WhatsApp forwards with transparent community-driven fact-checks." />
     <title>FactStamp — India's Misinformation Fact-Checker</title>
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="FactStamp — Fact-Check WhatsApp Forwards" />
+    <meta property="og:description" content="Verify viral WhatsApp forwards with community evidence and shareable PNG cards." />
+    <meta property="og:image" content="/og-cover.svg" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FactStamp — Fact-Check WhatsApp Forwards" />
+    <meta name="twitter:description" content="Verify viral WhatsApp forwards with community evidence and shareable PNG cards." />
+    <meta name="twitter:image" content="/og-cover.svg" />
+
+    <!-- Google Fonts: DM Sans + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
     <script>
       (function () {
         try {
           var t = localStorage.getItem('fs-theme');
           if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', t);
+          if (t === 'dark') document.documentElement.classList.add('dark');
         } catch (e) {}
       })();
     </script>
   </head>
-  <body>
+  <body class="antialiased">
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
