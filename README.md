@@ -1,21 +1,21 @@
-# 🛡️ FactStamp — WhatsApp Misinformation Debunker
+# FactStamp — WhatsApp Misinformation Debunker
 
 > **Stop WhatsApp fake news before it spreads.** FactStamp is a decentralized, community-driven fact-checking platform built to verify viral WhatsApp forwards using a weighted 3-verifier quorum consensus engine and downloadable fact-check PNG cards.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-* **🛡️ Weighted 3-Verifier Quorum Engine**: Requires at least 3 independent verifications backed by official sources (WHO, Ministry of Health, government portals) before issuing a final verdict (`TRUE`, `FALSE`, `MISLEADING`, `UNVERIFIED`).
-* **📱 Shareable PNG Fact-Check Cards**: Instantly generate and download WhatsApp-optimized PNG verdict cards using `html2canvas` to share back directly into fast-moving group chats.
-* **⚡ Instant Duplicate Engine**: Prevents redundant work by matching incoming forwards against existing claims in real time.
-* **📊 Misinformation Intelligence Dashboard**: Real-time analytics, category distributions, weekly trending reports, and top verifier reputation leaderboards powered by Recharts.
-* **🔒 Enterprise Security & Firebase Rules**: Strict Firestore security rules (`firestore.rules`) and Storage security rules (`storage.rules`) enforcing data validation, user authentication, and rate limiting.
-* **🐳 Docker & Firebase Emulator Support**: Fully containerized environment with hot-reload development target and Nginx production target.
+* **Weighted 3-Verifier Quorum Engine**: Requires at least 3 independent verifications backed by official sources (WHO, Ministry of Health, government portals) before issuing a final verdict (`TRUE`, `FALSE`, `MISLEADING`, `UNVERIFIED`).
+* **Shareable PNG Fact-Check Cards**: Instantly generate and download WhatsApp-optimized PNG verdict cards using `html2canvas` to share back directly into fast-moving group chats.
+* **Instant Duplicate Engine**: Prevents redundant work by matching incoming forwards against existing claims in real time.
+* **Misinformation Intelligence Dashboard**: Real-time analytics, category distributions, weekly trending reports, and top verifier reputation leaderboards powered by Recharts.
+* **Enterprise Security & Firebase Rules**: Strict Firestore security rules (`firestore.rules`) and Storage security rules (`storage.rules`) enforcing data validation, user authentication, and rate limiting.
+* **Docker & Firebase Emulator Support**: Fully containerized environment with hot-reload development target and Nginx production target.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Technology |
 |---|---|
@@ -30,7 +30,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Prerequisites
 
@@ -70,7 +70,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## 🧪 Local Firebase Emulators & Database Seeding
+## Local Firebase Emulators & Database Seeding
 
 To run completely offline with the Firebase Local Emulator Suite:
 
@@ -84,7 +84,7 @@ npm run seed:db
 
 ---
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 ### Development Mode (with Hot Reloading)
 
@@ -102,7 +102,7 @@ Access production Nginx container at [http://localhost:8080](http://localhost:80
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 FactStamp/
@@ -128,7 +128,7 @@ FactStamp/
 
 ---
 
-## 📜 Scripts & Commands
+## Scripts & Commands
 
 | Command | Action |
 |---|---|
@@ -141,6 +141,6 @@ FactStamp/
 
 ---
 
-## 📄 License
+## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
