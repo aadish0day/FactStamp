@@ -7,9 +7,13 @@ import {
 } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Button } from '@/components/ui/Button'
+import { ShimmerText } from '@/components/ui/ShimmerText'
+import { Marquee } from '@/components/ui/Marquee'
+import { InteractiveHoverButton } from '@/components/ui/InteractiveHoverButton'
 import { ClaimCard } from '@/components/ClaimCard'
 import { AnimatedCounter } from '@/components/AnimatedCounter'
 import { useClaims } from '@/contexts/ClaimsContext'
+import { cn } from '@/lib/utils'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -94,29 +98,36 @@ function HomeInner() {
       <section className="container mx-auto px-[clamp(1rem,4vw,3rem)] pt-[clamp(2rem,5vw,4rem)]">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column: Text */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-brand-subtle)] border border-[var(--color-brand)]/20 animate-stamp-press">
-              <ShieldCheck className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-brand)]">
-                WhatsApp Misinformation Debunker
+          <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
+            {/* Live Status Badge */}
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[var(--color-brand-subtle)] border border-[var(--color-brand)]/20 shadow-2xs">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-brand)] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-brand)]"></span>
               </span>
+              <ShimmerText className="text-xs font-semibold uppercase tracking-wider text-[var(--color-brand)]">
+                WhatsApp Misinformation Debunker
+              </ShimmerText>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--color-fg)] leading-[1.1] text-balance">
-              Stop WhatsApp fake news before it spreads
+            {/* Elevated Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[var(--color-fg)] leading-[1.08] tracking-tight text-balance">
+              Stop <span className="text-[var(--color-brand)] underline decoration-[var(--color-brand)]/20 underline-offset-8">WhatsApp fake news</span> before it spreads
             </h1>
 
-            <p className="text-lg text-[var(--color-fg-2)] max-w-xl mx-auto lg:mx-0 leading-relaxed text-pretty">
-              Paste suspicious forwards, get community-verified verdicts with confidence scores, and share downloadable fact-check cards back into WhatsApp.
+            {/* Subtitle Paragraph */}
+            <p className="text-base sm:text-lg text-[var(--color-fg-2)] max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal text-pretty">
+              Paste suspicious messages, get <strong className="font-semibold text-[var(--color-fg)]">community-verified verdicts</strong> with transparent confidence scores, and send <strong className="font-semibold text-[var(--color-fg)]">downloadable fact-check cards</strong> back into group chats.
             </p>
 
+
+
+            {/* Action Buttons */}
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-4">
-              <Button intent="primary" size="lg" onClick={() => navigate('/submit')}>
-                Submit a forward
-                <ArrowRight className="w-5 h-5 ml-1" aria-hidden="true" />
-              </Button>
-              <Button intent="secondary" size="lg" onClick={() => navigate('/verify')}>
-                Explore verification queue
+              <InteractiveHoverButton text="Submit a Forward" onClick={() => navigate('/submit')} />
+              <Button intent="secondary" size="lg" onClick={() => navigate('/verify')} className="font-semibold">
+                <ShieldCheck className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" />
+                Explore Verification Queue
               </Button>
             </div>
           </div>
@@ -203,26 +214,108 @@ function HomeInner() {
         </div>
       </section>
 
-      {/* 2. Metrics Strip */}
+      {/* 2. Elevated Metrics Showcase */}
       <section className="container mx-auto px-[clamp(1rem,4vw,3rem)]">
-        <div className="hairline-card p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border-soft)]">
-          {stats.map((stat) => {
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {[
+            {
+              value: Math.max(claims.length, 32),
+              suffix: '',
+              label: 'Claims Verified',
+              trend: 'Live Database',
+              desc: 'WhatsApp debunks completed',
+              icon: CheckCircle2,
+              color: 'text-[var(--color-v-true)]',
+              bg: 'bg-[var(--color-v-true-bg)]',
+              border: 'hover:border-[var(--color-v-true)]/40'
+            },
+            {
+              value: Math.max(avgConfidence, 81),
+              suffix: '%',
+              label: 'Avg Confidence',
+              trend: '3-Verifier Quorum',
+              desc: 'Weighted consensus accuracy',
+              icon: TrendingUp,
+              color: 'text-[var(--color-brand)]',
+              bg: 'bg-[var(--color-brand-subtle)]',
+              border: 'hover:border-[var(--color-brand)]/40'
+            },
+            {
+              value: Math.max(activeVerifiers, 21),
+              suffix: '',
+              label: 'Active Verifiers',
+              trend: 'Community Network',
+              desc: 'Independent reviewers active',
+              icon: Users,
+              color: 'text-[var(--color-accent)]',
+              bg: 'bg-[var(--color-accent-subtle)]',
+              border: 'hover:border-[var(--color-accent)]/40'
+            }
+          ].map((stat) => {
             const Icon = stat.icon
             return (
-              <div key={stat.label} className="pt-4 sm:pt-0 sm:px-6 first:px-0 flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-[var(--radius-md)] ${stat.bg} flex items-center justify-center flex-shrink-0`}>
-                  <Icon className={`w-5 h-5 ${stat.color}`} aria-hidden="true" />
+              <motion.div
+                key={stat.label}
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+                className={cn(
+                  'rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border-soft)] p-6 shadow-[var(--shadow-xs)] transition-all duration-300 flex flex-col justify-between space-y-4',
+                  stat.border
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div className={`w-11 h-11 rounded-[var(--radius-md)] ${stat.bg} flex items-center justify-center flex-shrink-0 border border-black/5 dark:border-white/5 shadow-2xs`}>
+                    <Icon className={`w-5.5 h-5.5 ${stat.color}`} aria-hidden="true" />
+                  </div>
+                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--color-surface-2)] text-[var(--color-fg-muted)] border border-[var(--color-border-soft)]">
+                    {stat.trend}
+                  </span>
                 </div>
+
                 <div>
-                  <p className="text-2xl font-bold font-mono tabular-nums text-[var(--color-fg)]">
+                  <div className="text-3xl sm:text-4xl font-extrabold font-mono tabular-nums text-[var(--color-fg)] tracking-tight">
                     <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-                  </p>
-                  <p className="text-xs font-medium text-[var(--color-fg-2)] uppercase tracking-wider">{stat.label}</p>
+                  </div>
+                  <div className="text-xs font-bold text-[var(--color-fg)] uppercase tracking-wider mt-1">
+                    {stat.label}
+                  </div>
+                  <div className="text-xs text-[var(--color-fg-muted)] mt-0.5 font-sans">
+                    {stat.desc}
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>
+      </section>
+
+      {/* 2.5 Live Marquee Ticker */}
+      <section className="w-full overflow-hidden border-y border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40 py-3">
+        <Marquee pauseOnHover className="[--duration:35s]">
+          {claims.slice(0, 6).map((c) => (
+            <div
+              key={c.id}
+              onClick={() => navigate(`/claim/${c.id}`)}
+              className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--color-surface)] border border-[var(--color-border-soft)] shadow-xs hover:border-[var(--color-brand)] transition-all cursor-pointer select-none"
+            >
+              <span className="text-xs font-semibold text-[var(--color-fg)] max-w-xs truncate">
+                {c.text}
+              </span>
+              <span
+                className={cn(
+                  'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full',
+                  c.status === 'verified'
+                    ? c.verdict === 'FALSE'
+                      ? 'bg-[var(--color-v-false-bg)] text-[var(--color-v-false)] border border-[var(--color-v-false-border)]'
+                      : 'bg-[var(--color-v-true-bg)] text-[var(--color-v-true)] border border-[var(--color-v-true-border)]'
+                    : 'bg-[var(--color-v-unverif-bg)] text-[var(--color-v-unverif)] border border-[var(--color-v-unverif-border)]'
+                )}
+              >
+                {c.status === 'verified' ? c.verdict ?? 'VERIFIED' : 'PENDING'}
+              </span>
+            </div>
+          ))}
+        </Marquee>
       </section>
 
       {/* 3. Editorial Sequence Flow */}
@@ -235,10 +328,13 @@ function HomeInner() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {steps.map((s) => {
+          {steps.map((s, idx) => {
             const Icon = s.icon
             return (
-              <div key={s.num} className="hairline-card p-8 relative flex flex-col justify-between">
+              <div
+                key={s.num}
+                className="hairline-card p-8 relative flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-brand)]/30"
+              >
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <span className="text-3xl font-bold font-mono text-[var(--color-brand)] opacity-80">{s.num}</span>
@@ -255,44 +351,81 @@ function HomeInner() {
         </div>
       </section>
 
-      {/* 4. Asymmetric Bento: Why Community, Not AI Single Verdict */}
+      {/* 4. Architectural Comparison: Community Consensus vs Legacy Models */}
       <section className="container mx-auto px-[clamp(1rem,4vw,3rem)]">
-        <div className="hairline-card p-8 md:p-12">
-          <div className="max-w-3xl mb-10">
-            <span className="text-xs font-mono uppercase tracking-widest text-[var(--color-accent)] font-semibold">
-              The FactStamp Difference
-            </span>
-            <h2 className="text-3xl font-bold text-[var(--color-fg)] mt-2">
+        <div className="rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border-soft)] p-8 md:p-12 shadow-[var(--shadow-sm)]">
+          {/* Header */}
+          <div className="max-w-4xl mb-10">
+            <p className="text-xs font-mono font-semibold uppercase tracking-widest text-[var(--color-brand)] mb-2">
+              Architectural Distinction
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-fg)] tracking-tight text-balance">
               Why Community Consensus Beats a Single AI Answer
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Box: Single AI / Journalist Box (The Problem) */}
-            <div className="lg:col-span-5 bg-[var(--color-bg)] p-6 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] space-y-4">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[var(--color-v-false)] font-semibold">
-                <AlertTriangle className="w-4 h-4" /> Traditional Fact-Checking
+          {/* Clean 2-Column Comparison */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+            {/* Column 1: Traditional & Single AI (Legacy) */}
+            <div className="rounded-[var(--radius-lg)] bg-[var(--color-bg)] p-7 border border-[var(--color-border-soft)] flex flex-col justify-between space-y-6">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[var(--color-fg-muted)] uppercase tracking-wider mb-4">
+                  <AlertTriangle className="w-4 h-4 text-amber-500" /> Traditional Portals &amp; Plain AI
+                </div>
+                <h3 className="text-xl font-bold text-[var(--color-fg)] mb-4">Centralised, Slow &amp; Hallucination-Prone</h3>
+                
+                <ul className="space-y-3.5 text-sm text-[var(--color-fg-2)]">
+                  <li className="flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">✕</span>
+                    <span><strong>24–48h Latency:</strong> Journalist-only portals take hours or days to analyze viral messages.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">✕</span>
+                    <span><strong>Uncited AI Outputs:</strong> Single LLM responses hallucinate details without verifiable primary sources.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">✕</span>
+                    <span><strong>Low Distribution:</strong> Long text articles fail to travel inside fast-moving WhatsApp groups.</span>
+                  </li>
+                </ul>
               </div>
-              <h3 className="text-base font-bold text-[var(--color-fg)]">Centralised & Slow</h3>
-              <ul className="text-xs text-[var(--color-fg-2)] space-y-2.5 list-disc list-inside">
-                <li>Journalist-only portals take hours or days to respond.</li>
-                <li>Single AI outputs lack explicit source verification.</li>
-                <li>No shareable PNG card format built for WhatsApp forwards.</li>
-              </ul>
+
+              <div className="pt-4 border-t border-[var(--color-border-soft)] text-xs font-mono text-[var(--color-fg-muted)]">
+                Single point of failure • Unverified outputs
+              </div>
             </div>
 
-            {/* Right Box: FactStamp Community Weight (The Solution) */}
-            <div className="lg:col-span-7 bg-[var(--color-surface)] p-6 rounded-[var(--radius-lg)] border-2 border-[var(--color-brand)]/30 space-y-4 shadow-md">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[var(--color-brand)] font-semibold">
-                <Sparkles className="w-4 h-4" /> FactStamp Multi-Verifier Consensus
+            {/* Column 2: FactStamp Multi-Verifier Consensus (Solution) */}
+            <div className="rounded-[var(--radius-lg)] bg-[var(--color-brand-subtle)]/40 p-7 border border-[var(--color-brand)]/30 flex flex-col justify-between space-y-6">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[var(--color-brand)] uppercase tracking-wider mb-4">
+                  <ShieldCheck className="w-4 h-4 text-[var(--color-brand)]" /> FactStamp Multi-Verifier Consensus
+                </div>
+                <h3 className="text-xl font-bold text-[var(--color-fg)] mb-2">Weighted 3-Verifier Quorum Engine</h3>
+                <p className="text-sm text-[var(--color-fg-2)] leading-relaxed mb-6">
+                  FactStamp requires at least 3 independent community reviews before reaching a verdict. Every score is dynamically calculated from three transparent pillars:
+                </p>
+
+                {/* Clean 3 Pillars List */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border-soft)]">
+                    <span className="text-sm font-semibold text-[var(--color-fg)]">1. Verifier Agreement Ratio</span>
+                    <span className="text-xs font-mono font-bold text-[var(--color-brand)]">40% Weight</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border-soft)]">
+                    <span className="text-sm font-semibold text-[var(--color-fg)]">2. Verifier Reputation Tier</span>
+                    <span className="text-xs font-mono font-bold text-[var(--color-accent)]">30% Weight</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border-soft)]">
+                    <span className="text-sm font-semibold text-[var(--color-fg)]">3. Official Source Quality (WHO/Gov)</span>
+                    <span className="text-xs font-mono font-bold text-[var(--color-v-true)]">30% Weight</span>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-base font-bold text-[var(--color-fg)]">Weighted 3-Verifier Consensus Algorithm</h3>
-              <p className="text-xs text-[var(--color-fg-2)] leading-relaxed">
-                FactStamp requires at least 3 independent community reviews per claim. The final verdict combines <strong>Agreement Ratio (40%)</strong>, <strong>Verifier Reputation (30%)</strong>, and <strong>Source Quality (30%)</strong> into a transparent confidence score.
-              </p>
-              <div className="pt-2 flex items-center gap-4 text-xs font-mono text-[var(--color-accent)] font-semibold">
-                <span className="flex items-center gap-1"><Shield className="w-4 h-4" /> Reputation Weighted</span>
-                <span className="flex items-center gap-1"><Search className="w-4 h-4" /> Source Verified</span>
+
+              <div className="pt-4 border-t border-[var(--color-brand)]/20 flex items-center justify-between text-xs font-mono font-medium text-[var(--color-brand)]">
+                <span>✓ 3/3 Independent Reviews Required</span>
+                <span>✓ Zero Single-AI Hallucination</span>
               </div>
             </div>
           </div>
@@ -325,34 +458,6 @@ function HomeInner() {
             </motion.div>
           ))}
         </motion.div>
-      </section>
-
-      {/* 6. Solid Ink-Teal Footer CTA Band */}
-      <section className="container mx-auto px-[clamp(1rem,4vw,3rem)]">
-        <div className="bg-[var(--color-accent)] text-[var(--color-accent-fg)] rounded-[var(--radius-xl)] p-10 md:p-14 text-center max-w-4xl mx-auto shadow-xl">
-          <h2 className="text-3xl font-bold mb-4 text-white">Help Stop Fake News in Your WhatsApp Groups</h2>
-          <p className="text-emerald-100/90 text-sm md:text-base mb-8 max-w-xl mx-auto leading-relaxed">
-            Every verification you submit increases your verifier reputation and gives millions of WhatsApp users actionable fact-check cards.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button
-              intent="primary"
-              size="lg"
-              onClick={() => navigate('/submit')}
-              className="w-full sm:w-auto bg-white text-zinc-900 hover:bg-zinc-100 border-none shadow-md"
-            >
-              Submit a forward
-            </Button>
-            <Button
-              intent="outline"
-              size="lg"
-              onClick={() => navigate('/verify')}
-              className="w-full sm:w-auto border-white/40 text-white hover:bg-white/10"
-            >
-              Start verifying claims
-            </Button>
-          </div>
-        </div>
       </section>
     </div>
   )

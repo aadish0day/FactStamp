@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
@@ -14,15 +14,37 @@ interface ClaimCardProps {
 }
 
 export const ClaimCard = memo(function ClaimCard({ claim, to, className }: ClaimCardProps) {
+  const cardRef = useRef<HTMLAnchorElement>(null)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+  }
+
   return (
     <Link
+      ref={cardRef}
       to={to}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        'hairline-card p-6 block no-underline text-inherit transition-all',
+        'group relative hairline-card p-6 block no-underline text-inherit overflow-hidden transition-all duration-300',
+        'hover:-translate-y-1 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-brand)]/40',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2',
         className
       )}
     >
+      <div
+        className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-0"
+        style={{
+          opacity: isHovered ? 1 : 0,
+          background: `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, var(--color-brand-subtle), transparent 70%)`,
+        }}
+      />
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <CategoryBadge category={claim.category} />

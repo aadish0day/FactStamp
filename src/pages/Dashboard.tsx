@@ -28,6 +28,10 @@ import { Avatar } from '@/components/ui/Avatar'
 import { VerdictPill } from '@/components/ui/VerdictPill'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { Button } from '@/components/ui/Button'
+import { ShimmerText } from '@/components/ui/ShimmerText'
+import { Marquee } from '@/components/ui/Marquee'
+import { InteractiveHoverButton } from '@/components/ui/InteractiveHoverButton'
+import { SpotlightCard } from '@/components/ui/SpotlightCard'
 import { DashboardChart } from '@/components/DashboardChart'
 import { ContrastChecker } from '@/components/ContrastChecker'
 import { computeWeeklyReport } from '@/lib/weeklyReport'
@@ -188,11 +192,11 @@ export function Dashboard() {
       <Breadcrumbs />
 
       {/* Header Banner with CTA */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 bg-gradient-to-r from-[var(--color-surface-2)] via-[var(--color-surface)] to-[var(--color-surface-2)] p-6 lg:p-8 rounded-[var(--radius-xl)] border border-[var(--color-border)] shadow-[var(--shadow-md)]">
+      <div className="relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6 bg-gradient-to-r from-[var(--color-surface-2)] via-[var(--color-surface)] to-[var(--color-surface-2)] p-6 lg:p-8 rounded-[var(--radius-xl)] border border-[var(--color-border)] shadow-[var(--shadow-md)]">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>FactStamp Live Intelligence</span>
+            <ShimmerText className="text-xs font-bold text-[var(--color-brand)]">FactStamp Live Intelligence</ShimmerText>
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-[var(--color-fg)] tracking-tight mb-2">
             Misinformation Dashboard
@@ -202,15 +206,13 @@ export function Dashboard() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-3 flex-shrink-0 z-10">
           <Link to="/submit">
-            <Button intent="primary" size="lg" className="font-bold shadow-[var(--shadow-md)]">
-              <Plus className="w-4 h-4 me-1.5" />
-              Submit Claim
-            </Button>
+            <InteractiveHoverButton text="Submit Claim" />
           </Link>
           <Link to="/verify">
             <Button intent="secondary" size="lg" className="font-semibold">
+              <ShieldCheck className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" />
               Verify Claims Queue
             </Button>
           </Link>
@@ -222,8 +224,9 @@ export function Dashboard() {
         {kpis.map((kpi) => {
           const Icon = kpi.icon
           return (
-            <div
+            <SpotlightCard
               key={kpi.label}
+              spotlightColor={kpi.bgColor}
               className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all group relative overflow-hidden"
             >
               <div className="flex items-center justify-between mb-4">
@@ -245,13 +248,13 @@ export function Dashboard() {
                 )}
               </p>
               <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]">{kpi.label}</p>
-            </div>
+            </SpotlightCard>
           )
         })}
       </div>
 
       {/* Weekly Trending Misinformation Report — Module 7 */}
-      <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)] mb-10">
+      <div className="relative overflow-hidden p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)] mb-10">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] mb-2">

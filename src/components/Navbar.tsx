@@ -4,6 +4,7 @@ import { Menu, X, ShieldAlert, Sun, Moon, User, Star, LogOut } from 'lucide-reac
 import { useEffect, useCallback, useRef, useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
+import { InteractiveHoverButton } from '@/components/ui/InteractiveHoverButton'
 import { NotificationBell } from '@/components/NotificationBell'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -131,9 +132,7 @@ export function Navbar() {
           {user ? (
             <>
               <Link to="/submit" className="hidden lg:block">
-                <Button intent="primary" size="sm">
-                  Submit claim
-                </Button>
+                <InteractiveHoverButton text="Submit claim" className="min-w-[120px] px-4 py-1.5 min-h-[36px] text-xs" />
               </Link>
 
               {/* User indicator — desktop link to profile */}
