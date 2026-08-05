@@ -31,3 +31,7 @@ dist-ssr
 # Local tool config
 .kiro
 .impeccable
+
+# Python bytecode
+__pycache__/
+*.pyc
