@@ -208,6 +208,44 @@ export function Submit() {
     }, 1800)
   }
 
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-xl">
+        <Seo title="Sign In Required — Submit Claim" description="Sign in to FactStamp to submit WhatsApp forwards for community verification." />
+        <Breadcrumbs currentLabel="Submit claim" className="px-0 pt-0 mb-4" />
+
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-8 text-center shadow-[var(--shadow-lg)]">
+          <div className="w-16 h-16 rounded-full bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] flex items-center justify-center mx-auto mb-4">
+            <ShieldAlert className="w-8 h-8 text-[var(--color-brand)]" />
+          </div>
+          <h2 className="text-2xl font-extrabold text-[var(--color-fg)] mb-2">Sign in to submit claims</h2>
+          <p className="text-xs lg:text-sm text-[var(--color-fg-2)] mb-6 leading-relaxed">
+            To prevent spam and maintain community accuracy, you must be signed in to submit a WhatsApp forward for verification.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              intent="primary"
+              size="lg"
+              className="flex-1 font-bold shadow-[var(--shadow-sm)]"
+              onClick={() => navigate('/signin', { state: { from: '/submit' } })}
+            >
+              Sign In to Submit
+            </Button>
+            <Button
+              intent="outline"
+              size="lg"
+              className="flex-1 font-semibold"
+              onClick={() => navigate('/signup', { state: { from: '/submit' } })}
+            >
+              Create Account
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <Seo title="Submit a Claim" description="Paste a suspicious WhatsApp forward or upload a screenshot for community fact-checking." />
@@ -592,41 +630,56 @@ export function Submit() {
             Claim Submitted Successfully!
           </h3>
           <p className="text-xs text-[var(--color-fg-2)] mb-5 max-w-xs leading-relaxed">
-            Your claim is now in the community queue. Verifiers will evaluate sources and assign a verdict stamp.
+            Your claim is now in the community queue. Track it anytime in the <strong className="font-semibold text-[var(--color-fg)]">Verification Queue</strong> or under <strong className="font-semibold text-[var(--color-fg)]">Your Submitted Claims</strong> in the Dashboard.
           </p>
 
           <div className="w-full bg-[var(--color-surface-2)] rounded-xl p-4 mb-6 text-left border border-[var(--color-border-soft)]">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center justify-between gap-2 mb-2">
               <CategoryBadge category={category} />
-              <span className="text-[10px] font-mono text-[var(--color-brand)] font-bold">Status: Pending Verification</span>
+              <span className="text-[10px] font-mono text-[var(--color-brand)] font-bold bg-[var(--color-brand-subtle)] px-2 py-0.5 rounded-full border border-[var(--color-brand-subtle)]">
+                Status: Pending (0/3 Verifications)
+              </span>
             </div>
             <p className="text-xs text-[var(--color-fg)] leading-relaxed italic line-clamp-3">
               &quot;{claimText}&quot;
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+          <div className="flex flex-col gap-2.5 w-full">
+            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+              <Button
+                intent="primary"
+                className="flex-1 font-bold"
+                onClick={() => {
+                  setShowSuccessModal(false)
+                  if (submittedClaimId) navigate(`/claim/${submittedClaimId}`)
+                }}
+              >
+                <ExternalLink className="w-4 h-4 me-1" aria-hidden="true" />
+                View Claim Card
+              </Button>
+              <Button
+                intent="secondary"
+                className="flex-1 font-semibold"
+                onClick={() => {
+                  setShowSuccessModal(false)
+                  navigate('/dashboard')
+                }}
+              >
+                Go to Dashboard
+              </Button>
+            </div>
             <Button
-              intent="primary"
-              className="flex-1 font-bold"
-              onClick={() => {
-                setShowSuccessModal(false)
-                if (submittedClaimId) navigate(`/claim/${submittedClaimId}`)
-              }}
-            >
-              <ExternalLink className="w-4 h-4 me-1" aria-hidden="true" />
-              View Claim Card
-            </Button>
-            <Button
-              intent="secondary"
-              className="flex-1 font-semibold"
+              intent="ghost"
+              size="sm"
+              className="w-full text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
               onClick={() => {
                 setShowSuccessModal(false)
                 resetForm()
               }}
             >
-              <RotateCcw className="w-4 h-4 me-1" aria-hidden="true" />
-              Submit Another
+              <RotateCcw className="w-3.5 h-3.5 me-1" aria-hidden="true" />
+              Submit Another Forward
             </Button>
           </div>
         </div>

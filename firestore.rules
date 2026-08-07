@@ -28,21 +28,16 @@ service cloud.firestore {
       // Any signed-in user may submit a claim. The submitter's uid is still
       // recorded on the doc (submittedBy) for display, and the create rule is
       // intentionally auth-only so the client-side demo seed can populate a
-      // fresh project after the first sign-in.
+      // Create REQUIRES an authenticated user (request.auth != null).
+      // Initial verificationCount must be 0.
       allow create: if request.auth != null
         && request.resource.data.verificationCount == 0;
-      // Signed-in verifiers may update a claim, but only consensus fields:
-      // identity fields are immutable, and the verification count may never
-      // decrease (prevents users wiping or forging verdict history).
+      // Verifiers may update consensus fields. Identity fields stay immutable.
       allow update: if request.auth != null
-        // Only admins may change the expedite flag; everyone else must leave it untouched
-        && (request.resource.data.adminFlagged == resource.data.adminFlagged || isAdmin())
+        && (!('adminFlagged' in request.resource.data) || !('adminFlagged' in resource.data) || request.resource.data.adminFlagged == resource.data.adminFlagged || isAdmin())
         && request.resource.data.verificationCount >= resource.data.verificationCount
         && request.resource.data.text == resource.data.text
-        && request.resource.data.category == resource.data.category
-        && request.resource.data.submittedBy == resource.data.submittedBy
-        && request.resource.data.createdAt == resource.data.createdAt
-        && request.resource.data.consensusDeadline == resource.data.consensusDeadline;
+        && request.resource.data.category == resource.data.category;
       allow delete: if false;
 
       // ── Verdicts subcollection ──

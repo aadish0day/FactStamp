@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from '@/lib/utils'
-import { AlertCircle, CheckCircle2, XCircle, AlertTriangle, HelpCircle, RefreshCw, type LucideIcon } from 'lucide-react'
+import { AlertCircle, CheckCircle2, XCircle, AlertTriangle, HelpCircle, RefreshCw, Image as ImageIcon, type LucideIcon } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/Button'
@@ -235,8 +235,8 @@ export function VerifyDetail() {
       )}
 
       {/* Claim Display (read-only) */}
-      <div className="hairline-card p-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div className="hairline-card p-6 mb-8 space-y-4">
+        <div className="flex items-center justify-between">
           <CategoryBadge category={claim.category} />
           <span className="text-xs text-[var(--color-fg-muted)] font-mono tabular-nums">
             Submitted by {claim.submittedByName}
@@ -245,10 +245,58 @@ export function VerifyDetail() {
         <p className="text-lg text-[var(--color-fg)] leading-relaxed">
           {claim.text}
         </p>
+
+        {claim.imageUrl && (
+          <div className="pt-4 border-t border-[var(--color-border-soft)]">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-brand)] mb-3">
+              <ImageIcon className="w-4 h-4" />
+              <span>Attached Screenshot / Image Forward</span>
+            </div>
+            <div className="relative rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border-soft)] bg-[var(--color-surface-2)] p-2">
+              <a href={claim.imageUrl} target="_blank" rel="noopener noreferrer" className="block cursor-zoom-in">
+                <img
+                  src={claim.imageUrl}
+                  alt="Attached WhatsApp screenshot"
+                  className="w-full max-h-96 object-contain rounded-md hover:scale-[1.01] transition-transform"
+                />
+              </a>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Verification Form */}
-      <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Verification Form or Auth Gate */}
+      {!user ? (
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-8 text-center shadow-[var(--shadow-lg)]">
+          <div className="w-14 h-14 rounded-full bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-7 h-7 text-[var(--color-brand)]" />
+          </div>
+          <h3 className="text-xl font-extrabold text-[var(--color-fg)] mb-2">Sign in to verify this claim</h3>
+          <p className="text-xs lg:text-sm text-[var(--color-fg-2)] mb-6 max-w-md mx-auto leading-relaxed">
+            You must be a registered verifier to submit source-backed verdicts and earn reputation points.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
+            <Button
+              intent="primary"
+              size="lg"
+              className="flex-1 font-bold shadow-[var(--shadow-sm)]"
+              onClick={() => navigate('/signin', { state: { from: `/verify/${claim.id}` } })}
+            >
+              Sign In to Verify
+            </Button>
+            <Button
+              intent="outline"
+              size="lg"
+              className="flex-1 font-semibold"
+              onClick={() => navigate('/signup', { state: { from: `/verify/${claim.id}` } })}
+            >
+              Create Account
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-8">
         {/* Verdict Selection */}
         <fieldset>
           <legend className="text-lg font-semibold text-[var(--color-fg)] mb-4">
@@ -404,6 +452,7 @@ export function VerifyDetail() {
           Submit your verdict
         </Button>
       </form>
+      )}
     </div>
   )
 }

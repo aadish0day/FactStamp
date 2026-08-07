@@ -23,7 +23,7 @@ import {
   serverTimestamp,
   COLLECTIONS,
 } from '@/lib/firebase'
-import type { User, Claim, AppNotification } from '@/lib/types'
+import type { User, Claim, AppNotification, ClaimCategory, Verdict, SourceQuality } from '@/lib/types'
 
 /* ── 1. FIREBASE AUTHENTICATION SERVICE ── */
 
@@ -205,17 +205,134 @@ let permissionDeniedWarned = false
 /**
  * Overwrite a claim document with a fully-computed Claim object
  * (used after local confidence-score/consensus calculations).
+ * Uses setDoc with merge when document may not exist yet in Firestore (e.g. seed claims).
  */
 export async function updateClaimInFirestore(claim: Claim): Promise<void> {
   const { id: _id, ...data } = claim
   try {
-    await updateDoc(doc(db, COLLECTIONS.CLAIMS, claim.id), {
+    const docRef = doc(db, COLLECTIONS.CLAIMS, claim.id)
+    const snap = await getDoc(docRef)
+    const sanitizedData = {
       ...withoutUndefined(data as unknown as Record<string, unknown>),
       serverTime: serverTimestamp(),
-    })
-  } catch {
-    // Silently handle permission-denied / client ad-blocker stream drops so local state continues smoothly
+    }
+    if (snap.exists()) {
+      await updateDoc(docRef, sanitizedData)
+    } else {
+      await setDoc(docRef, sanitizedData)
+    }
+  } catch (err) {
+    console.warn('Firestore claim update notice:', err)
   }
+}
+
+/** Helper to parse Firestore Timestamp, ISO string, or number to ISO string. */
+function parseTimestamp(val: unknown): string {
+  if (!val) return new Date().toISOString()
+  if (typeof val === 'string') return val
+  if (typeof val === 'number') return new Date(val).toISOString()
+  if (typeof val === 'object' && val !== null) {
+    const obj = val as Record<string, unknown>
+    if (typeof obj.toDate === 'function') {
+      try {
+        return (obj.toDate as () => Date)().toISOString()
+      } catch {}
+    }
+    if (typeof obj.seconds === 'number') {
+      return new Date(obj.seconds * 1000).toISOString()
+    }
+    if (typeof obj._seconds === 'number') {
+      return new Date(obj._seconds * 1000).toISOString()
+    }
+  }
+  return new Date().toISOString()
+}
+
+/**
+ * Robustly normalizes raw Firestore document data into a clean Claim object.
+ * Handles Timestamps, case variations, missing fields, and field alias fallbacks.
+ */
+export function mapFirestoreDocToClaim(docId: string, data: Record<string, unknown>): Claim {
+  const text = typeof data.text === 'string'
+    ? data.text
+    : typeof data.claimText === 'string'
+    ? data.claimText
+    : typeof data.title === 'string'
+    ? data.title
+    : 'No text provided'
+
+  const rawCat = typeof data.category === 'string' ? data.category.toLowerCase().trim() : 'other'
+  const category: ClaimCategory = ['health', 'political', 'financial', 'religious', 'other'].includes(rawCat)
+    ? (rawCat as ClaimCategory)
+    : 'other'
+
+  const rawVerifications = Array.isArray(data.verifications) ? data.verifications : []
+  const verifications = rawVerifications.map((v: Record<string, unknown>, idx: number) => ({
+    id: typeof v.id === 'string' ? v.id : `v_${docId}_${idx}`,
+    claimId: docId,
+    verdict: (typeof v.verdict === 'string' ? v.verdict.toUpperCase() : 'UNVERIFIABLE') as Verdict,
+    sourceUrl: typeof v.sourceUrl === 'string' ? v.sourceUrl : '',
+    sourceQuality: (typeof v.sourceQuality === 'string' ? v.sourceQuality.toLowerCase() : 'medium') as SourceQuality,
+    explanation: typeof v.explanation === 'string' ? v.explanation : '',
+    verifierId: typeof v.verifierId === 'string' ? v.verifierId : '',
+    verifierName: typeof v.verifierName === 'string' ? v.verifierName : 'Community Verifier',
+    verifierReputation: typeof v.verifierReputation === 'number' ? v.verifierReputation : 50,
+    createdAt: parseTimestamp(v.createdAt),
+  }))
+
+  const verificationCount = typeof data.verificationCount === 'number'
+    ? data.verificationCount
+    : verifications.length
+
+  const rawStatus = typeof data.status === 'string' ? data.status.toLowerCase().trim() : ''
+  const status: 'pending' | 'verified' = rawStatus === 'verified'
+    ? 'verified'
+    : rawStatus === 'pending'
+    ? 'pending'
+    : verificationCount >= 3
+    ? 'verified'
+    : 'pending'
+
+  const createdAt = parseTimestamp(data.createdAt || data.serverTime)
+  const defaultDeadline = new Date(new Date(createdAt).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  const consensusDeadline = parseTimestamp(data.consensusDeadline || defaultDeadline)
+
+  return {
+    id: docId,
+    text,
+    category,
+    status,
+    verifications,
+    verificationCount,
+    createdAt,
+    consensusDeadline,
+    submittedBy: typeof data.submittedBy === 'string' ? data.submittedBy : 'u1',
+    submittedByName: typeof data.submittedByName === 'string' ? data.submittedByName : 'Community User',
+    imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl : undefined,
+    verdict: typeof data.verdict === 'string' ? (data.verdict.toUpperCase() as Verdict) : undefined,
+    confidenceScore: typeof data.confidenceScore === 'number' ? data.confidenceScore : undefined,
+    agreementRatio: typeof data.agreementRatio === 'number' ? data.agreementRatio : undefined,
+    avgVerifierReputation: typeof data.avgVerifierReputation === 'number' ? data.avgVerifierReputation : undefined,
+    sourceQualityScore: typeof data.sourceQualityScore === 'number' ? data.sourceQualityScore : undefined,
+    adminFlagged: typeof data.adminFlagged === 'boolean' ? data.adminFlagged : undefined,
+    adminFlaggedAt: data.adminFlaggedAt ? parseTimestamp(data.adminFlaggedAt) : undefined,
+    verifiedAt: data.verifiedAt ? parseTimestamp(data.verifiedAt) : undefined,
+  }
+}
+
+/**
+ * Fetch a single claim document from Cloud Firestore by ID.
+ */
+export async function getSingleClaimFromFirestore(claimId: string): Promise<Claim | null> {
+  try {
+    const snap = await getDoc(doc(db, COLLECTIONS.CLAIMS, claimId))
+    if (snap.exists()) {
+      return mapFirestoreDocToClaim(snap.id, snap.data() as Record<string, unknown>)
+    }
+  } catch (err) {
+    console.warn('Could not fetch single claim from Firestore:', err)
+  }
+  return null
 }
 
 /**
@@ -226,23 +343,35 @@ export function subscribeClaimsRealtime(
   callback: (claims: Claim[]) => void,
   onError?: (err: unknown) => void
 ): () => void {
-  const q = query(collection(db, COLLECTIONS.CLAIMS), orderBy('createdAt', 'desc'))
+  const claimsRef = collection(db, COLLECTIONS.CLAIMS)
+  const q = query(claimsRef, orderBy('createdAt', 'desc'))
 
   return onSnapshot(
     q,
     (snapshot) => {
       const claims: Claim[] = []
       snapshot.forEach((docSnap) => {
-        // Defensively drop any `id` field that might have been stored on the
-        // doc in older versions — the real document id always wins.
-        const { id: _storedId, ...data } = docSnap.data() as Record<string, unknown>
-        claims.push({ id: docSnap.id, ...(data as Omit<Claim, 'id'>) })
+        claims.push(mapFirestoreDocToClaim(docSnap.id, docSnap.data() as Record<string, unknown>))
       })
       callback(claims)
     },
     (err) => {
-      console.warn('Firestore realtime notice (using local state fallback):', err)
-      onError?.(err)
+      console.warn('Realtime ordered query notice, falling back to simple listener:', err)
+      return onSnapshot(
+        claimsRef,
+        (snapshot) => {
+          const claims: Claim[] = []
+          snapshot.forEach((docSnap) => {
+            claims.push(mapFirestoreDocToClaim(docSnap.id, docSnap.data() as Record<string, unknown>))
+          })
+          claims.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          callback(claims)
+        },
+        (fallbackErr) => {
+          console.warn('Firestore realtime fallback notice:', fallbackErr)
+          onError?.(fallbackErr)
+        }
+      )
     }
   )
 }

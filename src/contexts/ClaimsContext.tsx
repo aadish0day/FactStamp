@@ -7,6 +7,7 @@ import {
   updateClaimInFirestore,
   subscribeClaimsRealtime,
   flagClaimForExpeditedReview,
+  getSingleClaimFromFirestore,
 } from '@/services/firebaseService'
 
 const CONSENSUS_DEADLINE_DAYS = 7
@@ -486,6 +487,8 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const localClaimsRef = useRef<Claim[]>([])
+
   // Realtime Firestore sync — active only when real Firebase keys are present.
   useEffect(() => {
     if (!isFirebaseConfigured) {
@@ -497,7 +500,8 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
       (firestoreClaims) => {
         const firestoreIds = new Set(firestoreClaims.map((c) => c.id))
         const remainingSeeds = SEED_CLAIMS.filter((s) => !firestoreIds.has(s.id))
-        const merged = applyLocalExpiry([...firestoreClaims, ...remainingSeeds])
+        const remainingLocal = localClaimsRef.current.filter((l) => !firestoreIds.has(l.id))
+        const merged = applyLocalExpiry([...remainingLocal, ...firestoreClaims, ...remainingSeeds])
         setClaims(merged)
         setIsLoading(false)
       },
@@ -588,6 +592,9 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
       verificationCount: 0,
     }
 
+    // Track in localClaimsRef so realtime snapshots never overwrite this new claim
+    localClaimsRef.current = [newClaim, ...localClaimsRef.current.filter((c) => c.id !== newClaim.id)]
+
     if (isFirebaseConfigured) {
       try {
         // Strip the temporary local id so the Firestore doc never stores an
@@ -595,18 +602,19 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
         const { id: _tempId, ...claimData } = newClaim
         const id = await addClaimToFirestore(claimData)
         const persisted: Claim = { ...newClaim, id }
+        localClaimsRef.current = [persisted, ...localClaimsRef.current.filter((c) => c.id !== persisted.id && c.id !== newClaim.id)]
         // Dedupe defensively: the realtime listener may already have delivered
         // this claim before the write resolves, so never prepend a duplicate.
-        setClaims((prev) => [persisted, ...prev.filter((c) => c.id !== persisted.id)])
+        setClaims((prev) => [persisted, ...prev.filter((c) => c.id !== persisted.id && c.id !== newClaim.id)])
         return persisted
       } catch (err) {
         console.warn('Firestore add notice (using local state):', err)
-        setClaims((prev) => [newClaim, ...prev])
+        setClaims((prev) => [newClaim, ...prev.filter((c) => c.id !== newClaim.id)])
         return newClaim
       }
     }
 
-    setClaims((prev) => [newClaim, ...prev])
+    setClaims((prev) => [newClaim, ...prev.filter((c) => c.id !== newClaim.id)])
     return newClaim
   }, [])
 
@@ -616,6 +624,11 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
       if (!target) return
 
       const updatedClaim = computeUpdatedClaim(target, data)
+
+      localClaimsRef.current = [
+        updatedClaim,
+        ...localClaimsRef.current.filter((c) => c.id !== claimId),
+      ]
 
       setClaims((prev) =>
         prev.map((c) => (c.id === claimId ? updatedClaim : c))
@@ -658,7 +671,20 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
   // MUST stay side-effect free. Expiry is handled exclusively by the mount +
   // interval effects above — never synchronously inside a getter.
   const getClaimById = useCallback(
-    (id: string) => claims.find((c) => c.id === id),
+    (id: string) => {
+      const existing = claims.find((c) => c.id === id)
+      if (existing) return existing
+
+      if (isFirebaseConfigured && id) {
+        getSingleClaimFromFirestore(id).then((fetched) => {
+          if (fetched) {
+            localClaimsRef.current = [fetched, ...localClaimsRef.current.filter((c) => c.id !== fetched.id)]
+            setClaims((prev) => [fetched, ...prev.filter((c) => c.id !== fetched.id)])
+          }
+        })
+      }
+      return undefined
+    },
     [claims]
   )
 

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Check, Lock, Mail, User, Shield, Eye, EyeOff, Zap } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, Lock, Mail, User, Shield, ShieldCheck, Eye, EyeOff, Zap } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthLayout } from '@/components/AuthLayout'
+import { PasswordStrength } from '@/components/ui/PasswordStrength'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/lib/utils'
 
@@ -287,42 +289,22 @@ export function SignUp() {
           </div>
           {errors.password && <p id="reg-pass-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.password}</p>}
 
-          {/* Password strength meter */}
-          {form.password && (
-            <div className="mt-3 p-2.5 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] animate-pop-in">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-fg-muted)]">
-                  Password Strength
-                </span>
-                <span className="text-xs font-bold" style={{ color: pwColor }}>
-                  {STR_META[metCount].label || '\u2014'}
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
-                <span
-                  className="block h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${pwPct}%`, background: pwColor }}
-                />
-              </div>
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2">
-                {PW_REQS.map((r) => {
-                  const met = r.test(form.password)
-                  return (
-                    <li
-                      key={r.label}
-                      className={cn(
-                        'inline-flex items-center gap-1 text-[11px] font-medium transition-colors',
-                        met ? 'text-[var(--color-v-true)]' : 'text-[var(--color-fg-muted)]'
-                      )}
-                    >
-                      <Check className="w-3 h-3 stroke-[3]" aria-hidden="true" />
-                      {r.label}
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          )}
+          {/* Password Strength Indicator with spring cell transitions and crossfade labels */}
+          <AnimatePresence>
+            {form.password && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, y: -6 }}
+                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -6 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="overflow-hidden mt-3"
+              >
+                <div className="p-3.5 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] shadow-[var(--shadow-xs)]">
+                  <PasswordStrength value={form.password} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Confirm Password */}

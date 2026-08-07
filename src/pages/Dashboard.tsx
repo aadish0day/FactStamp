@@ -87,29 +87,48 @@ export function Dashboard() {
     [users]
   )
 
-  // Sort toggle
+  // Status & Sort toggles
   type SortMode = 'count' | 'recent'
-  const [sortMode, setSortMode] = useState<SortMode>('count')
+  type StatusFilter = 'all' | 'verified' | 'pending'
+  const [sortMode, setSortMode] = useState<SortMode>('recent')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
 
   const handleSortChange = (mode: SortMode) => {
     if (mode === sortMode) return
     setSortMode(mode)
     const label = mode === 'count' ? 'most verified first' : 'most recent first'
     toast(`Sorted by ${label}`, {
-      description: 'Updated the Most debunked claims list order.',
+      description: 'Updated the claims directory list order.',
       duration: 3000,
     })
   }
 
-  // Filtered & sorted debunked claims
-  const mostDebunked = useMemo(() => {
-    if (verifiedClaims.length === 0) return []
+  // User submitted claims
+  const userSubmittedClaims = useMemo(() => {
+    if (!user) return []
+    return claims.filter((c) => c.submittedBy === user.uid || c.submittedBy === 'u1')
+  }, [claims, user])
 
-    let list = [...verifiedClaims]
+  // Filtered & sorted claims directory
+  const filteredClaimsList = useMemo(() => {
+    if (claims.length === 0) return []
+
+    let list = [...claims]
+
+    if (statusFilter === 'verified') {
+      list = list.filter((c) => c.status === 'verified')
+    } else if (statusFilter === 'pending') {
+      list = list.filter((c) => c.status === 'pending')
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
-      list = list.filter((c) => c.text.toLowerCase().includes(q) || c.category.toLowerCase().includes(q))
+      list = list.filter(
+        (c) =>
+          (c.text || '').toLowerCase().includes(q) ||
+          (c.category || '').toLowerCase().includes(q) ||
+          (c.id || '').toLowerCase().includes(q)
+      )
     }
 
     const sorted = list.sort((a, b) => {
@@ -117,25 +136,26 @@ export function Dashboard() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
 
-    return sorted.slice(0, 6).map((c) => ({
+    return sorted.slice(0, 50).map((c) => ({
       claimId: c.id,
       text: c.text,
       category: c.category,
-      verdict: c.verdict!,
+      status: c.status,
+      verdict: c.verdict,
       count: c.verificationCount,
       createdAt: c.createdAt,
     }))
-  }, [verifiedClaims, sortMode, searchQuery])
+  }, [claims, statusFilter, sortMode, searchQuery])
 
-  // Edge case toast — fires once when the debunked list is unexpectedly empty
+  // Edge case toast — fires once when the claims list is unexpectedly empty
   useEffect(() => {
-    if (verifiedClaims.length > 0 && mostDebunked.length === 0 && !searchQuery) {
+    if (claims.length > 0 && filteredClaimsList.length === 0 && !searchQuery) {
       toast('No claims match this filter', {
-        description: 'Try a different sort option to view data.',
+        description: 'Try a different sort or status option to view data.',
         icon: <AlertCircle className="w-5 h-5 text-[var(--color-v-mislead)]" />,
       })
     }
-  }, [mostDebunked.length, verifiedClaims.length, searchQuery])
+  }, [filteredClaimsList.length, claims.length, searchQuery])
 
   // Admin expedite toggle for pending claims
   const pendingClaims = claims.filter((c) => c.status === 'pending')
@@ -450,12 +470,12 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Most Debunked Claims Table Card */}
+      {/* Claims Directory Table Card */}
       <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)] mb-10">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-lg font-bold text-[var(--color-fg)]">Most Debunked Claims</h2>
-            <p className="text-xs text-[var(--color-fg-2)]">Virally forwarded misinformation flagged by the community</p>
+            <h2 className="text-lg font-bold text-[var(--color-fg)]">Community Claims Directory</h2>
+            <p className="text-xs text-[var(--color-fg-2)]">Virally forwarded claims and pending community queue</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -471,8 +491,56 @@ export function Dashboard() {
               />
             </div>
 
+            {/* Status Filter Toggle */}
+            <div className="flex items-center gap-1 bg-[var(--color-surface-2)] rounded-[var(--radius-lg)] p-1 border border-[var(--color-border-soft)]">
+              <button
+                type="button"
+                onClick={() => setStatusFilter('all')}
+                className={`px-2.5 py-1 text-xs font-bold rounded-[calc(var(--radius-lg)-2px)] transition-all cursor-pointer ${
+                  statusFilter === 'all'
+                    ? 'bg-[var(--color-surface)] text-[var(--color-fg)] shadow-[var(--shadow-xs)] border border-[var(--color-border-soft)]'
+                    : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]'
+                }`}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter('verified')}
+                className={`px-2.5 py-1 text-xs font-bold rounded-[calc(var(--radius-lg)-2px)] transition-all cursor-pointer ${
+                  statusFilter === 'verified'
+                    ? 'bg-[var(--color-surface)] text-[var(--color-fg)] shadow-[var(--shadow-xs)] border border-[var(--color-border-soft)]'
+                    : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]'
+                }`}
+              >
+                Verified
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter('pending')}
+                className={`px-2.5 py-1 text-xs font-bold rounded-[calc(var(--radius-lg)-2px)] transition-all cursor-pointer ${
+                  statusFilter === 'pending'
+                    ? 'bg-[var(--color-surface)] text-[var(--color-fg)] shadow-[var(--shadow-xs)] border border-[var(--color-border-soft)]'
+                    : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]'
+                }`}
+              >
+                Pending Queue
+              </button>
+            </div>
+
             {/* Sort Toggle */}
             <div className="flex items-center gap-1 bg-[var(--color-surface-2)] rounded-[var(--radius-lg)] p-1 border border-[var(--color-border-soft)]">
+              <button
+                type="button"
+                onClick={() => handleSortChange('recent')}
+                className={`px-3 py-1 text-xs font-bold rounded-[calc(var(--radius-lg)-2px)] transition-all cursor-pointer ${
+                  sortMode === 'recent'
+                    ? 'bg-[var(--color-surface)] text-[var(--color-fg)] shadow-[var(--shadow-xs)] border border-[var(--color-border-soft)]'
+                    : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]'
+                }`}
+              >
+                Most Recent
+              </button>
               <button
                 type="button"
                 onClick={() => handleSortChange('count')}
@@ -485,17 +553,6 @@ export function Dashboard() {
                 <ArrowUpDown className="w-3 h-3 inline me-1" aria-hidden="true" />
                 Most Verified
               </button>
-              <button
-                type="button"
-                onClick={() => handleSortChange('recent')}
-                className={`px-3 py-1 text-xs font-bold rounded-[calc(var(--radius-lg)-2px)] transition-all cursor-pointer ${
-                  sortMode === 'recent'
-                    ? 'bg-[var(--color-surface)] text-[var(--color-fg)] shadow-[var(--shadow-xs)] border border-[var(--color-border-soft)]'
-                    : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]'
-                }`}
-              >
-                Most Recent
-              </button>
             </div>
           </div>
         </div>
@@ -506,43 +563,49 @@ export function Dashboard() {
               <tr className="border-b border-[var(--color-border-soft)] text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]">
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4">Claim Content</th>
-                <th className="py-3 px-4">Verdict</th>
+                <th className="py-3 px-4">Status / Verdict</th>
                 <th className="py-3 px-4 text-right font-mono">Verifications</th>
                 <th className="py-3 px-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-soft)]">
-              {mostDebunked.length === 0 ? (
+              {filteredClaimsList.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-xs text-[var(--color-fg-muted)]">
                     No claims match your search or filter
                   </td>
                 </tr>
               ) : (
-                mostDebunked.map((item) => (
+                filteredClaimsList.map((item) => (
                   <tr key={item.claimId} className="hover:bg-[var(--color-surface-2)]/60 transition-colors">
                     <td className="py-3.5 px-4">
                       <CategoryBadge category={item.category} />
                     </td>
                     <td className="py-3.5 px-4 text-xs font-medium text-[var(--color-fg)] max-w-sm">
                       <Link
-                        to={`/claim/${item.claimId}`}
+                        to={item.status === 'pending' ? `/verify/${item.claimId}` : `/claim/${item.claimId}`}
                         className="hover:text-[var(--color-brand)] hover:underline line-clamp-2 leading-relaxed"
                       >
                         &ldquo;{item.text}&rdquo;
                       </Link>
                     </td>
                     <td className="py-3.5 px-4">
-                      <VerdictPill verdict={item.verdict} size="sm" />
+                      {item.status === 'verified' && item.verdict ? (
+                        <VerdictPill verdict={item.verdict} size="sm" />
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--color-v-unverif-bg)] text-[var(--color-v-unverif)] border border-[var(--color-v-unverif-border)]">
+                          Pending Verification
+                        </span>
+                      )}
                     </td>
                     <td className="py-3.5 px-4 text-xs text-[var(--color-fg)] text-right font-mono font-bold tabular-nums">
-                      {item.count}
+                      {item.count}/3
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      <Link to={`/claim/${item.claimId}`}>
+                      <Link to={item.status === 'pending' ? `/verify/${item.claimId}` : `/claim/${item.claimId}`}>
                         <Button intent="ghost" size="sm" className="h-7 text-xs px-2.5">
                           <ExternalLink className="w-3 h-3 me-1" />
-                          View
+                          {item.status === 'pending' ? 'Verify' : 'View'}
                         </Button>
                       </Link>
                     </td>
@@ -553,6 +616,57 @@ export function Dashboard() {
           </table>
         </div>
       </div>
+
+      {/* Your Submitted Claims Panel */}
+      {userSubmittedClaims.length > 0 && (
+        <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-brand-subtle)] shadow-[var(--shadow-md)] mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--color-fg)]">Your Submitted Claims ({userSubmittedClaims.length})</h2>
+              <p className="text-xs text-[var(--color-fg-2)]">Track verification progress for claims you submitted</p>
+            </div>
+            <Link to="/submit">
+              <Button intent="outline" size="sm">
+                <Plus className="w-3.5 h-3.5 me-1" />
+                Submit New Claim
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {userSubmittedClaims.map((c) => (
+              <div
+                key={c.id}
+                className="flex flex-col justify-between p-4 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] hover:border-[var(--color-brand-subtle)] transition-all"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <CategoryBadge category={c.category} />
+                    {c.status === 'verified' && c.verdict ? (
+                      <VerdictPill verdict={c.verdict} size="sm" />
+                    ) : (
+                      <span className="text-[10px] font-mono font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2 py-0.5 rounded-full border border-[var(--color-brand-subtle)]">
+                        Pending ({c.verificationCount}/3)
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-medium text-[var(--color-fg)] line-clamp-2 leading-relaxed">
+                    &ldquo;{c.text}&rdquo;
+                  </p>
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--color-border-soft)] text-[10px] font-mono text-[var(--color-fg-muted)]">
+                  <span>Submitted {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true })}</span>
+                  <Link to={c.status === 'pending' ? `/verify/${c.id}` : `/claim/${c.id}`}>
+                    <span className="text-[var(--color-brand)] font-bold hover:underline">
+                      {c.status === 'pending' ? 'View Queue →' : 'View Verdict Card →'}
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Admin Panel — Expedite Review (Module 7) */}
       {user?.isAdmin && pendingClaims.length > 0 && (
