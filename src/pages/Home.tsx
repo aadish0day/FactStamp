@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { ShimmerText } from '@/components/ui/ShimmerText'
 import { Marquee } from '@/components/ui/Marquee'
 import { InteractiveHoverButton } from '@/components/ui/InteractiveHoverButton'
+import { FlowButton } from '@/components/ui/FlowButton'
 import { ClaimCard } from '@/components/ClaimCard'
 import { AnimatedCounter } from '@/components/AnimatedCounter'
 import { useClaims } from '@/contexts/ClaimsContext'
@@ -45,6 +46,7 @@ function HomeInner() {
 
   // Real stats computed from Firestore claims
   const verifiedClaims = claims.filter((c) => c.status === 'verified')
+  const pendingCount = claims.filter((c) => c.status === 'pending').length
   const avgConfidence = verifiedClaims.length
     ? Math.round(
         verifiedClaims.reduce((sum, c) => sum + (c.confidenceScore ?? 0), 0) / verifiedClaims.length
@@ -125,10 +127,7 @@ function HomeInner() {
             {/* Action Buttons */}
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-4">
               <InteractiveHoverButton text="Submit a Forward" onClick={() => navigate('/submit')} />
-              <Button intent="secondary" size="lg" onClick={() => navigate('/verify')} className="font-semibold">
-                <ShieldCheck className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" />
-                Explore Verification Queue
-              </Button>
+              <FlowButton text="Explore Verification Queue" onClick={() => navigate('/verify')} />
             </div>
           </div>
 

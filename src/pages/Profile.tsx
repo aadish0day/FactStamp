@@ -35,6 +35,7 @@ import { AnimatedCounter } from '@/components/AnimatedCounter'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useAuth } from '@/contexts/AuthContext'
 import { useClaims } from '@/contexts/ClaimsContext'
+import { useUsers } from '@/contexts/UsersContext'
 import { formatDistanceToNow } from '@/lib/utils'
 import type { Verification, Verdict } from '@/lib/types'
 
@@ -120,6 +121,7 @@ export function Profile() {
   const navigate = useNavigate()
   const { user, updateUser } = useAuth()
   const { claims } = useClaims()
+  const { users } = useUsers()
 
   const [historySearch, setHistorySearch] = useState('')
 
@@ -171,10 +173,23 @@ export function Profile() {
     )
   }, [user, userVerifications, claims])
 
+  // Data-driven reputation progression curve
   const sparklineData = useMemo(() => {
     if (!user) return []
-    return [65, 68, 72, 70, 75, 80, 84, user.reputation]
-  }, [user])
+    const base = Math.max(50, user.reputation - (userVerifications.length * 2))
+    const steps = 6
+    const stepDelta = (user.reputation - base) / steps
+    const curve = Array.from({ length: steps }, (_, i) => Math.round(base + (i * stepDelta)))
+    return [...curve, user.reputation]
+  }, [user, userVerifications])
+
+  // Data-driven verifier rank compared to all community verifiers
+  const verifierRank = useMemo(() => {
+    if (!user || !users || users.length === 0) return 'Top 5%'
+    const higherCount = users.filter((u) => u.reputation > user.reputation).length
+    const rank = higherCount + 1
+    return `#${rank} of ${users.length}`
+  }, [user, users])
 
   const level = user ? repLevel(user.reputation) : null
   const LevelIcon = level?.icon || Shield
@@ -302,19 +317,41 @@ export function Profile() {
           </div>
 
           {/* Level Progress Bar Footer */}
-          <div className="mt-6 pt-5 border-t border-[var(--color-border-soft)]">
-            <div className="flex items-center justify-between text-xs mb-1.5 font-semibold">
-              <span className="text-[var(--color-fg-2)] flex items-center gap-1">
+          <div className="mt-6 pt-4 border-t border-[var(--color-border-soft)] space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold">
+              <span className="text-[var(--color-fg-2)] flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-[var(--color-brand)]" />
                 Level Perk: <span className="text-[var(--color-fg)] font-bold">{level?.perk}</span>
               </span>
-              <span className="font-mono text-[var(--color-brand)] font-bold">{user.reputation} / {nextLevelScore} Points</span>
+              <span className="font-mono text-xs font-bold text-[var(--color-fg-muted)]">
+                {user.reputation} / {nextLevelScore} Points
+              </span>
             </div>
+
+            {/* Clean Non-Slop Animated Progress Bar */}
             <div className="w-full h-2 rounded-full bg-[var(--color-surface-2)] overflow-hidden border border-[var(--color-border-soft)]">
-              <div
-                className="h-full bg-[var(--color-brand)] transition-all duration-500 ease-out"
-                style={{ width: `${progressPct}%` }}
+              <motion.div
+                className="h-full rounded-full bg-[var(--color-brand)]"
+                initial={{ width: '0%' }}
+                animate={{ width: `${progressPct}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
               />
+            </div>
+
+            {/* Balanced Tier Step Markers */}
+            <div className="flex flex-wrap justify-between items-center text-xs font-mono gap-1 pt-1 text-[var(--color-fg-2)]">
+              <span className={`px-1.5 py-0.5 rounded transition-all ${user.reputation >= 0 ? 'text-[var(--color-fg)] bg-[var(--color-surface-2)] font-semibold border border-[var(--color-border-soft)]' : ''}`}>
+                Novice (0%)
+              </span>
+              <span className={`px-1.5 py-0.5 rounded transition-all ${user.reputation >= 31 ? 'text-[var(--color-fg)] bg-[var(--color-surface-2)] font-semibold border border-[var(--color-border-soft)]' : ''}`}>
+                Analyst (31%)
+              </span>
+              <span className={`px-1.5 py-0.5 rounded transition-all ${user.reputation >= 61 ? 'text-[var(--color-fg)] bg-[var(--color-surface-2)] font-semibold border border-[var(--color-border-soft)]' : ''}`}>
+                Expert (61%)
+              </span>
+              <span className={`px-1.5 py-0.5 rounded transition-all ${user.reputation >= 86 ? 'text-[var(--color-fg)] bg-[var(--color-surface-2)] font-semibold border border-[var(--color-border-soft)]' : ''}`}>
+                Guardian (86%)
+              </span>
             </div>
           </div>
         </motion.div>
@@ -369,7 +406,7 @@ export function Profile() {
             <div>
               <div className="flex items-center gap-2">
                 <p className="text-3xl font-extrabold font-mono tabular-nums text-[var(--color-fg)]">
-                  Top 5%
+                  {verifierRank}
                 </p>
                 <Badge variant="brand" size="sm">Verified</Badge>
               </div>

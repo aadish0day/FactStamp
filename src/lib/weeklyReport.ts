@@ -40,15 +40,18 @@ export function computeWeeklyReport(claims: Claim[]): WeeklyReport {
     return d >= weekStart && d <= weekEnd
   })
 
-  // 1. Most submitted categories for the week
+  // Use 7-day window if claims exist, otherwise fall back to all claims so seed/mock data populates
+  const targetClaims = weekClaims.length > 0 ? weekClaims : claims
+
+  // 1. Most submitted categories
   const categoryCounts: WeeklyCategoryCount[] = CATEGORY_ORDER.map((category) => ({
     category,
-    count: weekClaims.filter((c) => c.category === category).length,
+    count: targetClaims.filter((c) => c.category === category).length,
   }))
     .sort((a, b) => b.count - a.count)
 
-  // 2. Five most debunked claims this week (FALSE or MISLEADING, most verified)
-  const debunkedClaims = weekClaims
+  // 2. Five most debunked claims (FALSE or MISLEADING, most verified)
+  const debunkedClaims = targetClaims
     .filter(
       (c) =>
         c.status === 'verified' &&

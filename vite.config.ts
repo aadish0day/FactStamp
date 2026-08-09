@@ -10,6 +10,18 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
+    hmr: {
+      clientPort: 5174,
+    },
+  },
   optimizeDeps: {
     include: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
   },

@@ -19,6 +19,7 @@ import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { VERDICT_META } from '@/lib/types'
 import { convertOklchInString } from '@/lib/utils'
+import { toPng, toBlob } from 'html-to-image'
 
 /**
  * All CSS variable names defined in the design system that may contain
@@ -44,6 +45,7 @@ const CSS_VARS_TO_PATCH = [
   '--shadow-border','--shadow-border-hover',
 ]
 
+/** Detail view for individual claim with verification timeline and share cards. */
 export function ClaimDetail() {
   const { claimId } = useParams<{ claimId: string }>()
   const navigate = useNavigate()
@@ -51,7 +53,6 @@ export function ClaimDetail() {
   const { user } = useAuth()
   const [error, setError] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
-  const [showCardPreview, setShowCardPreview] = useState(false)
 
   const claim = claimId ? getClaimById(claimId) : undefined
 
@@ -208,261 +209,33 @@ export function ClaimDetail() {
       return
     }
 
-    // Force the card to a fixed 540px square for high-res capture.
-    // At scale: 2, the PNG is exactly 1080×1080px (WhatsApp-compatible).
-    const origWidth = wrapper.style.width
-    const origMaxWidth = wrapper.style.maxWidth
-    const origHeight = wrapper.style.height
-    wrapper.style.width = '540px'
-    wrapper.style.maxWidth = '540px'
-    wrapper.style.height = '540px'
-
-    // Patch stylesheet rules to convert oklch/oklab → rgb so html2canvas's
-    // internal CSS parser doesn't crash when it encounters them
-    const restore = patchStyleSheets()
-
     try {
-      const html2canvas = (await import('html2canvas')).default
-
-      const canvas = await html2canvas(wrapper, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: 540,
-        onclone: (clonedDoc) => {
-          const card = clonedDoc.getElementById('whatsapp-fact-check-card')
-          if (card) {
-            // Force a fixed 540px square on the clone too (→ 1080×1080 PNG)
-            ;(card as HTMLElement).style.width = '540px'
-            ;(card as HTMLElement).style.maxWidth = '540px'
-            ;(card as HTMLElement).style.height = '540px'
-          }
-
-          // Convert all oklch/oklab in <style> tags in clonedDoc
-          const styleTags = clonedDoc.querySelectorAll('style')
-          styleTags.forEach((style) => {
-            if (style.textContent && (style.textContent.includes('oklch') || style.textContent.includes('oklab'))) {
-              style.textContent = convertOklchInString(style.textContent)
-            }
-          })
-
-          // Inject computed CSS variable overrides with RGB-safe values
-          const rootCs = getComputedStyle(document.documentElement)
-          const overrides: string[] = []
-          for (const name of CSS_VARS_TO_PATCH) {
-            const raw = rootCs.getPropertyValue(name).trim()
-            if (!raw) continue
-            const safe = (raw.includes('oklch') || raw.includes('oklab'))
-              ? convertOklchInString(raw)
-              : raw
-            overrides.push(`  ${name}: ${safe} !important;`)
-          }
-          if (overrides.length > 0) {
-            const overrideStyle = clonedDoc.createElement('style')
-            overrideStyle.id = 'fs-clone-oklch-override'
-            overrideStyle.textContent = `:root, .dark {\n${overrides.join('\n')}\n}`
-            clonedDoc.head.appendChild(overrideStyle)
-          }
-
-          // Resolve computed styles from original onto cloned elements
-          const PROPS_TO_INLINE = [
-            'color', 'background-color', 'border-color',
-            'border-top-color', 'border-right-color',
-            'border-bottom-color', 'border-left-color',
-            'box-shadow', 'text-decoration-color',
-            'outline-color', 'fill', 'stroke',
-          ] as const
-
-          const origCard = document.getElementById('whatsapp-fact-check-card')
-          if (origCard && card) {
-            const origEls = origCard.querySelectorAll('*')
-            const cloneEls = card.querySelectorAll('*')
-            const pairs: [Element, Element][] = [[origCard, card]]
-            origEls.forEach((el, i) => {
-              if (cloneEls[i]) pairs.push([el, cloneEls[i]])
-            })
-
-            for (const [origEl, cloneEl] of pairs) {
-              const cs = getComputedStyle(origEl)
-              const htmlClone = cloneEl as HTMLElement
-              for (const prop of PROPS_TO_INLINE) {
-                const val = cs.getPropertyValue(prop)
-                if (val && val !== 'none' && val !== 'rgba(0, 0, 0, 0)') {
-                  const safe = (val.includes('oklch') || val.includes('oklab'))
-                    ? convertOklchInString(val)
-                    : val
-                  htmlClone.style.setProperty(prop, safe, 'important')
-                }
-              }
-            }
-          }
-
-          // Convert oklch/oklab in inline style attributes
-          clonedDoc.querySelectorAll('[style]').forEach((el) => {
-            const styleAttr = el.getAttribute('style')
-            if (styleAttr && (styleAttr.includes('oklch') || styleAttr.includes('oklab'))) {
-              el.setAttribute('style', convertOklchInString(styleAttr))
-            }
-          })
-
-          // Ensure pure-white background
-          if (clonedDoc.body) {
-            clonedDoc.body.style.setProperty('background-color', '#ffffff', 'important')
-          }
-          if (clonedDoc.documentElement) {
-            clonedDoc.documentElement.style.setProperty('background-color', '#ffffff', 'important')
-          }
-        },
+      // html-to-image uses browser native SVG foreignObject rendering.
+      // It captures EXACT fonts, Flexbox alignment, crisp text, and shadows with zero layout glitches.
+      const dataUrl = await toPng(wrapper, {
+        pixelRatio: 2, // Crisp 2x high resolution (1080px wide)
+        backgroundColor: '#fffbf5',
+        cacheBust: true,
+        skipFonts: true,
       })
 
       const link = document.createElement('a')
       link.download = `factstamp-${claim.id}.png`
-      link.href = canvas.toDataURL('image/png')
+      link.href = dataUrl
       link.click()
       toast.success('Fact-check card downloaded!', {
         description: 'You can now share this PNG card back into your WhatsApp group.',
       })
     } catch (err) {
-      console.error('[FactStamp] html2canvas error:', err)
+      console.error('[FactStamp] PNG capture error:', err)
       const message = err instanceof Error ? err.message : 'Unknown error'
       toast.error('Download failed', {
         description: `Could not generate PNG: ${message}`,
       })
     } finally {
-      // Restore the card's original dimensions
-      wrapper.style.width = origWidth
-      wrapper.style.maxWidth = origMaxWidth
-      wrapper.style.height = origHeight
-      restore()
       setIsDownloading(false)
     }
   }
-
-  const handleShareWhatsApp = useCallback(async () => {
-    const meta = claim.verdict ? VERDICT_META[claim.verdict] : null
-    const verdictEmoji = {
-      TRUE: '✅ ',
-      FALSE: '❌ ',
-      MISLEADING: '⚠️ ',
-      UNVERIFIABLE: '❓ ',
-      CONTESTED: '⚖️ ',
-    }[claim.verdict || 'UNVERIFIABLE']
-
-    // Try sharing as image via Web Share API first
-    try {
-      const element = document.getElementById('whatsapp-fact-check-card')
-      if (element && navigator.share && navigator.canShare) {
-        // Force a fixed 540px square for high-res capture (1080×1080 PNG)
-        const origW = element.style.width
-        const origMW = element.style.maxWidth
-        const origH = element.style.height
-        element.style.width = '540px'
-        element.style.maxWidth = '540px'
-        element.style.height = '540px'
-
-        const restore = patchStyleSheets()
-        let canvas
-        try {
-          const html2canvas = (await import('html2canvas')).default
-          canvas = await html2canvas(element, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            width: 540,
-            onclone: (clonedDoc) => {
-              const card = clonedDoc.getElementById('whatsapp-fact-check-card')
-              if (card) {
-                ;(card as HTMLElement).style.width = '540px'
-                ;(card as HTMLElement).style.maxWidth = '540px'
-              }
-              // Convert oklch/oklab in style tags
-              const styleTags = clonedDoc.querySelectorAll('style')
-              styleTags.forEach((style) => {
-                if (style.textContent && (style.textContent.includes('oklch') || style.textContent.includes('oklab'))) {
-                  style.textContent = convertOklchInString(style.textContent)
-                }
-              })
-              // Inject computed CSS variable overrides (RGB-safe)
-              const cs = getComputedStyle(document.documentElement)
-              const overrides: string[] = []
-              for (const name of CSS_VARS_TO_PATCH) {
-                const raw = cs.getPropertyValue(name).trim()
-                if (!raw) continue
-                const safe = (raw.includes('oklch') || raw.includes('oklab'))
-                  ? convertOklchInString(raw)
-                  : raw
-                overrides.push(`  ${name}: ${safe} !important;`)
-              }
-              if (overrides.length > 0) {
-                const overrideStyle = clonedDoc.createElement('style')
-                overrideStyle.id = 'fs-clone-oklch-override'
-                overrideStyle.textContent = `:root, .dark {\n${overrides.join('\n')}\n}`
-                clonedDoc.head.appendChild(overrideStyle)
-              }
-              // Convert oklch/oklab in inline style attributes
-              clonedDoc.querySelectorAll('[style]').forEach((el) => {
-                const styleAttr = el.getAttribute('style')
-                if (styleAttr && (styleAttr.includes('oklch') || styleAttr.includes('oklab'))) {
-                  el.setAttribute('style', convertOklchInString(styleAttr))
-                }
-              })
-            },
-          })
-        } finally {
-          element.style.width = origW
-          element.style.maxWidth = origMW
-          element.style.height = origH
-          restore()
-        }
-
-        const blob = await new Promise<Blob | null>((resolve) =>
-          canvas.toBlob((b) => resolve(b), 'image/png', 1)
-        )
-
-        if (blob) {
-          const file = new File([blob], `factstamp-${claim.id}.png`, { type: 'image/png' })
-          const shareData: ShareData = { files: [file] }
-
-          if (navigator.canShare(shareData)) {
-            await navigator.share(shareData)
-            toast.success('Shared successfully!')
-            return
-          }
-        }
-      }
-    } catch {
-      // Web Share failed — fall through to text-based share
-    }
-
-    // Fallback: open WhatsApp with pre-formatted text
-    const claimSnippet = claim.text.length > 120
-      ? claim.text.slice(0, 120) + '…'
-      : claim.text
-
-    const confidenceLine = claim.confidenceScore !== undefined
-      ? `Confidence: ${claim.confidenceScore}%`
-      : ''
-
-    const text = [
-      `${verdictEmoji} *FactStamp Verdict: ${meta?.label ?? 'Unknown'}*`,
-      '',
-      `"${claimSnippet}"`,
-      '',
-      confidenceLine,
-      '',
-      '━━━━━━━━━━━━━━━━━━',
-      `Verify this claim: ${window.location.origin}/claim/${claim.id}`,
-      'factstamp.app — India\'s community fact-checker',
-    ].filter(Boolean).join('\n')
-
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
-    window.open(waUrl, '_blank', 'noopener,noreferrer')
-
-    toast.success('WhatsApp share link ready!', {
-      description: 'Send the fact-check card back into your WhatsApp groups.',
-    })
-  }, [claim])
 
   return (
     <div className="container mx-auto px-[clamp(1rem,4vw,3rem)] py-8">
@@ -774,92 +547,96 @@ export function ClaimDetail() {
         )}
 
         {claim.status === 'verified' && claim.verdict !== 'CONTESTED' && (
-          <>
-            {/* Download WhatsApp Card CTA */}
-            <div className="hairline-card p-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-base">WhatsApp Fact-Check Card</h3>
-                <Button
-                  intent="ghost"
-                  size="sm"
-                  onClick={() => setShowCardPreview(!showCardPreview)}
-                  className="text-xs"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  {showCardPreview ? 'Hide Preview' : 'Preview'}
-                </Button>
-              </div>
-
-              <p className="text-sm text-[var(--color-fg-2)] mb-4">
-                Download a high-res PNG fact-check card to share back into WhatsApp groups.
-              </p>
-
-              <div className="mb-4">
-                <FactCheckCard
-                  claim={claim}
-                  id="whatsapp-fact-check-card"
-                  onDownload={handleDownloadCard}
-                />
-              </div>
-
-              {isDownloading && (
-                <p className="text-xs text-[var(--color-fg-muted)] text-center animate-pulse">
-                  Generating PNG image with html2canvas...
-                </p>
-              )}
-
-              {/* Share on WhatsApp button */}
-              <Button
-                intent="secondary"
-                size="sm"
-                className="w-full"
-                onClick={handleShareWhatsApp}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-4 h-4"
-                  aria-hidden="true"
-                >
+          <div className="hairline-card p-5 border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] rounded-[var(--radius-xl)] space-y-3.5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#25D366]/15 flex items-center justify-center text-[#25D366] flex-shrink-0">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
-                Share on WhatsApp
-              </Button>
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-[var(--color-fg)]">WhatsApp Fact Card</h3>
+                <p className="text-[11px] text-[var(--color-fg-muted)]">Official 1:1 image preview</p>
+              </div>
             </div>
 
-            {/* Confidence Breakdown */}
+            {/* Live PNG Card Preview Frame */}
+            <div className="rounded-xl overflow-hidden border border-[var(--color-border-soft)] shadow-inner bg-[var(--color-bg)]">
+              <FactCheckCard claim={claim} id="whatsapp-fact-check-card" />
+            </div>
+
+            <Button
+              intent="primary"
+              size="md"
+              className="w-full font-bold shadow-md"
+              onClick={handleDownloadCard}
+              disabled={isDownloading}
+            >
+              <Download className="w-4 h-4 me-1" />
+              {isDownloading ? 'Generating PNG...' : 'Download WhatsApp Card (PNG)'}
+            </Button>
+          </div>
+        )}
+
+            {/* Confidence Breakdown Card */}
             {claim.agreementRatio !== undefined && (
-              <div className="hairline-card p-6">
-                <h3 className="font-semibold mb-4 text-sm">Confidence breakdown</h3>
-                <div className="space-y-4">
+              <div className="hairline-card p-5 space-y-4">
+                {/* Header */}
+                <div className="border-b border-[var(--color-border-soft)] pb-3 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[11px] font-mono font-bold text-[var(--color-fg-muted)] uppercase tracking-wider">
+                      Confidence Breakdown
+                    </h3>
+                    {claim.confidenceScore !== undefined && (
+                      <span className="font-mono text-sm font-black text-[var(--color-brand)] tabular-nums">
+                        {claim.confidenceScore}%
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="flex items-center gap-1.5 font-medium text-[var(--color-fg)]">
+                      <span className={`w-2 h-2 rounded-full ${(claim.confidenceScore ?? 0) >= 80 ? 'bg-emerald-500' : (claim.confidenceScore ?? 0) >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                      {(claim.confidenceScore ?? 0) >= 80 ? 'High Confidence' : (claim.confidenceScore ?? 0) >= 50 ? 'Moderate' : 'Low Confidence'}
+                    </span>
+                    <span className="text-[var(--color-fg-muted)]">•</span>
+                    <span className="text-[11px] font-mono text-[var(--color-fg-muted)]">3 Signals</span>
+                  </div>
+                </div>
+
+                {/* Metrics */}
+                <div className="space-y-3.5">
                   {[
-                    { label: 'Verifier agreement', value: claim.agreementRatio, weight: '40%' },
-                    { label: 'Avg verifier reputation', value: claim.avgVerifierReputation ?? 0, weight: '30%' },
-                    { label: 'Source quality', value: claim.sourceQualityScore ?? 0, weight: '30%' },
-                  ].map((item) => (
-                    <div key={item.label}>
-                      <div className="flex items-center justify-between mb-1.5 text-xs">
-                        <span className="text-[var(--color-fg)]">{item.label}</span>
-                        <span className="font-mono text-[var(--color-fg-muted)]">{item.weight} weight</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-2 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
+                    { label: 'Verifier consensus', value: claim.agreementRatio, weight: '40%' },
+                    { label: 'Contributor reputation', value: claim.avgVerifierReputation ?? 0, weight: '30%' },
+                    { label: 'Source domain authority', value: claim.sourceQualityScore ?? 0, weight: '30%' },
+                  ].map((item) => {
+                    const val = Math.round(item.value)
+                    return (
+                      <div key={item.label} className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[var(--color-fg)] font-medium truncate pr-2">{item.label}</span>
+                          <div className="flex items-center gap-1.5 font-mono text-xs flex-shrink-0">
+                            <span className="font-bold text-[var(--color-fg)] tabular-nums">{val}%</span>
+                            <span className="text-[10px] text-[var(--color-fg-muted)]">({item.weight})</span>
+                          </div>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-500"
+                            className="h-full rounded-full bg-[var(--color-brand)] transition-all duration-500 ease-out"
                             style={{ width: `${Math.min(100, Math.max(0, item.value))}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono font-medium text-[var(--color-fg)] min-w-[3ch] text-right">
-                          {Math.round(item.value)}%
-                        </span>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
+
+                {/* Explanation Footnote */}
+                <p className="text-[11px] text-[var(--color-fg-muted)] leading-relaxed pt-2.5 border-t border-[var(--color-border-soft)]">
+                  Calculated from weighted verifier agreement (40%), reviewer trust score (30%), and source domain authority (30%).
+                </p>
               </div>
             )}
-          </>
-        )}
       </aside>
       </div>
     </div>

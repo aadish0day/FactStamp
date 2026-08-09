@@ -17,341 +17,276 @@ const VERDICT_ICONS = {
 
 /**
  * Hardcoded palette for export-safe rendering.
- * html2canvas cannot parse oklch()/oklab() or CSS custom properties that
- * resolve to them. Every color here is a plain hex/rgb string.
+ * html2canvas cannot parse oklch()/oklab() or CSS custom properties.
+ * Every color here is a plain hex string.
  */
-const CARD_PALETTE = {
-  bg: '#ffffff',
-  surface: '#f8f5f1',
-  border: '#e8e2da',
+const P = {
+  bg: '#fffbf5',
+  surface: '#f6f1ea',
+  border: '#e6ded4',
+  borderDark: '#d4c8b8',
   fg: '#1c1917',
-  fgSecondary: '#57534e',
-  fgMuted: '#a8a29e',
+  fgSec: '#57534e',
+  fgMuted: '#948e85',
   brand: '#c2410c',
-  brandBg: '#fff7ed',
+  brandLight: '#ea580c',
+  white: '#ffffff',
 }
 
-const SOURCE_QUALITY_COLORS: Record<string, string> = {
-  high: '#16a34a',
-  medium: '#d97706',
-  low: '#dc2626',
+/** Smart text truncation at word boundaries so words are never cut in half. */
+function truncateText(text: string, max = 150): string {
+  if (!text) return ''
+  const trimmed = text.trim().replace(/\s+/g, ' ')
+  if (trimmed.length <= max) return trimmed
+  const cut = trimmed.slice(0, max)
+  const lastSpace = cut.lastIndexOf(' ')
+  return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trimEnd() + '…'
 }
 
-/** Truncate claim text to 100 chars for the share card. */
-function truncateClaim(text: string, max = 100): string {
-  if (text.length <= max) return text
-  return text.slice(0, max - 1).trimEnd() + '…'
-}
-
-/** Collect every unique source domain cited across verifications. */
-function collectSourceDomains(claim: Claim): string[] {
-  const domains = new Set<string>()
+/** Collect unique source domains from verifications. */
+function collectDomains(claim: Claim): string[] {
+  const d = new Set<string>()
   for (const v of claim.verifications) {
     try {
-      const host = new URL(v.sourceUrl).hostname.replace(/^www\./, '')
-      domains.add(host)
+      d.add(new URL(v.sourceUrl).hostname.replace(/^www\./, ''))
     } catch {
-      // Ignore malformed URLs
+      /* skip */
     }
   }
-  return [...domains].slice(0, 3)
+  return [...d].slice(0, 3)
 }
 
+/**
+ * FactCheckCard – High-end editorial fact-check share card.
+ * Designed for pixel-perfect PNG export at 540px width (1080px @ scale 2).
+ */
 export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: FactCheckCardProps) {
   if (!claim.verdict) return null
 
   const meta = VERDICT_META[claim.verdict]
-  const Icon = VERDICT_ICONS[claim.verdict]
-  const topVerification = claim.verifications?.[0]
-  const sourceDomains = collectSourceDomains(claim)
+  const VIcon = VERDICT_ICONS[claim.verdict]
+  const topV = claim.verifications?.[0]
+  const domains = collectDomains(claim)
 
-  // One-line explanation: collapse whitespace and truncate to a single line
-  const oneLineExplanation = topVerification
-    ? topVerification.explanation.replace(/\s+/g, ' ').trim()
+  const explanation = topV
+    ? topV.explanation.replace(/\s+/g, ' ').trim()
     : ''
+
+  const dateStr = claim.createdAt
+    ? new Date(claim.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    : ''
+
+  const fontSans = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  const fontMono = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
 
   return (
     <div className="space-y-4">
-      {/* Export card — exactly 540px tall in the DOM and exported at scale 2,
-          producing a true 1080×1080px PNG for WhatsApp compatibility.
-          All colors are hardcoded hex so html2canvas never sees oklch/oklab. */}
+      {/* Outer Card Shell */}
       <div
         id={id}
         style={{
           width: '100%',
           maxWidth: '540px',
-          aspectRatio: '1 / 1',
           margin: '0 auto',
-          padding: '28px',
+          padding: '0',
           borderRadius: '20px',
-          backgroundColor: CARD_PALETTE.bg,
+          backgroundColor: P.bg,
           border: `2px solid ${meta.hexBorder}`,
-          boxShadow: `0 8px 32px -4px ${meta.thudColor}, 0 0 0 1px rgba(0,0,0,0.03)`,
-          display: 'flex',
-          flexDirection: 'column' as const,
-          gap: '10px',
+          boxShadow: `0 12px 32px -8px ${meta.thudColor}`,
           position: 'relative' as const,
-          overflow: 'hidden',
           userSelect: 'none' as const,
-          fontFamily: '"DM Sans", ui-sans-serif, system-ui, sans-serif',
+          fontFamily: fontSans,
+          boxSizing: 'border-box' as const,
+          overflow: 'visible' as const, // NO overflow hidden to prevent clipping bottom text
         }}
       >
-        {/* Subtle watermark */}
+        {/* ─── Top Gradient Accent Bar ─── */}
         <div style={{
-          position: 'absolute',
-          right: '-40px',
-          bottom: '-40px',
-          opacity: 0.03,
-          pointerEvents: 'none',
-        }}>
-          <ShieldAlert style={{ width: '220px', height: '220px', color: CARD_PALETTE.fg }} />
-        </div>
+          height: '6px',
+          borderRadius: '18px 18px 0 0',
+          background: `linear-gradient(90deg, ${meta.hexColor}, ${P.brand}, ${meta.hexColor})`,
+        }} />
 
-        {/* ── Header ── */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: `1px solid ${CARD_PALETTE.border}`,
-          paddingBottom: '12px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* ─── Card Inner Padding Container ─── */}
+        <div style={{ padding: '20px 20px 28px 20px', boxSizing: 'border-box' }}>
+
+          {/* ── HEADER ROW ── */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '16px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px',
+                background: `linear-gradient(145deg, ${P.brand}, ${P.brandLight})`,
+                boxShadow: '0 4px 14px rgba(194,65,12,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <ShieldAlert style={{ width: '22px', height: '22px', color: P.white }} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: '20px', letterSpacing: '-0.03em', color: P.fg, lineHeight: 1.1 }}>
+                  FactStamp
+                </div>
+                <div style={{ fontSize: '9px', color: P.fgMuted, fontFamily: fontMono, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2px', fontWeight: 700 }}>
+                  Community Fact-Check
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+              <div style={{
+                fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em',
+                padding: '4px 12px', borderRadius: '8px',
+                backgroundColor: meta.hexBg, color: meta.hexColor, border: `1.5px solid ${meta.hexBorder}`,
+              }}>
+                {claim.category}
+              </div>
+              {dateStr && (
+                <div style={{ fontSize: '9px', fontFamily: fontMono, color: P.fgMuted, fontWeight: 600 }}>
+                  {dateStr}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Divider Line ── */}
+          <div style={{ height: '1px', backgroundColor: P.border, marginBottom: '16px' }} />
+
+          {/* ── FORWARDED CLAIM QUOTE ── */}
+          <div style={{ marginBottom: '16px' }}>
             <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: `linear-gradient(135deg, ${CARD_PALETTE.brand}, #ea580c)`,
+              fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em',
+              color: P.fgMuted, fontFamily: fontMono, marginBottom: '8px',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+              <span style={{ width: '16px', height: '2.5px', backgroundColor: P.brand, display: 'inline-block', borderRadius: '2px' }} />
+              Forwarded WhatsApp Claim
+            </div>
+            <div style={{
+              fontSize: '13.5px', fontWeight: 500, color: P.fg, lineHeight: 1.55, fontStyle: 'italic',
+              backgroundColor: P.surface, padding: '14px 16px', borderRadius: '14px',
+              border: `1px solid ${P.border}`, borderLeft: `4px solid ${P.brand}`,
+              boxSizing: 'border-box',
+            }}>
+              &ldquo;{truncateText(claim.text, 145)}&rdquo;
+            </div>
+          </div>
+
+          {/* ── VERDICT SEAL ── */}
+          <div style={{
+            padding: '18px 20px 16px',
+            borderRadius: '18px',
+            border: `2px solid ${meta.hexBorder}`,
+            background: `linear-gradient(145deg, ${meta.hexBg}, ${P.white})`,
+            boxShadow: `0 6px 20px ${meta.thudColor}`,
+            textAlign: 'center',
+            marginBottom: '16px',
+            boxSizing: 'border-box',
+          }}>
+            {/* Verdict Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+              <VIcon style={{ width: '40px', height: '40px', color: meta.hexColor, flexShrink: 0 }} />
+              <span style={{
+                fontSize: '34px', fontWeight: 900, textTransform: 'uppercase',
+                letterSpacing: '-0.02em', color: meta.hexColor, lineHeight: 1.1,
+              }}>
+                {meta.label}
+              </span>
+            </div>
+
+            {/* Stats Row with top border */}
+            <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexWrap: 'wrap' as const,
+              gap: '12px',
+              marginTop: '12px',
+              paddingTop: '10px',
+              borderTop: `1px solid ${meta.hexBorder}`,
             }}>
-              <ShieldAlert style={{ width: '20px', height: '20px', color: '#ffffff' }} />
-            </div>
-            <div>
-              <div style={{
-                fontWeight: 700,
-                fontSize: '16px',
-                letterSpacing: '-0.01em',
-                color: CARD_PALETTE.fg,
-                lineHeight: 1.2,
-              }}>
-                FactStamp
-              </div>
-              <div style={{
-                fontSize: '9px',
-                color: CARD_PALETTE.fgMuted,
-                fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                marginTop: '1px',
-              }}>
-                Fact-Check Card
+              {claim.confidenceScore !== undefined && (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: P.fgSec, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Confidence
+                    </span>
+                    <span style={{ fontSize: '17px', fontWeight: 900, fontFamily: fontMono, color: meta.hexColor }}>
+                      {claim.confidenceScore}%
+                    </span>
+                  </div>
+                  <div style={{ width: '1px', height: '16px', backgroundColor: meta.hexBorder }} />
+                </>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', fontWeight: 700, color: P.fgSec, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <Users style={{ width: '14px', height: '14px', color: P.brand }} />
+                {claim.verificationCount} verifiers
               </div>
             </div>
           </div>
 
-          {/* Category pill */}
-          <div style={{
-            fontSize: '10px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            padding: '4px 10px',
-            borderRadius: '6px',
-            backgroundColor: meta.hexBg,
-            color: meta.hexColor,
-            border: `1px solid ${meta.hexBorder}`,
-          }}>
-            {claim.category}
-          </div>
-        </div>
-
-        {/* ── Claim Text (truncated to 100 chars) ── */}
-        <div>
-          <div style={{
-            fontSize: '9px',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            color: CARD_PALETTE.fgMuted,
-            fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-            marginBottom: '5px',
-          }}>
-            CLAIM FORWARDED:
-          </div>
-          <div style={{
-            fontSize: '12px',
-            fontWeight: 500,
-            color: CARD_PALETTE.fg,
-            lineHeight: 1.5,
-            fontStyle: 'italic',
-            backgroundColor: CARD_PALETTE.surface,
-            padding: '10px 12px',
-            borderRadius: '10px',
-            border: `1px solid ${CARD_PALETTE.border}`,
-            minHeight: '54px',
-            display: 'flex',
-            alignItems: 'center',
-          }}>
-            &ldquo;{truncateClaim(claim.text)}&rdquo;
-          </div>
-        </div>
-
-        {/* ── Central Verdict Stamp ── */}
-        <div style={{
-          padding: '14px 16px',
-          borderRadius: '14px',
-          border: `2.5px solid ${meta.hexBorder}`,
-          backgroundColor: meta.hexBg,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '2px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Icon style={{ width: '36px', height: '36px', color: meta.hexColor }} />
-            <span style={{
-              fontSize: '30px',
-              fontWeight: 800,
-              textTransform: 'uppercase',
-              letterSpacing: '-0.02em',
-              color: meta.hexColor,
-              lineHeight: 1,
+          {/* ── RATIONALE (WHY BOX) ── */}
+          {explanation && (
+            <div style={{
+              fontSize: '11.5px', lineHeight: 1.5, color: P.fgSec,
+              backgroundColor: P.surface, padding: '12px 16px', borderRadius: '14px',
+              border: `1px solid ${P.border}`, borderLeft: `4px solid ${meta.hexColor}`,
+              marginBottom: '18px', boxSizing: 'border-box',
             }}>
-              {meta.label}
-            </span>
-          </div>
-          {claim.confidenceScore !== undefined && (
-            <div style={{ textAlign: 'center', marginTop: '2px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 500, color: CARD_PALETTE.fgSecondary }}>
-                Confidence:{' '}
+              <span style={{ fontWeight: 800, color: P.fg, textTransform: 'uppercase', fontSize: '9.5px', letterSpacing: '0.08em' }}>
+                Consensus Rationale:{' '}
               </span>
-              <span style={{
-                fontSize: '16px',
-                fontWeight: 700,
-                fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-                fontVariantNumeric: 'tabular-nums',
-                color: meta.hexColor,
-              }}>
-                {claim.confidenceScore}%
-              </span>
+              {truncateText(explanation, 140)}
             </div>
           )}
 
-          {/* Verifier count */}
+          {/* ── FOOTER ROW ── */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            fontSize: '10px',
-            fontWeight: 600,
-            color: CARD_PALETTE.fgSecondary,
-            marginTop: '2px',
+            paddingTop: '14px',
+            paddingBottom: '6px',
+            borderTop: `1px solid ${P.border}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            boxSizing: 'border-box',
           }}>
-            <Users style={{ width: '11px', height: '11px', color: CARD_PALETTE.brand }} />
-            {claim.verificationCount} community verifier{claim.verificationCount !== 1 ? 's' : ''}
-          </div>
-        </div>
-
-        {/* ── One-line Explanation ── */}
-        {oneLineExplanation && (
-          <div style={{
-            fontSize: '11px',
-            lineHeight: 1.4,
-            color: CARD_PALETTE.fgSecondary,
-            backgroundColor: CARD_PALETTE.surface,
-            padding: '8px 12px',
-            borderRadius: '8px',
-            border: `1px solid ${CARD_PALETTE.border}`,
-            display: '-webkit-box',
-            WebkitLineClamp: 1,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}>
-            <span style={{ fontWeight: 600, color: CARD_PALETTE.fg }}>Why: </span>
-            {oneLineExplanation}
-          </div>
-        )}
-
-        {/* ── Source Domains ── */}
-        {sourceDomains.length > 0 && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            fontSize: '9px',
-            color: CARD_PALETTE.fgMuted,
-            fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
-            <Globe style={{ width: '10px', height: '10px', flexShrink: 0, color: CARD_PALETTE.brand }} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {sourceDomains.join(' · ')}
-            </span>
-          </div>
-        )}
-
-        {/* ── Footer ── */}
-        <div style={{
-          marginTop: 'auto',
-          paddingTop: '10px',
-          borderTop: `1px solid ${CARD_PALETTE.border}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: '9px',
-          color: CARD_PALETTE.fgMuted,
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            maxWidth: '60%',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
-            {topVerification && (
-              <span style={{
-                width: '7px',
-                height: '7px',
-                borderRadius: '50%',
-                backgroundColor: SOURCE_QUALITY_COLORS[topVerification.sourceQuality] || '#a8a29e',
-                flexShrink: 0,
-                display: 'inline-block',
-              }} />
-            )}
-            <span style={{
-              fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              maxWidth: '58%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              lineHeight: 1.4,
             }}>
-              {topVerification
-                ? (() => { try { return new URL(topVerification.sourceUrl).hostname } catch { return 'factstamp.vercel.app' } })()
-                : 'factstamp.vercel.app'
-              }
-            </span>
+              <Globe style={{ width: '14px', height: '14px', flexShrink: 0, color: P.brand }} />
+              <span style={{ fontFamily: fontMono, fontSize: '10px', fontWeight: 600, color: P.fgSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.4 }}>
+                {domains.length > 0 ? domains.join(' · ') : 'factstamp.vercel.app'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', lineHeight: 1.4 }}>
+              <div style={{
+                width: '18px', height: '18px', borderRadius: '5px',
+                background: `linear-gradient(135deg, ${P.brand}, ${P.brandLight})`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <ShieldAlert style={{ width: '11px', height: '11px', color: P.white }} />
+              </div>
+              <span style={{ fontFamily: fontMono, fontSize: '11px', fontWeight: 800, color: P.brand, letterSpacing: '0.02em', lineHeight: 1.4 }}>
+                factstamp.vercel.app
+              </span>
+            </div>
           </div>
-          <div style={{
-            fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-            fontSize: '9px',
-            fontWeight: 600,
-            color: CARD_PALETTE.brand,
-            letterSpacing: '0.02em',
-          }}>
-            factstamp.vercel.app
-          </div>
+
         </div>
       </div>
 
       {onDownload && (
         <button
           onClick={onDownload}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-[var(--radius-md)] font-semibold text-sm bg-[var(--color-brand)] text-[var(--color-brand-fg)] hover:bg-[var(--color-brand-hover)] active:scale-[0.97] shadow-[var(--shadow-sm)] transition-all duration-150 ease-out cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-[var(--radius-lg)] font-bold text-sm bg-[var(--color-brand)] text-[var(--color-brand-fg)] hover:bg-[var(--color-brand-hover)] active:scale-[0.98] shadow-[var(--shadow-md)] transition-all duration-200 ease-out cursor-pointer"
         >
           <Download className="w-4 h-4" />
           Download WhatsApp Card (PNG)

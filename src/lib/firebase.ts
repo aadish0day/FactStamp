@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app'
+import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics'
 import {
   getAuth,
   GoogleAuthProvider,
@@ -59,6 +60,16 @@ export const isFirebaseConfigured = useFirebaseEmulators || isRealApiKey(import.
 
 // Initialize Firebase App instance safely
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
+
+// Analytics Instance (initialized conditionally in browser environment)
+export let analytics: Analytics | null = null
+if (typeof window !== 'undefined') {
+  isSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app)
+    }
+  }).catch(() => {})
+}
 
 // Core Firebase Services
 export const auth = getAuth(app)

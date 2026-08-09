@@ -31,9 +31,9 @@ import { Button } from '@/components/ui/Button'
 import { ShimmerText } from '@/components/ui/ShimmerText'
 import { Marquee } from '@/components/ui/Marquee'
 import { InteractiveHoverButton } from '@/components/ui/InteractiveHoverButton'
+import { FlowButton } from '@/components/ui/FlowButton'
 import { SpotlightCard } from '@/components/ui/SpotlightCard'
 import { DashboardChart } from '@/components/DashboardChart'
-import { ContrastChecker } from '@/components/ContrastChecker'
 import { computeWeeklyReport } from '@/lib/weeklyReport'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useUsers } from '@/contexts/UsersContext'
@@ -171,7 +171,18 @@ export function Dashboard() {
   }
 
   // Dev contrast checker toggle
-  const [showContrast, setShowContrast] = useState(false)
+  // Dynamic verifier title calculation based on user reputation & verification count
+  const getVerifierTitle = (reputation: number, verifications: number): string => {
+    if (reputation >= 90 && verifications >= 10) return 'Lead Fact-Checker'
+    if (reputation >= 80 || verifications >= 5) return 'Senior Analyst'
+    if (reputation >= 60 || verifications >= 2) return 'Community Verifier'
+    return 'Contributor'
+  }
+
+  // Data-driven KPI trends
+  const verifiedPercentage = claims.length ? Math.round((verifiedClaims.length / claims.length) * 100) : 0
+  const falsePercentage = verifiedClaims.length ? Math.round((falseClaims.length / verifiedClaims.length) * 100) : 0
+  const confidenceLabel = avgConfidence >= 80 ? 'High confidence' : avgConfidence >= 50 ? 'Moderate' : 'Low confidence'
 
   const kpis = [
     {
@@ -181,7 +192,7 @@ export function Dashboard() {
       color: 'var(--color-v-true)',
       bgColor: 'var(--color-v-true-bg)',
       borderColor: 'var(--color-v-true-border)',
-      trend: '+12% this week',
+      trend: `${verifiedPercentage}% of total`,
     },
     {
       label: 'False Claims Debunked',
@@ -190,7 +201,7 @@ export function Dashboard() {
       color: 'var(--color-v-false)',
       bgColor: 'var(--color-v-false-bg)',
       borderColor: 'var(--color-v-false-border)',
-      trend: '84% of submissions',
+      trend: `${falsePercentage}% of verified`,
     },
     {
       label: 'Avg Consensus Score',
@@ -200,11 +211,9 @@ export function Dashboard() {
       color: 'var(--color-brand)',
       bgColor: 'var(--color-brand-subtle)',
       borderColor: 'var(--color-brand-subtle)',
-      trend: 'High confidence',
+      trend: confidenceLabel,
     },
   ]
-
-  const VERIFIER_TITLES = ['Lead Fact-Checker', 'Senior Analyst', 'Community Verifier', 'Fact Guardian', 'Active Analyst']
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -216,7 +225,9 @@ export function Dashboard() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <ShimmerText className="text-xs font-bold text-[var(--color-brand)]">FactStamp Live Intelligence</ShimmerText>
+            <ShimmerText className="text-xs font-bold text-[var(--color-brand)]">
+              FactStamp Intelligence · {claims.length} Claims Tracked
+            </ShimmerText>
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-[var(--color-fg)] tracking-tight mb-2">
             Misinformation Dashboard
@@ -231,10 +242,7 @@ export function Dashboard() {
             <InteractiveHoverButton text="Submit Claim" />
           </Link>
           <Link to="/verify">
-            <Button intent="secondary" size="lg" className="font-semibold">
-              <ShieldCheck className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" />
-              Verify Claims Queue
-            </Button>
+            <FlowButton text="Verify Claims Queue" />
           </Link>
         </div>
       </div>
@@ -286,9 +294,9 @@ export function Dashboard() {
               {weekly.weeklyClaimCount} claim{weekly.weeklyClaimCount !== 1 ? 's' : ''} submitted this week · computed live from Firestore
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-[var(--color-fg-muted)] bg-[var(--color-surface-2)]/70 border border-[var(--color-border-soft)] px-3 py-1.5 rounded-full">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand)]" />
-            <span>Auto-generated Monday 00:00 IST</span>
+          <div className="flex items-center gap-2 text-xs text-[var(--color-fg-muted)] bg-[var(--color-surface-2)]/70 border border-[var(--color-border-soft)] px-3 py-1.5 rounded-full font-mono">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Updated Live · Weekly Sync Mon 00:00 IST</span>
           </div>
         </div>
 
@@ -436,15 +444,15 @@ export function Dashboard() {
           ) : (
           <div className="space-y-3">
             {leaderboard.map((verifier, index) => {
-              const ranks = ['#1', '#2', '#3', '#4', '#5']
               const isTop3 = index < 3
+              const title = getVerifierTitle(verifier.reputation, verifier.verifications)
               return (
                 <div
                   key={`${verifier.uid}-${index}`}
                   className="flex items-center gap-3.5 p-3 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] hover:border-[var(--color-brand-subtle)] transition-all"
                 >
                   <span className={`text-xs font-bold font-mono w-6 text-center flex items-center justify-center ${isTop3 ? 'text-[var(--color-brand)]' : 'text-[var(--color-fg-muted)]'}`}>
-                    {index === 0 ? <Trophy className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" /> : ranks[index]}
+                    {index === 0 ? <Trophy className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" /> : `#${index + 1}`}
                   </span>
                   <Avatar initials={verifier.name[0]} size="md" />
                   <div className="flex-1 min-w-0">
@@ -454,7 +462,7 @@ export function Dashboard() {
                       </p>
                     </div>
                     <p className="text-[10px] text-[var(--color-fg-muted)] font-medium mt-0.5">
-                      {VERIFIER_TITLES[index]} · {verifier.verifications} checks
+                      {title} · {verifier.verifications} checks
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
@@ -474,8 +482,13 @@ export function Dashboard() {
       <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)] mb-10">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-lg font-bold text-[var(--color-fg)]">Community Claims Directory</h2>
-            <p className="text-xs text-[var(--color-fg-2)]">Virally forwarded claims and pending community queue</p>
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg font-bold text-[var(--color-fg)]">Community Claims Directory</h2>
+              <span className="text-[10px] font-mono font-bold text-[var(--color-fg-muted)] bg-[var(--color-surface-2)] px-2 py-0.5 rounded-full border border-[var(--color-border-soft)]">
+                {filteredClaimsList.length} claims
+              </span>
+            </div>
+            <p className="text-xs text-[var(--color-fg-2)]">Scrollable directory of virally forwarded claims and pending queue</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -557,15 +570,16 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
+        {/* Scrollable Container with Sticky Table Header */}
+        <div className="max-h-[480px] overflow-y-auto overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] custom-scrollbar">
+          <table className="w-full text-left border-collapse">
+            <thead className="sticky top-0 bg-[var(--color-surface)] z-10 shadow-[0_1px_0_var(--color-border-soft)]">
               <tr className="border-b border-[var(--color-border-soft)] text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]">
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Claim Content</th>
-                <th className="py-3 px-4">Status / Verdict</th>
-                <th className="py-3 px-4 text-right font-mono">Verifications</th>
-                <th className="py-3 px-4 text-right">Action</th>
+                <th className="py-3 px-4 bg-[var(--color-surface)]">Category</th>
+                <th className="py-3 px-4 bg-[var(--color-surface)]">Claim Content</th>
+                <th className="py-3 px-4 bg-[var(--color-surface)]">Status / Verdict</th>
+                <th className="py-3 px-4 text-right font-mono bg-[var(--color-surface)]">Verifications</th>
+                <th className="py-3 px-4 text-right bg-[var(--color-surface)]">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-soft)]">
@@ -785,39 +799,6 @@ export function Dashboard() {
             ))}
           </div>
         )}
-      </div>
-
-      {/* APCA Contrast Audit — collapsible dev card */}
-      <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)]">
-        <button
-          onClick={() => setShowContrast((prev) => !prev)}
-          className="flex items-center justify-between w-full text-left cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-[var(--radius-md)] bg-[var(--color-brand-subtle)] flex items-center justify-center">
-              <Eye className="w-4 h-4 text-[var(--color-brand)]" />
-            </div>
-            <div>
-              <h3 className="text-xs font-bold text-[var(--color-fg)]">
-                Design Token Contrast Audit (APCA)
-              </h3>
-              <p className="text-[10px] text-[var(--color-fg-muted)]">
-                Accessibility compliance tool {showContrast ? '' : '(click to expand)'}
-              </p>
-            </div>
-          </div>
-          <span className="text-[var(--color-fg-muted)]">
-            {showContrast ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          </span>
-        </button>
-
-        <div
-          className={`overflow-hidden transition-all duration-300 ${
-            showContrast ? 'max-h-[3000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <ContrastChecker />
-        </div>
       </div>
     </div>
   )

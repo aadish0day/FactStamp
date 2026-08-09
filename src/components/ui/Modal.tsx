@@ -87,7 +87,7 @@ export function Modal({ open, onClose, title, size = 'md', children }: ModalProp
         aria-labelledby={title ? 'modal-title' : undefined}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          'bg-[var(--color-surface)] rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)]',
+          'relative bg-[var(--color-surface)] rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)]',
           'w-full max-h-[85dvh] overflow-y-auto',
           'animate-dropdown-slide',
           {
@@ -97,25 +97,34 @@ export function Modal({ open, onClose, title, size = 'md', children }: ModalProp
           }
         )}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-soft)]">
-          {title && (
+        {/* Header or Floating Close Button */}
+        {title ? (
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-soft)]">
             <h2 id="modal-title" className="text-lg font-semibold text-[var(--color-fg)]">
               {title}
             </h2>
-          )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex items-center justify-center w-8 h-8 rounded-[var(--radius-sm)] bg-transparent border-none text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+        ) : (
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center justify-center w-8 h-8 rounded-[var(--radius-sm)] bg-transparent border-none text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] ml-auto"
+            className="absolute top-3.5 right-3.5 z-10 flex items-center justify-center w-8 h-8 rounded-[var(--radius-sm)] bg-transparent border-none text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
             aria-label="Close"
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
-        </div>
+        )}
 
         {/* Body */}
-        <div className="px-6 py-4">{children}</div>
+        <div className="px-6 py-5">{children}</div>
       </div>
     </div>,
     document.body

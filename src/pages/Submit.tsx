@@ -22,6 +22,7 @@ import {
   ScanLine,
   Lightbulb,
   Check,
+  LayoutDashboard,
 } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -38,12 +39,54 @@ import type { ClaimCategory } from '@/lib/types'
 
 type Tab = 'text' | 'image'
 
-const CATEGORY_OPTIONS: { id: ClaimCategory; label: string; desc: string; icon: typeof HeartPulse; color: string }[] = [
-  { id: 'health', label: 'Health & Medical', desc: 'Home remedies, cures, diseases', icon: HeartPulse, color: 'var(--color-v-true)' },
-  { id: 'political', label: 'Political & Govt', desc: 'Elections, policies, laws', icon: Landmark, color: 'var(--color-v-false)' },
-  { id: 'financial', label: 'Financial & Loans', desc: 'Bank schemes, free money, UPI', icon: Coins, color: 'var(--color-v-mislead)' },
-  { id: 'religious', label: 'Religious & Culture', desc: 'Festivals, heritage, beliefs', icon: Flame, color: 'var(--color-accent)' },
-  { id: 'other', label: 'Other Topics', desc: 'Scams, tech, general viral news', icon: HelpCircle, color: 'var(--color-brand)' },
+const CATEGORY_OPTIONS: {
+  id: ClaimCategory
+  label: string
+  desc: string
+  icon: typeof HeartPulse
+  iconBg: string
+  iconColor: string
+}[] = [
+  {
+    id: 'health',
+    label: 'Health & Medical',
+    desc: 'Home remedies, cures, diseases',
+    icon: HeartPulse,
+    iconBg: 'bg-[var(--color-v-true-bg)]',
+    iconColor: 'text-[var(--color-v-true)]',
+  },
+  {
+    id: 'political',
+    label: 'Political & Govt',
+    desc: 'Elections, policies, laws',
+    icon: Landmark,
+    iconBg: 'bg-[var(--color-v-false-bg)]',
+    iconColor: 'text-[var(--color-v-false)]',
+  },
+  {
+    id: 'financial',
+    label: 'Financial & Loans',
+    desc: 'Bank schemes, free money, UPI',
+    icon: Coins,
+    iconBg: 'bg-[var(--color-v-mislead-bg)]',
+    iconColor: 'text-[var(--color-v-mislead)]',
+  },
+  {
+    id: 'religious',
+    label: 'Religious & Culture',
+    desc: 'Festivals, heritage, beliefs',
+    icon: Flame,
+    iconBg: 'bg-[var(--color-accent-subtle)]',
+    iconColor: 'text-[var(--color-accent)]',
+  },
+  {
+    id: 'other',
+    label: 'Other Topics',
+    desc: 'Scams, tech, general viral news',
+    icon: HelpCircle,
+    iconBg: 'bg-[var(--color-brand-subtle)]',
+    iconColor: 'text-[var(--color-brand)]',
+  },
 ]
 
 const SAMPLE_FORWARDS = [
@@ -448,7 +491,7 @@ export function Submit() {
               <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-2.5">
                 Select Claim Category
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {CATEGORY_OPTIONS.map((c) => {
                   const Icon = c.icon
                   const selected = category === c.id
@@ -457,22 +500,33 @@ export function Submit() {
                       key={c.id}
                       type="button"
                       className={cn(
-                        'flex items-start gap-3 p-3 rounded-[var(--radius-lg)] border text-left transition-all cursor-pointer select-none',
+                        'relative flex items-start gap-3 p-3.5 rounded-[var(--radius-lg)] border text-left cursor-pointer select-none transition-all duration-200 ease-out',
                         selected
-                          ? 'bg-[var(--color-surface-2)] border-[var(--color-brand)] shadow-[var(--shadow-sm)] ring-1 ring-[var(--color-brand)]'
-                          : 'bg-[var(--color-surface)] border-[var(--color-border-soft)] hover:border-[var(--color-border)] hover:bg-[var(--color-surface-2)]/50'
+                          ? 'bg-[var(--color-brand-subtle)]/40 border-[var(--color-brand)] shadow-[var(--shadow-xs)]'
+                          : 'bg-[var(--color-surface)] border-[var(--color-border-soft)] hover:border-[var(--color-border)] hover:bg-[var(--color-surface-2)]/60'
                       )}
                       onClick={() => setCategory(c.id)}
                     >
                       <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                        style={{ backgroundColor: `${c.color}15`, color: c.color }}
+                        className={cn(
+                          'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 border border-black/5 dark:border-white/5 transition-transform duration-200',
+                          selected && 'scale-105',
+                          c.iconBg,
+                          c.iconColor
+                        )}
                       >
                         <Icon className="w-4 h-4" />
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-[var(--color-fg)]">{c.label}</p>
-                        <p className="text-[10px] text-[var(--color-fg-muted)] truncate">{c.desc}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <p className={cn('text-xs font-bold transition-colors', selected ? 'text-[var(--color-brand)]' : 'text-[var(--color-fg)]')}>
+                            {c.label}
+                          </p>
+                          {selected && (
+                            <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] flex-shrink-0 animate-pop-in" />
+                          )}
+                        </div>
+                        <p className="text-[10px] text-[var(--color-fg-muted)] truncate mt-0.5">{c.desc}</p>
                       </div>
                     </button>
                   )
@@ -619,66 +673,98 @@ export function Submit() {
       <Modal
         open={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
-        size="sm"
+        size="md"
       >
-        <div className="flex flex-col items-center text-center py-4">
-          <div className="w-16 h-16 rounded-full bg-[var(--color-v-true-bg)] border border-[var(--color-v-true-border)] flex items-center justify-center mb-4 animate-pop-in">
-            <CheckCircle2 className="w-9 h-9 text-[var(--color-v-true)]" aria-hidden="true" />
+        <div className="flex flex-col items-center text-center py-2 px-1">
+          {/* Glowing Animated Icon Badge */}
+          <div className="relative mb-4 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full bg-[var(--color-v-true)]/20 blur-xl scale-150" />
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-v-true-bg)] via-[var(--color-surface)] to-[var(--color-v-true-bg)] border border-[var(--color-v-true-border)] shadow-[var(--shadow-sm)] flex items-center justify-center animate-pop-in">
+              <CheckCircle2 className="w-8 h-8 text-[var(--color-v-true)]" aria-hidden="true" />
+            </div>
           </div>
 
-          <h3 className="text-xl font-extrabold text-[var(--color-fg)] mb-1">
+          <h3 className="text-2xl font-extrabold text-[var(--color-fg)] tracking-tight mb-1.5">
             Claim Submitted Successfully!
           </h3>
-          <p className="text-xs text-[var(--color-fg-2)] mb-5 max-w-xs leading-relaxed">
-            Your claim is now in the community queue. Track it anytime in the <strong className="font-semibold text-[var(--color-fg)]">Verification Queue</strong> or under <strong className="font-semibold text-[var(--color-fg)]">Your Submitted Claims</strong> in the Dashboard.
+          <p className="text-xs sm:text-sm text-[var(--color-fg-2)] mb-6 max-w-md leading-relaxed">
+            Your claim has been added to the community verification queue. Independent verifiers will now review sources and submit consensus verdicts.
           </p>
 
-          <div className="w-full bg-[var(--color-surface-2)] rounded-xl p-4 mb-6 text-left border border-[var(--color-border-soft)]">
-            <div className="flex items-center justify-between gap-2 mb-2">
+          {/* Elevated Claim Preview Card */}
+          <div className="w-full text-left rounded-2xl bg-[var(--color-surface-2)]/80 border border-[var(--color-border-soft)] p-4 sm:p-5 shadow-[var(--shadow-sm)] mb-6 space-y-3.5">
+            {/* Top Bar: Category + Status Pill */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border-soft)] pb-3">
               <CategoryBadge category={category} />
-              <span className="text-[10px] font-mono text-[var(--color-brand)] font-bold bg-[var(--color-brand-subtle)] px-2 py-0.5 rounded-full border border-[var(--color-brand-subtle)]">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--color-brand-subtle)] text-[var(--color-brand)] border border-[var(--color-brand)]/20">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-brand)] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-brand)]" />
+                </span>
                 Status: Pending (0/3 Verifications)
               </span>
             </div>
-            <p className="text-xs text-[var(--color-fg)] leading-relaxed italic line-clamp-3">
-              &quot;{claimText}&quot;
-            </p>
+
+            {/* Submitted Text Quote Box */}
+            <div className="p-3.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-soft)] shadow-2xs">
+              <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[var(--color-fg-muted)] block mb-1">
+                Submitted Forward Content
+              </span>
+              <p className="text-xs sm:text-sm text-[var(--color-fg)] font-medium leading-relaxed italic line-clamp-3">
+                &ldquo;{claimText}&rdquo;
+              </p>
+            </div>
+
+            {/* Bottom Info Bar */}
+            <div className="flex items-center justify-between text-[11px] font-mono text-[var(--color-fg-muted)] pt-0.5">
+              <span className="flex items-center gap-1">
+                <ShieldAlert className="w-3.5 h-3.5 text-[var(--color-brand)]" />
+                3 Verifiers Quorum Required
+              </span>
+              <span className="text-[var(--color-v-true)] font-bold">
+                +2 Rep On Completion
+              </span>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2.5 w-full">
-            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3 w-full">
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
               <Button
                 intent="primary"
-                className="flex-1 font-bold"
+                size="lg"
+                className="flex-1 font-bold shadow-[var(--shadow-sm)]"
                 onClick={() => {
                   setShowSuccessModal(false)
                   if (submittedClaimId) navigate(`/claim/${submittedClaimId}`)
                 }}
               >
-                <ExternalLink className="w-4 h-4 me-1" aria-hidden="true" />
+                <ExternalLink className="w-4 h-4 me-1.5" aria-hidden="true" />
                 View Claim Card
               </Button>
               <Button
                 intent="secondary"
+                size="lg"
                 className="flex-1 font-semibold"
                 onClick={() => {
                   setShowSuccessModal(false)
                   navigate('/dashboard')
                 }}
               >
+                <LayoutDashboard className="w-4 h-4 me-1.5" aria-hidden="true" />
                 Go to Dashboard
               </Button>
             </div>
             <Button
               intent="ghost"
               size="sm"
-              className="w-full text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
+              className="w-full text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] py-2"
               onClick={() => {
                 setShowSuccessModal(false)
                 resetForm()
               }}
             >
-              <RotateCcw className="w-3.5 h-3.5 me-1" aria-hidden="true" />
+              <RotateCcw className="w-3.5 h-3.5 me-1.5" aria-hidden="true" />
               Submit Another Forward
             </Button>
           </div>

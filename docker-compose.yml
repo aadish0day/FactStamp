@@ -17,7 +17,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - .:/app
-      - /app/node_modules
+      - dev_node_modules:/app/node_modules
     ports:
       - "5174:5173"
     restart: unless-stopped
@@ -39,3 +39,7 @@ services:
     ports:
       - "8080:80"
     restart: unless-stopped
+
+# Named volume so `docker compose down -v` clears the stale Vite dep cache
+volumes:
+  dev_node_modules:
