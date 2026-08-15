@@ -3,10 +3,11 @@ service firebase.storage {
   match /b/{bucket}/o {
     // Claim screenshots: public read so shared cards and public claim pages
     // load images; uploads require auth and must be image files ≤ 10 MB.
+    // Restricting to safe raster/vector formats (jpeg, png, gif, webp) to avoid SVG script-execution XSS.
     match /claim_screenshots/{fileName} {
       allow read: if true;
       allow write: if request.auth != null
-        && request.resource.contentType.matches('image/.*')
+        && request.resource.contentType in ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
         && request.resource.size < 10 * 1024 * 1024;
     }
 

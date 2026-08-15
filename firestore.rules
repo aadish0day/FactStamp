@@ -1,48 +1,106 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ── Verifier Profiles ──
-    // Any signed-in user can read profiles (names/reputations appear on
-    // claim cards); only the owner can create/update/delete their own doc.
-    match /users/{uid} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == uid;
-    }
-
-    // ── Admin helper ──
-    // An admin is a signed-in user whose own profile doc carries isAdmin == true.
-    // Used to gate expedite-flag writes on claims below.
+    // ── Admin Helper ──
+    // An admin is a signed-in user whose profile document has isAdmin == true.
     function isAdmin() {
       return request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAdmin', false) == true;
+    }
+
+    // ── Seed User Helper ──
+    // Checks if the authenticated user is a seeded developer account ending with @factstamp.app
+    function isSeedUser() {
+      return request.auth != null && request.auth.token.email.matches('.*@factstamp\\.app');
+    }
+
+    // ── Verifier Profiles ──
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.uid == request.auth.uid
+        && (
+          isSeedUser() || (
+            request.resource.data.get('reputation', 50) == 50
+            && request.resource.data.get('totalVerifications', 0) == 0
+            && request.resource.data.get('isAdmin', false) == false
+          )
+        );
+      allow update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.joinedAt == resource.data.joinedAt
+        && request.resource.data.get('reputation', 50) == resource.data.get('reputation', 50)
+        && request.resource.data.get('totalVerifications', 0) == resource.data.get('totalVerifications', 0)
+        && request.resource.data.get('isAdmin', false) == resource.data.get('isAdmin', false);
+      allow delete: if false;
+    }
+
+    // Helper to verify a field's value did not change during update
+    function isUnchanged(field) {
+      return request.resource.data.get(field, null) == resource.data.get(field, null);
+    }
+
+    // Helper to check that identity fields did not change during update
+    function identityUnchanged() {
+      return isUnchanged('text')
+        && isUnchanged('category')
+        && isUnchanged('submittedBy')
+        && isUnchanged('submittedByName')
+        && isUnchanged('createdAt')
+        && isUnchanged('consensusDeadline')
+        && isUnchanged('imageUrl');
     }
 
     // ── Claims ──
-    // Read is public (home feed + share cards are viewable signed-out).
-    // Create requires a signed-in submitter. Consensus updates are allowed
-    // for any signed-in verifier, but the claim's identity fields (text,
-    // category, submitter, timestamps) are immutable so nobody can rewrite
-    // someone else's claim. Deletes are disabled entirely.
     match /claims/{claimId} {
       allow read: if true;
-      // Any signed-in user may submit a claim. The submitter's uid is still
-      // recorded on the doc (submittedBy) for display, and the create rule is
-      // intentionally auth-only so the client-side demo seed can populate a
-      // Create REQUIRES an authenticated user (request.auth != null).
-      // Initial verificationCount must be 0.
       allow create: if request.auth != null
-        && request.resource.data.verificationCount == 0;
-      // Verifiers may update consensus fields. Identity fields stay immutable.
+        && request.resource.data.verificationCount == 0
+        && request.resource.data.get('imageUrl', 'https://placeholder.com').matches('^(data:image/(jpeg|png|webp);base64,|https?://).*')
+        && (request.resource.data.submittedBy == request.auth.uid || isAdmin());
       allow update: if request.auth != null
-        && (!('adminFlagged' in request.resource.data) || !('adminFlagged' in resource.data) || request.resource.data.adminFlagged == resource.data.adminFlagged || isAdmin())
-        && request.resource.data.verificationCount >= resource.data.verificationCount
-        && request.resource.data.text == resource.data.text
-        && request.resource.data.category == resource.data.category;
+        && (
+          // Case A: Admin update (moderator consensus corrections, seeding, flagging)
+          (
+            isAdmin()
+            && request.resource.data.text == resource.data.text
+            && request.resource.data.category == resource.data.category
+          )
+          ||
+          // Case B: Consensus expiry updates (claims overdue for verification marked CONTESTED)
+          (
+            identityUnchanged()
+            && resource.data.status == 'pending'
+            && request.resource.data.status == 'verified'
+            && request.resource.data.verdict == 'CONTESTED'
+            && isUnchanged('verifications')
+            && isUnchanged('verificationCount')
+            && isUnchanged('adminFlagged')
+            && isUnchanged('adminFlaggedAt')
+          )
+          ||
+          // Case C: Adding a source-backed verification
+          (
+            identityUnchanged()
+            && isUnchanged('adminFlagged')
+            && isUnchanged('adminFlaggedAt')
+            // Count must increment by 1
+            && request.resource.data.verificationCount == resource.data.verificationCount + 1
+            // Existing verifications array must be preserved
+            && request.resource.data.verifications.hasAll(resource.data.verifications)
+            // The newly appended verification element must be validated
+            && request.resource.data.verifications[resource.data.verifications.size()].verifierId == request.auth.uid
+            && request.resource.data.verifications[resource.data.verifications.size()].verifierReputation == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.reputation
+            && request.resource.data.verifications[resource.data.verifications.size()].verdict in ['TRUE', 'FALSE', 'MISLEADING', 'UNVERIFIABLE']
+            && request.resource.data.verifications[resource.data.verifications.size()].sourceUrl.matches('^https?://.+')
+            && request.resource.data.verifications[resource.data.verifications.size()].explanation is string
+            && request.resource.data.verifications[resource.data.verifications.size()].explanation.size() >= 50
+          )
+        );
       allow delete: if false;
 
       // ── Verdicts subcollection ──
-      // Any signed-in user can add a verdict to a claim, but it must carry
-      // their own uid; only the author can edit their own verdict.
       match /verdicts/{verdictId} {
         allow read: if true;
         allow create: if request.auth != null
@@ -54,15 +112,19 @@ service cloud.firestore {
     }
 
     // ── Notifications ──
-    // Users can only read/write their own notification docs; the userId field
-    // must always match the authenticated user.
     match /notifications/{notificationId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
         && request.resource.data.userId == request.auth.uid;
       allow update: if request.auth != null
         && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId;
+        && request.resource.data.userId == resource.data.userId
+        // Only allow updating isRead. All other fields must stay identical.
+        && isUnchanged('type')
+        && isUnchanged('title')
+        && isUnchanged('message')
+        && isUnchanged('createdAt')
+        && isUnchanged('claimId');
       allow delete: if false;
     }
   }

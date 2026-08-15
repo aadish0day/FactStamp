@@ -155,7 +155,10 @@ export function VerifyDetail() {
       newErrors.sourceUrl = 'Please provide a source URL'
     } else {
       try {
-        new URL(sourceUrl)
+        const parsed = new URL(sourceUrl)
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+          newErrors.sourceUrl = 'Only HTTP and HTTPS links are allowed'
+        }
       } catch {
         newErrors.sourceUrl = 'Please enter a valid URL (e.g., https://example.com)'
       }
