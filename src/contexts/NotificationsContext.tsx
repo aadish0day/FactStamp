@@ -70,6 +70,7 @@ const NotificationsContext = createContext<NotificationsContextValue>(defaultNot
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
+    if (isFirebaseConfigured) return []
     try {
       const saved = localStorage.getItem('fs_notifications')
       return saved ? JSON.parse(saved) : DEFAULT_SEED_NOTIFICATIONS
@@ -98,7 +99,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     const unsub = subscribeNotificationsRealtime(
       user.uid,
       (firestoreNotifications) => {
-        if (firestoreNotifications && firestoreNotifications.length > 0) {
+        if (firestoreNotifications) {
           setNotifications(firestoreNotifications)
         }
         setIsLoading(false)

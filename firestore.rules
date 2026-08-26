@@ -8,32 +8,12 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAdmin', false) == true;
     }
 
-    // ── Seed User Helper ──
-    // Checks if the authenticated user is a seeded developer account ending with @factstamp.app
+    // ── Seed / Developer User Helper ──
+    // Checks if the authenticated user is a verified developer account ending with @factstamp.app
     function isSeedUser() {
-      return request.auth != null && request.auth.token.email.matches('.*@factstamp\\.app');
-    }
-
-    // ── Verifier Profiles ──
-    match /users/{uid} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == uid
-        && request.resource.data.uid == request.auth.uid
-        && (
-          isSeedUser() || (
-            request.resource.data.get('reputation', 50) == 50
-            && request.resource.data.get('totalVerifications', 0) == 0
-            && request.resource.data.get('isAdmin', false) == false
-          )
-        );
-      allow update: if request.auth != null && request.auth.uid == uid
-        && request.resource.data.uid == resource.data.uid
-        && request.resource.data.email == resource.data.email
-        && request.resource.data.joinedAt == resource.data.joinedAt
-        && request.resource.data.get('reputation', 50) == resource.data.get('reputation', 50)
-        && request.resource.data.get('totalVerifications', 0) == resource.data.get('totalVerifications', 0)
-        && request.resource.data.get('isAdmin', false) == resource.data.get('isAdmin', false);
-      allow delete: if false;
+      return request.auth != null
+        && request.auth.token.email.matches('.*@factstamp\\.app')
+        && request.auth.token.get('email_verified', true) == true;
     }
 
     // Helper to verify a field's value did not change during update
@@ -41,7 +21,7 @@ service cloud.firestore {
       return request.resource.data.get(field, null) == resource.data.get(field, null);
     }
 
-    // Helper to check that identity fields did not change during update
+    // Helper to check that claim identity fields did not change during update
     function identityUnchanged() {
       return isUnchanged('text')
         && isUnchanged('category')
@@ -52,21 +32,75 @@ service cloud.firestore {
         && isUnchanged('imageUrl');
     }
 
+    // ── Verifier Profiles ──
+    match /users/{uid} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null && (
+        (
+          request.auth.uid == uid && (
+            isSeedUser() || (
+              request.resource.data.get('reputation', 50) == 50
+              && request.resource.data.get('totalVerifications', 0) == 0
+              && request.resource.data.get('isAdmin', false) == false
+              && request.resource.data.displayName is string
+              && request.resource.data.displayName.size() <= 100
+              && request.resource.data.email == request.auth.token.email
+            )
+          )
+        ) || isAdmin() || isSeedUser()
+      );
+
+      allow update: if request.auth != null && (
+        // Admin update: can manage reputation, verification count, and admin role
+        (
+          (isAdmin() || isSeedUser())
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.get('reputation', 50) is int
+          && request.resource.data.get('reputation', 50) >= 0
+          && request.resource.data.get('reputation', 50) <= 100
+          && request.resource.data.get('totalVerifications', 0) is int
+          && request.resource.data.get('totalVerifications', 0) >= 0
+        )
+        ||
+        // Self-update: users can only update display profile info; sensitive fields are strictly immutable
+        (
+          request.auth.uid == uid
+          && isUnchanged('uid')
+          && isUnchanged('email')
+          && isUnchanged('joinedAt')
+          && isUnchanged('reputation')
+          && isUnchanged('totalVerifications')
+          && isUnchanged('isAdmin')
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() <= 100
+        )
+      );
+
+      allow delete: if request.auth != null && (isAdmin() || isSeedUser());
+    }
+
     // ── Claims ──
     match /claims/{claimId} {
       allow read: if true;
+
       allow create: if request.auth != null
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 10
+        && request.resource.data.text.size() <= 2000
+        && request.resource.data.category in ['health', 'political', 'financial', 'religious', 'other']
+        && request.resource.data.status == 'pending'
         && request.resource.data.verificationCount == 0
+        && request.resource.data.verifications == []
+        && request.resource.data.submittedByName is string
+        && request.resource.data.submittedByName.size() <= 100
         && request.resource.data.get('imageUrl', 'https://placeholder.com').matches('^(data:image/(jpeg|png|webp);base64,|https?://).*')
-        && (request.resource.data.submittedBy == request.auth.uid || isAdmin());
+        && (request.resource.data.submittedBy == request.auth.uid || isAdmin() || isSeedUser());
+
       allow update: if request.auth != null
         && (
-          // Case A: Admin update (moderator consensus corrections, seeding, flagging)
-          (
-            isAdmin()
-            && request.resource.data.text == resource.data.text
-            && request.resource.data.category == resource.data.category
-          )
+          // Case A: Admin update (moderator consensus corrections, text edit, verdict override, seeding, flagging)
+          (isAdmin() || isSeedUser())
           ||
           // Case B: Consensus expiry updates (claims overdue for verification marked CONTESTED)
           (
@@ -93,29 +127,46 @@ service cloud.firestore {
             && request.resource.data.verifications[resource.data.verifications.size()].verifierId == request.auth.uid
             && request.resource.data.verifications[resource.data.verifications.size()].verifierReputation == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.reputation
             && request.resource.data.verifications[resource.data.verifications.size()].verdict in ['TRUE', 'FALSE', 'MISLEADING', 'UNVERIFIABLE']
+            && request.resource.data.verifications[resource.data.verifications.size()].sourceUrl is string
+            && request.resource.data.verifications[resource.data.verifications.size()].sourceUrl.size() <= 500
             && request.resource.data.verifications[resource.data.verifications.size()].sourceUrl.matches('^https?://.+')
             && request.resource.data.verifications[resource.data.verifications.size()].explanation is string
             && request.resource.data.verifications[resource.data.verifications.size()].explanation.size() >= 50
+            && request.resource.data.verifications[resource.data.verifications.size()].explanation.size() <= 3000
+            && request.resource.data.verifications[resource.data.verifications.size()].verifierName is string
+            && request.resource.data.verifications[resource.data.verifications.size()].verifierName.size() <= 100
           )
         );
-      allow delete: if false;
+
+      allow delete: if request.auth != null && (isAdmin() || isSeedUser());
 
       // ── Verdicts subcollection ──
       match /verdicts/{verdictId} {
         allow read: if true;
         allow create: if request.auth != null
-          && request.resource.data.verifierId == request.auth.uid;
+          && request.resource.data.verifierId == request.auth.uid
+          && request.resource.data.explanation is string
+          && request.resource.data.explanation.size() <= 3000;
         allow update: if request.auth != null
-          && resource.data.verifierId == request.auth.uid;
+          && resource.data.verifierId == request.auth.uid
+          && isUnchanged('claimId')
+          && isUnchanged('verifierId')
+          && isUnchanged('createdAt')
+          && request.resource.data.explanation is string
+          && request.resource.data.explanation.size() <= 3000;
         allow delete: if false;
       }
     }
 
     // ── Notifications ──
     match /notifications/{notificationId} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin() || isSeedUser());
       allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid;
+        && (request.resource.data.userId == request.auth.uid || isAdmin() || isSeedUser())
+        && request.resource.data.title is string
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 2000;
       allow update: if request.auth != null
         && resource.data.userId == request.auth.uid
         && request.resource.data.userId == resource.data.userId
@@ -125,7 +176,36 @@ service cloud.firestore {
         && isUnchanged('message')
         && isUnchanged('createdAt')
         && isUnchanged('claimId');
-      allow delete: if false;
+      allow delete: if request.auth != null && (isAdmin() || isSeedUser() || resource.data.userId == request.auth.uid);
+    }
+
+    // ── Moderation Incident Reports ──
+    match /reports/{reportId} {
+      allow read: if request.auth != null && (isAdmin() || isSeedUser());
+      allow create: if request.auth != null
+        && request.resource.data.reportedBy == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.targetType in ['claim', 'user', 'verification']
+        && request.resource.data.reason in ['misinformation_spam', 'low_quality_source', 'manipulation', 'fake_account', 'harassment', 'other']
+        && request.resource.data.severity in ['low', 'medium', 'high']
+        && request.resource.data.targetTitle is string
+        && request.resource.data.targetTitle.size() <= 300
+        && request.resource.data.details is string
+        && request.resource.data.details.size() <= 3000;
+      allow update: if request.auth != null && (isAdmin() || isSeedUser());
+      allow delete: if request.auth != null && (isAdmin() || isSeedUser());
+    }
+
+    // ── Administrative Audit Logs (Immutable) ──
+    match /audit_logs/{logId} {
+      allow read: if request.auth != null && (isAdmin() || isSeedUser());
+      allow create: if request.auth != null
+        && (isAdmin() || isSeedUser())
+        && request.resource.data.action is string
+        && request.resource.data.action.size() <= 200
+        && request.resource.data.details is string
+        && request.resource.data.details.size() <= 2000;
+      allow update, delete: if false;
     }
   }
 }

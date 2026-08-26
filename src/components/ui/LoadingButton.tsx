@@ -1,0 +1,315 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+
+const CELL = {
+  type: "spring",
+  stiffness: 520,
+  damping: 34,
+  mass: 0.45,
+} as const;
+
+const CROSSFADE = {
+  type: "spring",
+  stiffness: 260,
+  damping: 34,
+  mass: 0.8,
+} as const;
+
+const INSTANT = { duration: 0 } as const;
+
+export type AsyncActionStatus = "idle" | "pending" | "success" | "error";
+
+export type UseAsyncActionOptions = {
+  action: () => unknown;
+  resetAfter?: number;
+  onError?: (error: unknown) => void;
+};
+
+export function useAsyncAction({
+  action,
+  resetAfter = 1400,
+  onError,
+}: UseAsyncActionOptions) {
+  const [status, setStatus] = useState<AsyncActionStatus>("idle");
+
+  const phase = useRef<AsyncActionStatus>("idle");
+  const runId = useRef(0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alive = useRef(true);
+
+  const act = useRef(action);
+  const fail = useRef(onError);
+
+  useEffect(() => {
+    act.current = action;
+    fail.current = onError;
+  });
+
+  const clear = useCallback(() => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+  }, []);
+
+  const reset = useCallback(() => {
+    runId.current += 1;
+    clear();
+    phase.current = "idle";
+    setStatus("idle");
+  }, [clear]);
+
+  const run = useCallback(() => {
+    if (phase.current === "pending") return;
+
+    clear();
+    const id = ++runId.current;
+    phase.current = "pending";
+    setStatus("pending");
+
+    const settle = (next: "success" | "error") => {
+      if (!alive.current || id !== runId.current) return;
+      clear();
+      phase.current = next;
+      setStatus(next);
+      timer.current = setTimeout(() => {
+        if (!alive.current || id !== runId.current) return;
+        phase.current = "idle";
+        setStatus("idle");
+      }, resetAfter);
+    };
+
+    Promise.resolve()
+      .then(() => act.current())
+      .then(
+        () => settle("success"),
+        (error: unknown) => {
+          fail.current?.(error);
+          settle("error");
+        },
+      );
+  }, [clear, resetAfter]);
+
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+      clear();
+    };
+  }, [clear]);
+
+  return {
+    status,
+    run,
+    reset,
+    pending: status === "pending",
+  };
+}
+
+function Spinner({ still }: { still: boolean }) {
+  return (
+    <motion.svg
+      width="14"
+      height="14"
+      viewBox="0 0 12 12"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+      animate={still ? undefined : { rotate: 360 }}
+      transition={
+        still ? undefined : { duration: 0.85, repeat: Infinity, ease: "linear" }
+      }
+    >
+      <circle
+        cx="6"
+        cy="6"
+        r="4.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeOpacity="0.22"
+      />
+      <path
+        d="M10.5 6A4.5 4.5 0 0 0 6 1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </motion.svg>
+  );
+}
+
+function CheckMark() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 12 12"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M2.6 6.3 4.9 8.6 9.4 3.6"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function AlertMark() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 12 12"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M6 2.9v3.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6 9.05h.01"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export type LoadingButtonProps = {
+  onAction: () => unknown;
+  children: string;
+  pendingLabel?: string;
+  successLabel?: string;
+  errorLabel?: string;
+  resetAfter?: number;
+  disabled?: boolean;
+  type?: "button" | "submit";
+  onError?: (error: unknown) => void;
+  className?: string;
+};
+
+export function LoadingButton({
+  onAction,
+  children,
+  pendingLabel = children,
+  successLabel = "Done",
+  errorLabel = "Try again",
+  resetAfter = 1400,
+  disabled = false,
+  type = "button",
+  onError,
+  className = "",
+}: LoadingButtonProps) {
+  const reduced = useReducedMotion();
+
+  const { status, run, pending } = useAsyncAction({
+    action: onAction,
+    resetAfter,
+    onError,
+  });
+
+  const fade = reduced ? INSTANT : CROSSFADE;
+
+  const label =
+    status === "pending"
+      ? pendingLabel
+      : status === "success"
+        ? successLabel
+        : status === "error"
+          ? errorLabel
+          : children;
+
+  const faces = [
+    {
+      key: "idle",
+      text: children,
+      tone: "text-[var(--color-brand-fg)]",
+      icon: null,
+    },
+    {
+      key: "pending",
+      text: pendingLabel,
+      tone: "text-[var(--color-brand-fg)]/80",
+      icon: <Spinner still={reduced === true || status !== "pending"} />,
+    },
+    {
+      key: "success",
+      text: successLabel,
+      tone: "text-[var(--color-brand-fg)]",
+      icon: <CheckMark />,
+    },
+    {
+      key: "error",
+      text: errorLabel,
+      tone: "text-[var(--color-brand-fg)]",
+      icon: <AlertMark />,
+    },
+  ];
+
+  return (
+    <>
+      <motion.button
+        type={type}
+        disabled={disabled || pending}
+        aria-label={label}
+        aria-busy={pending || undefined}
+        aria-disabled={disabled || pending || undefined}
+        whileTap={disabled || pending || reduced ? undefined : { y: 1 }}
+        transition={CELL}
+        onClick={(event) => {
+          if (pending) {
+            event.preventDefault();
+            return;
+          }
+          if (type === "submit") {
+            // Let the form's onSubmit event handle it, but also trigger the async state tracker
+            run();
+          } else {
+            run();
+          }
+        }}
+        className={`inline-flex items-center justify-center gap-2 whitespace-nowrap select-none duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:active:scale-100 touch-manipulation bg-[var(--color-brand)] text-[var(--color-brand-fg)] hover:bg-[var(--color-brand-hover)] border border-transparent px-6 py-2.5 text-sm sm:text-base h-11 rounded-full w-full font-bold shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all cursor-pointer relative overflow-hidden ${className}`}
+        style={{ touchAction: "manipulation" }}
+      >
+        <span aria-hidden className="relative grid place-items-center">
+          {faces.map((face) => (
+            <motion.span
+              key={face.key}
+              initial={false}
+              animate={
+                face.key === status
+                  ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                  : { opacity: 0, y: 3, filter: "blur(3px)" }
+              }
+              transition={fade}
+              className={`col-start-1 row-start-1 flex items-center justify-center gap-1.5 whitespace-nowrap ${face.tone}`}
+            >
+              {face.icon}
+              {face.text}
+            </motion.span>
+          ))}
+        </span>
+      </motion.button>
+
+      <span role="status" aria-live="polite" className="sr-only">
+        {status === "success"
+          ? successLabel
+          : status === "error"
+            ? errorLabel
+            : ""}
+      </span>
+    </>
+  );
+}
+
+export default LoadingButton;

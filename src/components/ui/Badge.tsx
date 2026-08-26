@@ -2,6 +2,7 @@ import { memo } from 'react'
 import { cn } from '@/lib/utils'
 
 export type BadgeVariant = 'default' | 'neutral' | 'success' | 'warning' | 'error' | 'info' | 'brand'
+  | 'cat-health' | 'cat-political' | 'cat-religious' | 'cat-financial' | 'cat-other'
 export type BadgeSize = 'sm' | 'md' | 'lg'
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -19,6 +20,11 @@ const variantClasses: Record<BadgeVariant, string> = {
   error: 'bg-[var(--color-v-false-bg)] text-[var(--color-v-false)] border-[var(--color-v-false-border)]',
   info: 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border-[var(--color-accent)]',
   brand: 'bg-[var(--color-brand-subtle,rgba(224,86,36,0.1))] text-[var(--color-brand)] border-[var(--color-brand)]',
+  'cat-health': 'bg-[var(--color-cat-health-bg)] text-[var(--color-cat-health)] border-[var(--color-cat-health-border)]',
+  'cat-political': 'bg-[var(--color-cat-political-bg)] text-[var(--color-cat-political)] border-[var(--color-cat-political-border)]',
+  'cat-religious': 'bg-[var(--color-cat-religious-bg)] text-[var(--color-cat-religious)] border-[var(--color-cat-religious-border)]',
+  'cat-financial': 'bg-[var(--color-cat-financial-bg)] text-[var(--color-cat-financial)] border-[var(--color-cat-financial-border)]',
+  'cat-other': 'bg-[var(--color-cat-other-bg)] text-[var(--color-cat-other)] border-[var(--color-cat-other-border)]',
 }
 
 const sizeClasses: Record<BadgeSize, string> = {

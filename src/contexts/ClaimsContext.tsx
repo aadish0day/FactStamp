@@ -2,12 +2,16 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef, ty
 import type { Claim, Verification, Verdict } from '@/lib/types'
 import { calculateConfidenceScore, determineSourceQuality, sourceQualityToScore } from '@/lib/confidenceScore'
 import { isFirebaseConfigured, auth } from '@/lib/firebase'
+import { useAuth } from '@/contexts/AuthContext'
 import {
   addClaimToFirestore,
   updateClaimInFirestore,
   subscribeClaimsRealtime,
   flagClaimForExpeditedReview,
   getSingleClaimFromFirestore,
+  deleteClaimFromFirestore,
+  adminOverrideClaim,
+  adminDeleteVerification,
 } from '@/services/firebaseService'
 
 const CONSENSUS_DEADLINE_DAYS = 7
@@ -38,6 +42,9 @@ interface ClaimsContextValue {
   getVerifiedClaims: () => Claim[]
   expireOverdueClaims: () => void
   flagClaim: (claimId: string, flagged: boolean) => Promise<void>
+  deleteClaim: (claimId: string) => Promise<void>
+  adminUpdateClaim: (claimId: string, updates: Partial<Claim>) => Promise<void>
+  deleteVerification: (claimId: string, verificationId: string) => Promise<void>
   isLoading: boolean
 }
 
@@ -58,6 +65,9 @@ const defaultClaimsContext: ClaimsContextValue = {
   getVerifiedClaims: () => [],
   expireOverdueClaims: () => {},
   flagClaim: async () => {},
+  deleteClaim: async () => {},
+  adminUpdateClaim: async () => {},
+  deleteVerification: async () => {},
   isLoading: false,
 }
 
@@ -447,8 +457,9 @@ const SEED_CLAIMS: Claim[] = [
 ]
 
 export function ClaimsProvider({ children }: { children: ReactNode }) {
+  const { user, updateUser } = useAuth()
   // The claims collection is initialized with rich seed data and updated via Firestore
-  const [claims, setClaims] = useState<Claim[]>(SEED_CLAIMS)
+  const [claims, setClaims] = useState<Claim[]>(isFirebaseConfigured ? [] : SEED_CLAIMS)
   const [isLoading, setIsLoading] = useState(isFirebaseConfigured)
   const expiryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const attemptedExpiryIdsRef = useRef<Set<string>>(new Set())
@@ -498,10 +509,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
 
     const unsub = subscribeClaimsRealtime(
       (firestoreClaims) => {
-        const firestoreIds = new Set(firestoreClaims.map((c) => c.id))
-        const remainingSeeds = SEED_CLAIMS.filter((s) => !firestoreIds.has(s.id))
-        const remainingLocal = localClaimsRef.current.filter((l) => !firestoreIds.has(l.id))
-        const merged = applyLocalExpiry([...remainingLocal, ...firestoreClaims, ...remainingSeeds])
+        const merged = applyLocalExpiry(firestoreClaims)
         setClaims(merged)
         setIsLoading(false)
       },
@@ -639,8 +647,26 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
           console.warn('Firestore verdict sync notice:', err)
         )
       }
+
+      if (user && data.verifierId === user.uid) {
+        let repChange = 0
+        if (target.status === 'verified' && target.verdict) {
+          repChange = data.verdict === target.verdict ? 2 : -1
+        } else if (target.status === 'pending') {
+          if (target.verifications.length + 1 >= 3) {
+            repChange = data.verdict === updatedClaim.verdict ? 2 : -1
+          }
+        }
+
+        updateUser({
+          totalVerifications: user.totalVerifications + 1,
+          reputation: Math.max(0, Math.min(100, user.reputation + repChange)),
+        }).catch((err) => {
+          console.warn('Failed to update verifier profile after verification:', err)
+        })
+      }
     },
-    [claims]
+    [claims, user, updateUser]
   )
 
   /**
@@ -661,6 +687,75 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
           await flagClaimForExpeditedReview(claimId, flagged)
         } catch (err) {
           console.warn('Firestore flag sync notice:', err)
+        }
+      }
+    },
+    []
+  )
+
+  /**
+   * Admin action: hard delete a claim from local state and Firestore
+   */
+  const deleteClaim = useCallback(
+    async (claimId: string) => {
+      localClaimsRef.current = localClaimsRef.current.filter((c) => c.id !== claimId)
+      setClaims((prev) => prev.filter((c) => c.id !== claimId))
+      if (isFirebaseConfigured) {
+        try {
+          await deleteClaimFromFirestore(claimId)
+        } catch (err) {
+          console.warn('Firestore claim delete notice:', err)
+        }
+      }
+    },
+    []
+  )
+
+  /**
+   * Admin action: override / update claim fields directly (verdict, category, text, status, etc.)
+   */
+  const adminUpdateClaim = useCallback(
+    async (claimId: string, updates: Partial<Claim>) => {
+      setClaims((prev) =>
+        prev.map((c) => (c.id === claimId ? { ...c, ...updates } : c))
+      )
+      localClaimsRef.current = localClaimsRef.current.map((c) =>
+        c.id === claimId ? { ...c, ...updates } : c
+      )
+      if (isFirebaseConfigured) {
+        try {
+          await adminOverrideClaim(claimId, updates)
+        } catch (err) {
+          console.warn('Firestore admin claim override notice:', err)
+        }
+      }
+    },
+    []
+  )
+
+  /**
+   * Admin action: delete a specific verification from a claim
+   */
+  const deleteVerification = useCallback(
+    async (claimId: string, verificationId: string) => {
+      setClaims((prev) =>
+        prev.map((c) => {
+          if (c.id !== claimId) return c
+          const updatedVerifs = c.verifications.filter((v) => v.id !== verificationId)
+          const isVerified = updatedVerifs.length >= 3
+          return {
+            ...c,
+            verifications: updatedVerifs,
+            verificationCount: updatedVerifs.length,
+            status: isVerified ? 'verified' : 'pending',
+          }
+        })
+      )
+      if (isFirebaseConfigured) {
+        try {
+          await adminDeleteVerification(claimId, verificationId)
+        } catch (err) {
+          console.warn('Firestore verification delete notice:', err)
         }
       }
     },
@@ -700,7 +795,20 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
 
   return (
     <ClaimsContext.Provider
-      value={{ claims, addClaim, addVerification, getClaimById, getPendingClaims, getVerifiedClaims, expireOverdueClaims, flagClaim, isLoading }}
+      value={{
+        claims,
+        addClaim,
+        addVerification,
+        getClaimById,
+        getPendingClaims,
+        getVerifiedClaims,
+        expireOverdueClaims,
+        flagClaim,
+        deleteClaim,
+        adminUpdateClaim,
+        deleteVerification,
+        isLoading,
+      }}
     >
       {children}
     </ClaimsContext.Provider>

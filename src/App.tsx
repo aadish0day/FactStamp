@@ -10,6 +10,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Navbar } from '@/components/Navbar'
 import { OnlineStatusBar } from '@/components/OnlineStatusBar'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { AdminRoute } from '@/components/AdminRoute'
 import { Footer } from '@/components/Footer'
 
 const Home = lazy(() => import('@/pages/Home').then((m) => ({ default: m.Home })))
@@ -21,6 +22,7 @@ const VerifyQueue = lazy(() => import('@/pages/VerifyQueue').then((m) => ({ defa
 const VerifyDetail = lazy(() => import('@/pages/VerifyDetail').then((m) => ({ default: m.VerifyDetail })))
 const Dashboard = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
 const Profile = lazy(() => import('@/pages/Profile').then((m) => ({ default: m.Profile })))
+const Admin = lazy(() => import('@/pages/Admin').then((m) => ({ default: m.Admin })))
 const NotFound = lazy(() => import('@/pages/NotFound').then((m) => ({ default: m.NotFound })))
 
 export default function App() {
@@ -33,31 +35,31 @@ export default function App() {
     >
       <ThemeProvider>
         <AuthProvider>
-          <UsersProvider>
-            <NotificationsProvider>
-            <ClaimsProvider>
-              <ErrorBoundary>
-              <AppShell />
-              <Toaster
-                position="top-right"
-                closeButton
-                gap={8}
-                visibleToasts={3}
-                toastOptions={{
-                  style: {
-                    background: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
-                    color: 'var(--color-fg)',
-                    borderRadius: 'var(--radius-md)',
-                    boxShadow: 'var(--shadow-md)',
-                    fontSize: '0.875rem',
-                  },
-                }}
-              />
-            </ErrorBoundary>
-            </ClaimsProvider>
-            </NotificationsProvider>
-          </UsersProvider>
+          <ClaimsProvider>
+            <UsersProvider>
+              <NotificationsProvider>
+                <ErrorBoundary>
+                  <AppShell />
+                  <Toaster
+                    position="top-right"
+                    closeButton
+                    gap={8}
+                    visibleToasts={3}
+                    toastOptions={{
+                      style: {
+                        background: 'var(--color-surface)',
+                        border: '1px solid var(--color-border)',
+                        color: 'var(--color-fg)',
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: 'var(--shadow-md)',
+                        fontSize: '0.875rem',
+                      },
+                    }}
+                  />
+                </ErrorBoundary>
+              </NotificationsProvider>
+            </UsersProvider>
+          </ClaimsProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
@@ -66,7 +68,14 @@ export default function App() {
 
 function AppShell() {
   const { pathname } = useLocation()
-  const isAuthPage = pathname === '/signin' || pathname === '/signup'
+  // The admin console is a standalone, staff-only interface: it has its own
+  // full-screen auth gate and chrome, so it must NOT render the public navbar
+  // and footer (which are the "normal user" layout).
+  const isStandalonePage =
+    pathname === '/signin' ||
+    pathname === '/signup' ||
+    pathname === '/admin' ||
+    pathname.startsWith('/admin/')
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-fg)]">
@@ -77,7 +86,7 @@ function AppShell() {
       >
         Skip to main content
       </a>
-      {!isAuthPage && <Navbar />}
+      {!isStandalonePage && <Navbar />}
       <OnlineStatusBar />
                 <main id="main-content" tabIndex={-1} aria-live="polite" aria-atomic="true">
                   <Suspense
@@ -103,11 +112,13 @@ function AppShell() {
                     {/* Public dashboard — Module 7: all users can view without auth */}
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                    {/* Unlisted staff console — direct URL access only */}
+                    <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   </Suspense>
                 </main>
-                {!isAuthPage && <Footer />}
+                {!isStandalonePage && <Footer />}
             </div>
   )
 }

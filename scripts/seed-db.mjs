@@ -95,7 +95,7 @@ const v = (id, claimId, verdict, sourceUrl, sourceQuality, explanation, verifier
 })
 
 // Mirrors the old demo data — kept ONLY in this script as the seed source.
-const SEED_CLAIMS = [
+const VERIFIED_SEEDS = [
   {
     id: 'c1',
     text: 'Dengue fever can be cured by eating neem leaves and taking antibiotics within 24 hours of symptoms appearing. Forward this to all your family groups!',
@@ -253,49 +253,184 @@ const SEED_CLAIMS = [
     ],
   },
   {
-    id: 'c9',
-    text: 'Mobile phone radiation causes brain cancer — this has been proven by a WHO study published in 2023.',
+    id: 'c13',
+    text: 'Sticking a slice of raw onion in your socks overnight pulls toxins and heavy metals from your body, curing the flu.',
     category: 'health',
-    status: 'pending',
-    createdAt: '2026-07-28T16:00:00Z',
-    consensusDeadline: '2026-08-04T16:00:00Z',
-    submittedByName: 'Ananya Gupta',
-    verifications: [],
+    status: 'verified',
+    createdAt: '2026-07-17T09:00:00Z',
+    consensusDeadline: '2026-07-24T09:00:00Z',
+    submittedByName: 'Kavya Nair',
+    verdict: 'FALSE',
+    confidenceScore: 99,
+    agreementRatio: 1.0,
+    sourceQualityScore: 90,
+    verifications: [
+      v('v13', 'c13', 'FALSE', 'https://www.healthline.com/health/onion-in-socks', 'high',
+        'Scientific research shows raw onions do not absorb toxins through the skin. The flu is caused by a virus, and placing onions on feet has no therapeutic effect.',
+        'Raj Patel', '2025-06-03T10:15:00Z'),
+      v('v14', 'c13', 'FALSE', 'https://www.snopes.com/fact-check/onions-in-socks/', 'medium',
+        'The practice originates from a 16th-century plague myth. Modern biology confirms there is no mechanism for onions to filter blood or draw heavy metals through the skin.',
+        'Vikram Singh', '2025-06-03T11:00:00Z'),
+    ],
   },
   {
-    id: 'c10',
-    text: 'The government is planning to impose a 28% GST on all religious donations made through digital payment platforms.',
-    category: 'religious',
-    status: 'pending',
-    createdAt: '2026-07-25T13:00:00Z',
-    consensusDeadline: '2026-08-01T13:00:00Z',
-    submittedByName: 'Priya Sharma',
-    verifications: [],
-  },
-  {
-    id: 'c11',
-    text: 'A new RBI rule effective July 1 requires all bank accounts to have Aadhaar linked or they will be frozen.',
-    category: 'financial',
-    status: 'pending',
-    createdAt: '2026-07-23T15:00:00Z',
-    consensusDeadline: '2026-07-30T15:00:00Z',
-    submittedByName: 'Neha Joshi',
-    verifications: [],
-    // Pre-flagged by the admin for expedited review (surfaces first in queue)
-    adminFlagged: true,
-    adminFlaggedAt: '2026-07-29T10:00:00Z',
-  },
-  {
-    id: 'c12',
-    text: 'Eating bananas at night causes respiratory problems and should be avoided. This is an ancient Ayurvedic teaching.',
+    id: 'c14',
+    text: 'India has officially launched its first reusable hybrid rocket, designed and built by a private space startup.',
     category: 'other',
-    status: 'pending',
-    createdAt: '2026-07-29T18:00:00Z',
-    consensusDeadline: '2026-08-05T18:00:00Z',
-    submittedByName: 'Ananya Gupta',
-    verifications: [],
+    status: 'verified',
+    createdAt: '2026-07-16T12:00:00Z',
+    consensusDeadline: '2026-07-23T12:00:00Z',
+    submittedByName: 'Aarav Mehta',
+    verdict: 'TRUE',
+    confidenceScore: 98,
+    agreementRatio: 1.0,
+    sourceQualityScore: 95,
+    verifications: [
+      v('v15', 'c14', 'TRUE', 'https://www.isro.gov.in/PrivateSpaceStartupLaunch', 'high',
+        'ISRO records confirm the successful suborbital launch of a hybrid rocket by a Chennai-based startup. The test vehicle successfully validated a reusable design.',
+        'Neha Joshi', '2025-06-02T14:30:00Z'),
+      v('v16', 'c14', 'TRUE', 'https://www.thehindu.com/sci-tech/science/private-rocket-launch', 'high',
+        'Media reports and press releases from IN-SPACe corroborate the successful launch and re-entry testing of the private hybrid rocket.',
+        'Priya Sharma', '2025-06-02T15:00:00Z'),
+    ],
   },
-]
+  {
+    id: 'c17',
+    text: 'The government has launched a unified pension scheme (UPS) guaranteeing 50% of the average basic salary as a pension for employees who serve at least 25 years.',
+    category: 'financial',
+    status: 'verified',
+    createdAt: '2026-07-15T09:00:00Z',
+    consensusDeadline: '2026-07-22T09:00:00Z',
+    submittedByName: 'Vikram Singh',
+    verdict: 'TRUE',
+    confidenceScore: 98,
+    agreementRatio: 1.0,
+    sourceQualityScore: 95,
+    verifications: [
+      v('v17', 'c17', 'TRUE', 'https://pib.gov.in/PressReleasePage.aspx?PRID=unified-pension', 'high',
+        'Official press release from the Press Information Bureau (PIB) confirms the Union Cabinet approved the Unified Pension Scheme (UPS) guaranteeing 50% basic pay as pension.',
+        'Vikram Singh', '2025-06-01T10:00:00Z'),
+      v('v18', 'c17', 'TRUE', 'https://www.livemint.com/news/india/cabinet-approves-unified-pension-scheme', 'high',
+        'Ministry of Finance brief details the 25-year service threshold to receive the full guaranteed 50% basic salary as pension under the new scheme.',
+        'Aarav Mehta', '2025-06-01T11:30:00Z'),
+    ],
+  },
+  {
+    id: 'c18',
+    text: 'Drinking silver water (colloidal silver) daily boosts the immune system to 100% and completely prevents cancer.',
+    category: 'health',
+    status: 'verified',
+    createdAt: '2026-07-14T11:00:00Z',
+    consensusDeadline: '2026-07-21T11:00:00Z',
+    submittedByName: 'Neha Joshi',
+    verdict: 'FALSE',
+    confidenceScore: 99,
+    agreementRatio: 1.0,
+    sourceQualityScore: 90,
+    verifications: [
+      v('v19', 'c18', 'FALSE', 'https://www.fda.gov/consumers/consumer-updates/colloidal-silver-products-warning', 'high',
+        'FDA warns consumers that colloidal silver is not safe or effective for treating any disease. It has no known function in the body and can cause argyria.',
+        'Raj Patel', '2025-05-31T09:15:00Z'),
+      v('v20', 'c18', 'FALSE', 'https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/colloidal-silver', 'high',
+        'Mayo Clinic health publications confirm that colloidal silver is not considered safe or effective, and can cause serious side effects including kidney damage and neurological issues.',
+        'Kavya Nair', '2025-05-31T10:30:00Z'),
+    ],
+  },
+];
+
+  // Dynamically calculate pending claim deadlines relative to seed run time so they stay active in UI
+  const daysAgo = (days) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+  const daysHence = (days) => new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+
+  const PENDING_SEEDS = [
+    {
+      id: 'c9',
+      text: 'Mobile phone radiation causes brain cancer — this has been proven by a WHO study published in 2023.',
+      category: 'health',
+      status: 'pending',
+      createdAt: daysAgo(2),
+      consensusDeadline: daysHence(5),
+      submittedByName: 'Ananya Gupta',
+      verifications: [],
+    },
+    {
+      id: 'c10',
+      text: 'The government is planning to impose a 28% GST on all religious donations made through digital payment platforms.',
+      category: 'religious',
+      status: 'pending',
+      createdAt: daysAgo(3),
+      consensusDeadline: daysHence(4),
+      submittedByName: 'Priya Sharma',
+      verifications: [],
+    },
+    {
+      id: 'c11',
+      text: 'A new RBI rule effective July 1 requires all bank accounts to have Aadhaar linked or they will be frozen.',
+      category: 'financial',
+      status: 'pending',
+      createdAt: daysAgo(4),
+      consensusDeadline: daysHence(3),
+      submittedByName: 'Neha Joshi',
+      verifications: [],
+      adminFlagged: true,
+      adminFlaggedAt: daysAgo(2),
+    },
+    {
+      id: 'c12',
+      text: 'Eating bananas at night causes respiratory problems and should be avoided. This is an ancient Ayurvedic teaching.',
+      category: 'other',
+      status: 'pending',
+      createdAt: daysAgo(1),
+      consensusDeadline: daysHence(6),
+      submittedByName: 'Ananya Gupta',
+      verifications: [],
+    },
+    {
+      id: 'c15',
+      text: 'The Income Tax Department has launched a new portal offering a flat 50% discount on all outstanding tax penalties paid before the end of this month.',
+      category: 'financial',
+      status: 'pending',
+      createdAt: daysAgo(3),
+      consensusDeadline: daysHence(4),
+      submittedByName: 'Kavya Nair',
+      verifications: [],
+    },
+    {
+      id: 'c16',
+      text: 'A new Supreme Court ruling mandates that all government employees must clear a weekly digital literacy exam or face suspension.',
+      category: 'political',
+      status: 'pending',
+      createdAt: daysAgo(2),
+      consensusDeadline: daysHence(5),
+      submittedByName: 'Raj Patel',
+      verifications: [],
+    },
+    {
+      id: 'c19',
+      text: 'A new parliamentary bill proposes to reserve 33% of all seats in national sports federations for former athletes.',
+      category: 'political',
+      status: 'pending',
+      createdAt: daysAgo(1),
+      consensusDeadline: daysHence(6),
+      submittedByName: 'Neha Joshi',
+      verifications: [],
+    },
+    {
+      id: 'c20',
+      text: 'The Ministry of Tourism is launching a digital-only pilgrimage pass that grants queue-less entry to top 50 temples across the country.',
+      category: 'religious',
+      status: 'pending',
+      createdAt: daysAgo(3),
+      consensusDeadline: daysHence(4),
+      submittedByName: 'Aarav Mehta',
+      verifications: [],
+    },
+  ]
+
+  const SEED_CLAIMS = [
+    ...VERIFIED_SEEDS,
+    ...PENDING_SEEDS
+  ]
 
 /* ── 3.5 Notification seed data ── */
 
@@ -414,6 +549,32 @@ async function writeDoc(path, data, idToken, { createOnly = false } = {}) {
   })
 }
 
+/* ── 6.5 Delete all documents in a Firestore collection ── */
+
+async function deleteCollection(collectionName, token) {
+  try {
+    const res = await api(`${FIRESTORE_BASE}/${collectionName}?pageSize=300`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (!res.documents || res.documents.length === 0) {
+      console.log(`  No existing documents found in ${collectionName}.`)
+      return
+    }
+    
+    console.log(`  Deleting ${res.documents.length} documents from ${collectionName}…`)
+    for (const doc of res.documents) {
+      const id = doc.name.split('/').pop()
+      await api(`${FIRESTORE_BASE}/${collectionName}/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+    }
+  } catch (err) {
+    console.warn(`  ⚠ Warning: Failed to clean collection ${collectionName}:`, err.message)
+  }
+}
+
 /* ── 7. Main ── */
 
 async function main() {
@@ -428,6 +589,14 @@ async function main() {
     accounts.push(acc)
     console.log(`  ${acc.created ? 'created' : 'exists '} → ${acc.email} (uid ${acc.uid.slice(0, 6)}…)`)
   }
+
+  const seedToken = accounts[0].idToken
+
+  // ── Clean up existing collections (Wipe) ──
+  console.log('\nWiping existing collections…')
+  await deleteCollection('claims', seedToken)
+  await deleteCollection('notifications', seedToken)
+  await deleteCollection('users', seedToken)
 
   // ── User profiles (owner-only writes, so each uses its own token) ──
   console.log('\nWriting verifier profiles…')
@@ -452,7 +621,6 @@ async function main() {
   // ── Claims ──
   console.log('\nSeeding claims…')
   // Any authenticated user may create claims (auth-only create rule).
-  const seedToken = accounts[0].idToken
   let created = 0
   let updated = 0
 
@@ -520,15 +688,21 @@ async function main() {
       })
       created++
     } catch (err) {
-      if (err.status !== 409) throw err // ALREADY_EXISTS → just update below
+      if (err.status !== 409) {
+        throw err
+      }
     }
 
-    await api(`${FIRESTORE_BASE}/claims/${claim.id}?${updateMask(mask)}`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${seedToken}` },
-      body: JSON.stringify({ fields: toFields(finalData) }),
-    })
-    updated++
+    try {
+      await api(`${FIRESTORE_BASE}/claims/${claim.id}?${updateMask(mask)}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${seedToken}` },
+        body: JSON.stringify({ fields: toFields(finalData) }),
+      })
+      updated++
+    } catch (err) {
+      throw err
+    }
   }
   console.log(`  ${created} claims created, ${updated} claims updated (12 total)`)
 
@@ -549,12 +723,7 @@ async function main() {
         })
         notifCreated++
       } catch (err) {
-        if (err.status !== 409) throw err // ALREADY_EXISTS → update below
-        await api(`${FIRESTORE_BASE}/notifications/${docId}?${updateMask(Object.keys(data))}`, {
-          method: 'PATCH',
-          headers: { Authorization: `Bearer ${acc.idToken}` },
-          body: JSON.stringify({ fields: toFields(data) }),
-        })
+        if (err.status !== 409) throw err // ALREADY_EXISTS → no-op since notification fields are immutable
         notifUpdated++
       }
     }

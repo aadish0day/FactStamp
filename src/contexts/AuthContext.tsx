@@ -1,20 +1,34 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { User } from '@/lib/types'
-import { auth, onAuthStateChanged, isFirebaseConfigured } from '@/lib/firebase'
+import {
+  auth,
+  onAuthStateChanged,
+  isFirebaseConfigured,
+  db,
+  COLLECTIONS,
+  doc,
+  setDoc,
+  onSnapshot,
+  serverTimestamp
+} from '@/lib/firebase'
 import {
   signUpWithEmail,
   signInWithEmail,
   signInWithGoogleProvider,
   signOutUser,
   resetPassword as resetPasswordService,
-  getUserProfile,
   updateUserProfile,
   getAuthErrorMessage,
 } from '@/services/firebaseService'
+import {
+  recordActivity,
+  isSessionExpired,
+  clearSecuritySession,
+} from '@/lib/security'
 
 interface AuthContextValue {
   user: User | null
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<User | null>
   loginWithGoogle: () => Promise<void>
   signup: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
@@ -26,7 +40,7 @@ interface AuthContextValue {
 
 const defaultAuthContext: AuthContextValue = {
   user: null,
-  login: async () => {},
+  login: async () => null,
   loginWithGoogle: async () => {},
   signup: async () => {},
   logout: async () => {},
@@ -39,47 +53,93 @@ const defaultAuthContext: AuthContextValue = {
 const AuthContext = createContext<AuthContextValue>(defaultAuthContext)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Auth state is fully managed by Firebase's onAuthStateChanged.
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(isFirebaseConfigured)
 
-  // Restore / track Firebase auth session (only when real keys are present)
+  // Realtime profile subscription to Firestore user document
   useEffect(() => {
     if (!isFirebaseConfigured) return
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let unsubscribeProfile: (() => void) | null = null
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        try {
-          const profile = await getUserProfile(firebaseUser.uid)
-          setUser(
-            profile ?? {
-              uid: firebaseUser.uid,
-              displayName: firebaseUser.displayName || 'Verifier',
-              email: firebaseUser.email || '',
-              reputation: 50,
-              totalVerifications: 0,
-              joinedAt: new Date().toISOString(),
-            }
-          )
-        } catch (err) {
-          console.warn('Failed to load verifier profile, using defaults:', err)
-          setUser({
-            uid: firebaseUser.uid,
-            displayName: firebaseUser.displayName || 'Verifier',
-            email: firebaseUser.email || '',
-            reputation: 50,
-            totalVerifications: 0,
-            joinedAt: new Date().toISOString(),
-          })
+        // 09. Session Hijacking: Check for idle session timeout on re-auth
+        if (isSessionExpired()) {
+          clearSecuritySession()
+          await signOutUser().catch(() => {})
+          setUser(null)
+          setIsLoading(false)
+          return
         }
+        recordActivity()
+
+        const userDocRef = doc(db, COLLECTIONS.USERS, firebaseUser.uid)
+        
+        unsubscribeProfile = onSnapshot(
+          userDocRef,
+          (snap) => {
+            if (snap.exists()) {
+              setUser(snap.data() as User)
+            } else {
+              const newProfile: User = {
+                uid: firebaseUser.uid,
+                displayName: firebaseUser.displayName || 'Verifier',
+                email: firebaseUser.email || '',
+                reputation: 50,
+                totalVerifications: 0,
+                joinedAt: new Date().toISOString(),
+              }
+              setDoc(userDocRef, { ...newProfile, createdAt: serverTimestamp() }).catch((err) => {
+                console.warn('Failed to initialize user document in Firestore:', err)
+              })
+              setUser(newProfile)
+            }
+            setIsLoading(false)
+          },
+          (err) => {
+            console.warn('Realtime profile subscription failed:', err)
+            setIsLoading(false)
+          }
+        )
       } else {
+        if (unsubscribeProfile) {
+          unsubscribeProfile()
+          unsubscribeProfile = null
+        }
         setUser(null)
+        setIsLoading(false)
       }
-      setIsLoading(false)
     })
 
-    return () => unsubscribe()
+    return () => {
+      unsubscribeAuth()
+      if (unsubscribeProfile) {
+        unsubscribeProfile()
+      }
+    }
   }, [])
+
+  // 09. Session Hijacking: Track user activity and auto-expire idle sessions
+  useEffect(() => {
+    const handleActivity = () => recordActivity()
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'] as const
+    events.forEach(evt => window.addEventListener(evt, handleActivity, { passive: true }))
+
+    // Check idle timeout every 60 seconds
+    const idleCheck = setInterval(async () => {
+      if (user && isSessionExpired()) {
+        clearSecuritySession()
+        await signOutUser().catch(() => {})
+        setUser(null)
+      }
+    }, 60_000)
+
+    return () => {
+      events.forEach(evt => window.removeEventListener(evt, handleActivity))
+      clearInterval(idleCheck)
+    }
+  }, [user])
 
   const login = useCallback(async (email: string, password: string) => {
     if (!isFirebaseConfigured) throw new Error('Firebase is not configured')
@@ -87,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const profile = await signInWithEmail(email, password)
       setUser(profile)
+      return profile
     } catch (err) {
       throw new Error(getAuthErrorMessage(err))
     } finally {
@@ -128,6 +189,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.warn('Firebase sign-out notice:', err)
       }
     }
+    // 09. Session Hijacking: Clear all security session tokens on logout
+    clearSecuritySession()
     setUser(null)
   }, [])
 
@@ -140,19 +203,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const updateUser = useCallback(
-    async (updates: Partial<User>) => {
-      setUser((prev) => (prev ? { ...prev, ...updates } : prev))
-      if (isFirebaseConfigured && user) {
-        try {
-          await updateUserProfile(user.uid, updates)
-        } catch (err) {
+  const updateUser = useCallback(async (updates: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev
+      const next = { ...prev, ...updates }
+      if (isFirebaseConfigured) {
+        updateUserProfile(prev.uid, updates).catch((err) => {
           console.warn('Firestore profile update notice:', err)
-        }
+        })
       }
-    },
-    [user]
-  )
+      return next
+    })
+  }, [])
 
   return (
     <AuthContext.Provider value={{ user, login, loginWithGoogle, signup, logout, resetPassword, updateUser, isLoading, isFirebaseConfigured }}>

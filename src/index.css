@@ -51,6 +51,27 @@
   --color-v-contested-bg:     oklch(0.48 0.10 240 / 0.07);
   --color-v-contested-border: oklch(0.48 0.10 240 / 0.20);
 
+  /* ── CATEGORY HUES (non-semantic, distinct from truth status colors) ── */
+  --color-cat-health:           oklch(0.50 0.18 48);   /* Saffron Brand */
+  --color-cat-health-bg:        oklch(0.50 0.18 48 / 0.08);
+  --color-cat-health-border:    oklch(0.50 0.18 48 / 0.22);
+
+  --color-cat-political:        oklch(0.44 0.10 195);  /* Deep Ink Accent */
+  --color-cat-political-bg:     oklch(0.44 0.10 195 / 0.08);
+  --color-cat-political-border: oklch(0.44 0.10 195 / 0.22);
+
+  --color-cat-religious:        oklch(0.64 0.10 85);   /* Sand Gold */
+  --color-cat-religious-bg:     oklch(0.64 0.10 85 / 0.08);
+  --color-cat-religious-border: oklch(0.64 0.10 85 / 0.22);
+
+  --color-cat-financial:        oklch(0.46 0.08 245);  /* Muted Slate Blue */
+  --color-cat-financial-bg:     oklch(0.46 0.08 245 / 0.08);
+  --color-cat-financial-border: oklch(0.46 0.08 245 / 0.22);
+
+  --color-cat-other:            oklch(0.54 0.05 55);   /* Muted Bronze/Sand */
+  --color-cat-other-bg:         oklch(0.54 0.05 55 / 0.08);
+  --color-cat-other-border:     oklch(0.54 0.05 55 / 0.22);
+
   /* ── SOURCE QUALITY INDICATORS ── */
   --color-sq-high: oklch(0.42 0.12 145);  /* green dot: gov/WHO */
   --color-sq-med:  oklch(0.62 0.13 65);   /* amber dot: news */
@@ -59,6 +80,7 @@
   /* ── TYPOGRAPHY ── */
   --font-display: "DM Sans", ui-sans-serif, system-ui;
   --font-sans:    "DM Sans", ui-sans-serif, system-ui;
+  --font-serif:   "Lora", Georgia, serif;
   --font-mono:    "JetBrains Mono", ui-monospace, monospace;
 
   /* Fluid Type Scale (modular ratio 1.250, mobile→desktop) */
@@ -154,6 +176,27 @@
   --color-v-contested:        oklch(0.60 0.10 240);
   --color-v-contested-bg:     oklch(0.60 0.10 240 / 0.09);
   --color-v-contested-border: oklch(0.60 0.10 240 / 0.25);
+
+  /* ── CATEGORY HUES DARK MODE OVERRIDES ── */
+  --color-cat-health:           oklch(0.72 0.18 48);   /* Saffron Brand */
+  --color-cat-health-bg:        oklch(0.72 0.18 48 / 0.10);
+  --color-cat-health-border:    oklch(0.72 0.18 48 / 0.25);
+
+  --color-cat-political:        oklch(0.72 0.10 195);  /* Deep Ink Accent */
+  --color-cat-political-bg:     oklch(0.72 0.10 195 / 0.10);
+  --color-cat-political-border: oklch(0.72 0.10 195 / 0.25);
+
+  --color-cat-religious:        oklch(0.76 0.10 85);   /* Sand Gold */
+  --color-cat-religious-bg:     oklch(0.76 0.10 85 / 0.10);
+  --color-cat-religious-border: oklch(0.76 0.10 85 / 0.25);
+
+  --color-cat-financial:        oklch(0.65 0.08 245);  /* Muted Slate Blue */
+  --color-cat-financial-bg:     oklch(0.65 0.08 245 / 0.10);
+  --color-cat-financial-border: oklch(0.65 0.08 245 / 0.25);
+
+  --color-cat-other:            oklch(0.68 0.05 55);   /* Muted Bronze/Sand */
+  --color-cat-other-bg:         oklch(0.68 0.05 55 / 0.10);
+  --color-cat-other-border:     oklch(0.68 0.05 55 / 0.25);
 
   /* Lightened source quality indicators for dark surface visibility */
   --color-sq-high: oklch(0.62 0.14 145);  /* matches v-true dark */
@@ -386,4 +429,9 @@ p {
     opacity: 1 !important;
     animation: none !important;
   }
+}
+
+/* Custom serif font utility */
+.font-serif {
+  font-family: var(--font-serif);
 }

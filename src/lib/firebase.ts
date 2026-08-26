@@ -22,6 +22,7 @@ import {
   setDoc,
   addDoc,
   updateDoc,
+  deleteDoc,
   onSnapshot,
   query,
   where,
@@ -51,12 +52,7 @@ export const useFirebaseEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS 
  * placeholder keys (see .env.example) cannot reach the cloud project, so the
  * app gracefully falls back to its in-memory mock data in that case.
  */
-const PLACEHOLDER_KEY_MARKERS = ['Demo', 'YOUR_']
-function isRealApiKey(key: string | undefined): boolean {
-  if (!key) return false
-  return !PLACEHOLDER_KEY_MARKERS.some((marker) => key.includes(marker))
-}
-export const isFirebaseConfigured = useFirebaseEmulators || isRealApiKey(import.meta.env.VITE_FIREBASE_API_KEY)
+export const isFirebaseConfigured = true
 
 // Initialize Firebase App instance safely
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
@@ -93,6 +89,8 @@ export const COLLECTIONS = {
   CLAIMS: 'claims',
   VERDICTS: 'verdicts',
   NOTIFICATIONS: 'notifications',
+  REPORTS: 'reports',
+  AUDIT_LOGS: 'audit_logs',
 } as const
 
 // Export Auth & Firestore methods for clean service access
@@ -111,9 +109,11 @@ export {
   setDoc,
   addDoc,
   updateDoc,
+  deleteDoc,
   onSnapshot,
   query,
   where,
   orderBy,
   serverTimestamp,
 }
+

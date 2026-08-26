@@ -16,6 +16,7 @@ import {
   setDoc,
   addDoc,
   updateDoc,
+  deleteDoc,
   onSnapshot,
   query,
   orderBy,
@@ -177,10 +178,10 @@ export async function resetPassword(email: string): Promise<void> {
  * verifiedAt, adminFlagged, ...) are frequently absent from local Claim
  * objects — so this keeps consensus + flag writes from throwing.
  */
-function withoutUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
+function withoutUndefined<T extends Record<string, unknown>>(obj: T): { [x: string]: any } {
   return Object.fromEntries(
     Object.entries(obj).filter(([, value]) => value !== undefined)
-  ) as Partial<T>
+  )
 }
 
 /**
@@ -470,3 +471,208 @@ export async function flagClaimForExpeditedReview(
     adminFlaggedAt: flagged ? new Date().toISOString() : null,
   })
 }
+
+/* ── 3. ADMIN OPERATIONS SERVICE ── */
+
+/**
+ * Hard delete a claim document from Firestore (Admin only)
+ */
+export async function deleteClaimFromFirestore(claimId: string): Promise<void> {
+  await deleteDoc(doc(db, COLLECTIONS.CLAIMS, claimId))
+}
+
+/**
+ * Delete a user profile document from Firestore (Admin only)
+ */
+export async function deleteUserFromFirestore(uid: string): Promise<void> {
+  await deleteDoc(doc(db, COLLECTIONS.USERS, uid))
+}
+
+/**
+ * Update any user's profile document as an Admin (e.g. adjust reputation, toggle isAdmin)
+ */
+export async function adminUpdateUserDoc(uid: string, updates: Partial<User>): Promise<void> {
+  await updateDoc(doc(db, COLLECTIONS.USERS, uid), withoutUndefined(updates as Record<string, unknown>))
+}
+
+/**
+ * Update claim fields directly as an Admin (verdict override, category, text, etc.)
+ */
+export async function adminOverrideClaim(claimId: string, updates: Partial<Claim>): Promise<void> {
+  const { id: _id, ...cleanUpdates } = updates
+  await updateDoc(
+    doc(db, COLLECTIONS.CLAIMS, claimId),
+    withoutUndefined(cleanUpdates as Record<string, unknown>)
+  )
+}
+
+/**
+ * Remove an illegitimate verification from a claim document as an Admin
+ */
+export async function adminDeleteVerification(claimId: string, verificationId: string): Promise<void> {
+  const claimRef = doc(db, COLLECTIONS.CLAIMS, claimId)
+  const snap = await getDoc(claimRef)
+  if (!snap.exists()) return
+
+  const data = snap.data()
+  const currentVerifications = Array.isArray(data.verifications) ? data.verifications : []
+  const filtered = currentVerifications.filter((v: { id?: string }) => v.id !== verificationId)
+
+  await updateDoc(claimRef, {
+    verifications: filtered,
+    verificationCount: filtered.length,
+    status: filtered.length >= 3 ? 'verified' : 'pending',
+  })
+}
+
+/**
+ * Realtime subscription to the reports collection for the admin incident center
+ */
+export function subscribeReportsRealtime(
+  callback: (reports: import('@/lib/types').ModerationReport[]) => void,
+  onError?: (err: unknown) => void
+): () => void {
+  const q = query(collection(db, COLLECTIONS.REPORTS), orderBy('reportedAt', 'desc'))
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const reports: import('@/lib/types').ModerationReport[] = []
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data()
+        reports.push({
+          id: docSnap.id,
+          targetType: data.targetType || 'claim',
+          targetId: data.targetId || '',
+          targetTitle: data.targetTitle || 'Untitled',
+          reason: data.reason || 'other',
+          details: data.details || '',
+          reportedBy: data.reportedBy || '',
+          reportedByName: data.reportedByName || 'Anonymous',
+          reportedAt: parseTimestamp(data.reportedAt || data.serverTime),
+          status: data.status || 'pending',
+          severity: data.severity || 'medium',
+          actionTaken: data.actionTaken,
+          resolvedAt: data.resolvedAt ? parseTimestamp(data.resolvedAt) : undefined,
+          resolvedBy: data.resolvedBy,
+        })
+      })
+      callback(reports)
+    },
+    (err) => {
+      console.warn('Firestore reports realtime notice:', err)
+      onError?.(err)
+    }
+  )
+}
+
+/**
+ * Add a new moderation report to Firestore
+ */
+export async function createModerationReport(
+  reportData: Omit<import('@/lib/types').ModerationReport, 'id'>
+): Promise<string> {
+  const docRef = await addDoc(collection(db, COLLECTIONS.REPORTS), {
+    ...withoutUndefined(reportData as unknown as Record<string, unknown>),
+    serverTime: serverTimestamp(),
+  })
+  return docRef.id
+}
+
+/**
+ * Update a moderation report in Firestore (e.g. resolve, dismiss, add action notes)
+ */
+export async function updateReportInFirestore(
+  reportId: string,
+  updates: Partial<import('@/lib/types').ModerationReport>
+): Promise<void> {
+  await updateDoc(
+    doc(db, COLLECTIONS.REPORTS, reportId),
+    withoutUndefined(updates as unknown as Record<string, unknown>)
+  )
+}
+
+/**
+ * Delete a moderation report from Firestore
+ */
+export async function deleteReportFromFirestore(reportId: string): Promise<void> {
+  await deleteDoc(doc(db, COLLECTIONS.REPORTS, reportId))
+}
+
+/**
+ * Authenticate an administrator session directly against Firebase Auth and Firestore DB
+ *
+ * The Firestore profile document (users/{uid}.isAdmin) is the SINGLE source of
+ * truth for staff clearance. Never auto-promote by email domain: granting admin
+ * to every @factstamp.app account is a privilege-escalation hole that makes
+ * normal accounts behave like staff across the whole app.
+ */
+export async function authenticateAdmin(usernameOrEmail: string, pass: string): Promise<User> {
+  const cleanInput = usernameOrEmail.trim().toLowerCase()
+  const email = cleanInput.includes('@') ? cleanInput : `${cleanInput}@factstamp.app`
+  const password = pass.trim()
+
+  // Sign in directly with Firebase Auth using provided credentials
+  const profile = await signInWithEmail(email, password)
+
+  // Verify that the user document has administrative clearance in Firestore DB
+  const userDocSnap = await getDoc(doc(db, COLLECTIONS.USERS, profile.uid))
+  const hasAdminFlag = userDocSnap.exists() && Boolean(userDocSnap.data()?.isAdmin)
+
+  if (!hasAdminFlag) {
+    throw new Error('Access denied: Account does not hold administrator privileges in Firestore DB.')
+  }
+
+  // Ensure the returned profile reflects the verified Firestore clearance
+  return { ...profile, isAdmin: true }
+}
+
+/**
+ * Add an audit log entry to Firestore (Admin only)
+ */
+export async function addAuditLogToFirestore(
+  log: Omit<import('@/lib/types').AdminAuditLog, 'id'>
+): Promise<string> {
+  const docRef = await addDoc(collection(db, COLLECTIONS.AUDIT_LOGS), {
+    ...withoutUndefined(log as unknown as Record<string, unknown>),
+    serverTime: serverTimestamp(),
+  })
+  return docRef.id
+}
+
+/**
+ * Realtime subscription to the audit logs collection
+ */
+export function subscribeAuditLogsRealtime(
+  callback: (logs: import('@/lib/types').AdminAuditLog[]) => void,
+  onError?: (err: unknown) => void
+): () => void {
+  const q = query(collection(db, COLLECTIONS.AUDIT_LOGS), orderBy('timestamp', 'desc'))
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const logs: import('@/lib/types').AdminAuditLog[] = []
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data()
+        logs.push({
+          id: docSnap.id,
+          timestamp: parseTimestamp(data.timestamp || data.serverTime),
+          adminId: data.adminId || '',
+          adminName: data.adminName || 'Admin',
+          action: data.action || '',
+          targetType: data.targetType || 'system',
+          targetId: data.targetId || '',
+          details: data.details || '',
+        })
+      })
+      callback(logs)
+    },
+    (err) => {
+      console.warn('Firestore audit logs realtime notice:', err)
+      onError?.(err)
+    }
+  )
+}
+
+

@@ -7,11 +7,11 @@ const CATEGORY_CONFIG: Record<
   ClaimCategory,
   { label: string; icon: LucideIcon; variant: BadgeVariant }
 > = {
-  health: { label: 'Health', icon: Heart, variant: 'error' },
-  political: { label: 'Political', icon: Landmark, variant: 'info' },
-  religious: { label: 'Religious', icon: BookOpen, variant: 'warning' },
-  financial: { label: 'Financial', icon: DollarSign, variant: 'success' },
-  other: { label: 'Other', icon: MoreHorizontal, variant: 'default' },
+  health: { label: 'Health', icon: Heart, variant: 'cat-health' },
+  political: { label: 'Political', icon: Landmark, variant: 'cat-political' },
+  religious: { label: 'Religious', icon: BookOpen, variant: 'cat-religious' },
+  financial: { label: 'Financial', icon: DollarSign, variant: 'cat-financial' },
+  other: { label: 'Other', icon: MoreHorizontal, variant: 'cat-other' },
 }
 
 interface CategoryBadgeProps {

@@ -27,6 +27,7 @@ import {
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/Button'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 import { Modal } from '@/components/ui/Modal'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { Textarea } from '@/components/ui/Input'
@@ -35,6 +36,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { findDuplicate } from '@/lib/duplicateDetection'
 import { cn } from '@/lib/utils'
 import { compressImageToDataUrl } from '@/lib/imageCompression'
+import { validateImageUpload, sanitizeTextInput } from '@/lib/security'
 import type { ClaimCategory } from '@/lib/types'
 
 type Tab = 'text' | 'image'
@@ -136,9 +138,7 @@ export function Submit() {
     setDuplicateFound(result)
   }, [claimText, claims, duplicateFound])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const handleSubmitAction = async () => {
     const newErrors: Record<string, string> = {}
     if (claimText.trim().length < 20) {
       newErrors.text = 'Claim text must be at least 20 characters'
@@ -151,29 +151,32 @@ export function Submit() {
       toast.error('Please fix the errors', {
         description: newErrors.text,
       })
-      return
+      throw new Error(newErrors.text)
     }
     if (duplicateFound) {
       toast.error('Duplicate claim', {
         description: 'This claim has already been verified by the community. View the existing verdict instead.',
       })
-      return
+      throw new Error('Duplicate claim')
     }
 
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 900))
+    try {
+      await new Promise((r) => setTimeout(r, 900))
 
-    const newClaim = await addClaim({
-      text: claimText.trim(),
-      category,
-      submittedBy: user?.uid || 'u1',
-      submittedByName: user?.displayName || 'Anonymous',
-      imageUrl: screenshotUrl || undefined,
-    })
+      const newClaim = await addClaim({
+        text: sanitizeTextInput(claimText.trim()),
+        category,
+        submittedBy: user?.uid || '',
+        submittedByName: sanitizeTextInput(user?.displayName || 'Anonymous'),
+        imageUrl: screenshotUrl || undefined,
+      })
 
-    setLoading(false)
-    setSubmittedClaimId(newClaim.id)
-    setShowSuccessModal(true)
+      setSubmittedClaimId(newClaim.id)
+      setShowSuccessModal(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -199,11 +202,14 @@ export function Submit() {
     if (file) handleFile(file)
   }
 
-  const handleFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast.error('Invalid file', { description: 'Please select an image file (.jpg, .png, .webp).' })
+  const handleFile = async (file: File) => {
+    // 17. File Upload Attack: Triple-layer validation (extension + MIME + magic bytes + size)
+    const validation = await validateImageUpload(file)
+    if (!validation.valid) {
+      toast.error('File rejected', { description: validation.error })
       return
     }
+
     const reader = new FileReader()
     reader.onload = (e) => {
       setUploadedImage(e.target?.result as string)
@@ -345,7 +351,7 @@ export function Submit() {
 
         {/* Text Tab */}
         {activeTab === 'text' && (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label htmlFor="claim-text" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]">
@@ -405,16 +411,16 @@ export function Submit() {
                     id="char-count"
                     className={cn(
                       'text-xs font-mono font-bold tabular-nums',
-                      claimText.length < 20
+                      claimText.trim().length < 20
                         ? 'text-[var(--color-fg-muted)]'
-                        : claimText.length > 500
+                        : claimText.trim().length > 500
                         ? 'text-[var(--color-v-false)]'
                         : 'text-[var(--color-v-true)]'
                     )}
                   >
-                    {claimText.length} / 500 chars
+                    {claimText.trim().length} / 500 chars
                   </span>
-                  {claimText.length >= 20 && claimText.length <= 500 && (
+                  {claimText.trim().length >= 20 && claimText.trim().length <= 500 && (
                     <span className="text-xs text-[var(--color-v-true)] font-semibold flex items-center gap-1 animate-pop-in">
                       <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
                       Valid forward length
@@ -535,16 +541,16 @@ export function Submit() {
             </div>
 
             {/* Submit Button */}
-            <Button
-              type="submit"
-              intent="primary"
-              size="lg"
-              className="w-full font-bold shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all cursor-pointer"
+            <LoadingButton
+              onAction={handleSubmitAction}
               disabled={claimText.trim().length < 20 || claimText.trim().length > 500 || !!duplicateFound || loading}
-              loading={loading}
+              pendingLabel="Submitting Claim for Verification..."
+              successLabel="Claim Submitted Successfully!"
+              errorLabel="Failed to Submit"
+              className="mt-6"
             >
               Submit Claim for Community Verification
-            </Button>
+            </LoadingButton>
           </form>
         )}
 
@@ -678,13 +684,13 @@ export function Submit() {
         <div className="flex flex-col items-center text-center py-2 px-1">
           {/* Glowing Animated Icon Badge */}
           <div className="relative mb-4 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full bg-[var(--color-v-true)]/20 blur-xl scale-150" />
-            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-v-true-bg)] via-[var(--color-surface)] to-[var(--color-v-true-bg)] border border-[var(--color-v-true-border)] shadow-[var(--shadow-sm)] flex items-center justify-center animate-pop-in">
-              <CheckCircle2 className="w-8 h-8 text-[var(--color-v-true)]" aria-hidden="true" />
+            <div className="absolute inset-0 rounded-full bg-[var(--color-brand)]/20 blur-xl scale-150" />
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-brand-subtle)] via-[var(--color-surface)] to-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] shadow-[var(--shadow-sm)] flex items-center justify-center animate-pop-in">
+              <CheckCircle2 className="w-8 h-8 text-[var(--color-brand)]" aria-hidden="true" />
             </div>
           </div>
 
-          <h3 className="text-2xl font-extrabold text-[var(--color-fg)] tracking-tight mb-1.5">
+          <h3 className="text-2xl sm:text-3xl font-black text-[var(--color-fg)] tracking-tight leading-tight mb-2">
             Claim Submitted Successfully!
           </h3>
           <p className="text-xs sm:text-sm text-[var(--color-fg-2)] mb-6 max-w-md leading-relaxed">
@@ -710,7 +716,7 @@ export function Submit() {
               <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[var(--color-fg-muted)] block mb-1">
                 Submitted Forward Content
               </span>
-              <p className="text-xs sm:text-sm text-[var(--color-fg)] font-medium leading-relaxed italic line-clamp-3">
+              <p className="text-sm sm:text-base text-[var(--color-fg)] font-medium leading-relaxed italic font-serif line-clamp-3">
                 &ldquo;{claimText}&rdquo;
               </p>
             </div>

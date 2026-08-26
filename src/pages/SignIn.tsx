@@ -78,11 +78,16 @@ export function SignIn() {
 
     setLoading(true)
     try {
-      await login(email.trim(), password)
+      const profile = await login(email.trim(), password)
       toast.success('Welcome back!', {
         description: 'Signed in successfully.',
       })
-      // Redirect to the page the user originally tried to visit
+      // Staff accounts go straight to the admin console; everyone else is
+      // redirected to the page the user originally tried to visit.
+      if (profile?.isAdmin) {
+        navigate('/admin')
+        return
+      }
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname
       navigate(from || '/')
     } catch (err) {

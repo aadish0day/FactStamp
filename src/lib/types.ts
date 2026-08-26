@@ -132,3 +132,46 @@ export const VERDICT_META: Record<Verdict, {
     hexBorder: '#bfdbfe',
   },
 }
+
+/* ── Moderation & Admin Types ── */
+
+export type ReportTargetType = 'claim' | 'user' | 'verification'
+export type ReportReason =
+  | 'misinformation_spam'
+  | 'harassment'
+  | 'low_quality_source'
+  | 'fake_account'
+  | 'manipulation'
+  | 'hate_speech'
+  | 'other'
+export type ReportStatus = 'pending' | 'investigating' | 'resolved' | 'dismissed'
+export type ReportSeverity = 'low' | 'medium' | 'high'
+
+export interface ModerationReport {
+  id: string
+  targetType: ReportTargetType
+  targetId: string
+  targetTitle: string
+  reason: ReportReason
+  details?: string
+  reportedBy: string
+  reportedByName: string
+  reportedAt: string
+  status: ReportStatus
+  severity: ReportSeverity
+  actionTaken?: string
+  resolvedAt?: string
+  resolvedBy?: string
+}
+
+export interface AdminAuditLog {
+  id: string
+  timestamp: string
+  adminId: string
+  adminName: string
+  action: string
+  targetType: 'claim' | 'user' | 'report' | 'system'
+  targetId: string
+  details: string
+}
+
