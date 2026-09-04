@@ -6,11 +6,15 @@
 
 ## Key Features
 
-* **Weighted 3-Verifier Quorum Engine**: Requires at least 3 independent verifications backed by official sources (WHO, Ministry of Health, government portals) before issuing a final verdict (`TRUE`, `FALSE`, `MISLEADING`, `UNVERIFIED`).
-* **Shareable PNG Fact-Check Cards**: Instantly generate and download WhatsApp-optimized PNG verdict cards using `html2canvas` to share back directly into fast-moving group chats.
+* **Weighted 3-Verifier Quorum Engine**: Requires at least 3 independent verifications backed by official sources (WHO, Ministry of Health, government portals) before issuing a final verdict (`TRUE`, `FALSE`, `MISLEADING`, `UNVERIFIED`), backed by automatic quorum settlement and queue replenishment.
+* **Shareable PNG Fact-Check Cards**: Instantly generate and download WhatsApp-optimized PNG verdict cards using `html-to-image` to share back directly into fast-moving group chats.
 * **Instant Duplicate Engine**: Prevents redundant work by matching incoming forwards against existing claims in real time.
+* **Multi-Tiered Login Rate Limiting & Brute-Force Guard**: Account-level and client-level tracking (`security.ts`) with 5-attempt thresholds, 15-minute progressive lockouts, active lockout banners, and real-time ticking countdown clocks.
+* **Universal Dual-Icon Sliding Theme Toggle**: Kinetic, accessible dark/light mode toggle (`<ThemeToggle />`) with smooth translate animations and system preference persistence across all app views.
+* **Pan-Indic High-Trust Typography Architecture**: Variable `Plus Jakarta Sans` for Latin editorial newsroom clarity, `Noto Sans Devanagari` for native vernacular Hindi/Marathi forward rendering, and native CSS `tabular-nums` for aligned counters and timers at 0 KB extra payload.
 * **Misinformation Intelligence Dashboard**: Real-time analytics, category distributions, weekly trending reports, and top verifier reputation leaderboards powered by Recharts.
 * **Enterprise Security & Firebase Rules**: Strict Firestore security rules (`firestore.rules`) and Storage security rules (`storage.rules`) enforcing data validation, user authentication, and rate limiting.
+* **Codebase Knowledge Graph (Graphify)**: Comprehensive graph mapping (`graphify-out/`) indexing 630+ nodes, 1,350+ edges, and 29 architectural communities for instant semantic discovery.
 * **Docker & Firebase Emulator Support**: Fully containerized environment with hot-reload development target and Nginx production target.
 
 ---
@@ -20,12 +24,14 @@
 | Layer | Technology |
 |---|---|
 | **Core Framework** | [React 18](https://react.dev/) + [Vite 5](https://vitejs.dev/) + [TypeScript 5.5](https://www.typescriptlang.org/) |
-| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) + Custom Design Tokens |
+| **Typography** | [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) + [Noto Sans Devanagari](https://fonts.google.com/specimen/Noto+Sans+Devanagari) + CSS `tabular-nums` |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) + Custom OKLCH Design Tokens |
 | **Animations** | [Framer Motion](https://www.framer.com/motion/) |
 | **Icons & UI** | [Lucide React](https://lucide.dev/) + [Sonner](https://sonner.emilkowal.si/) |
 | **Data Visualization** | [Recharts](https://recharts.org/) |
-| **Card Export** | [html2canvas](https://html2canvas.hertzen.com/) |
+| **Card Export** | [html-to-image](https://github.com/bubkoo/html-to-image) |
 | **Backend & DB** | [Firebase v12](https://firebase.google.com/) (Auth, Firestore, Storage, Emulators) |
+| **Knowledge Graph** | [Graphify](https://github.com/aadish0day/FactStamp/tree/main/graphify-out) CLI Engine |
 | **Deployment** | Docker + Docker Compose + Nginx |
 
 ---

@@ -78,10 +78,10 @@
   --color-sq-low:  oklch(0.48 0.16 25);   /* red dot: unverified */
 
   /* ── TYPOGRAPHY ── */
-  --font-display: "DM Sans", ui-sans-serif, system-ui;
-  --font-sans:    "DM Sans", ui-sans-serif, system-ui;
-  --font-serif:   "Lora", Georgia, serif;
-  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Plus Jakarta Sans", "Noto Sans Devanagari", system-ui, -apple-system, sans-serif;
+  --font-sans:    "Plus Jakarta Sans", "Noto Sans Devanagari", system-ui, -apple-system, sans-serif;
+  --font-serif:   ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  --font-mono:    "Plus Jakarta Sans", ui-monospace, SFMono-Regular, monospace;
 
   /* Fluid Type Scale (modular ratio 1.250, mobile→desktop) */
   --text-xs:   clamp(0.75rem, 0.1vw + 0.70rem, 0.8125rem);    /* 12→13px */
@@ -215,11 +215,12 @@ html {
   background-color: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "kern" 1, "liga" 1;
+  font-feature-settings: "kern" 1, "liga" 1, "tnum" 1;
 }
 
 body {

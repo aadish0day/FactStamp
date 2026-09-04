@@ -44,15 +44,17 @@ FactStamp uses a warm-toned, high-contrast palette based on OKLCH mappings. Pure
 
 ## 3. Typography Rules
 
-* **Display/Headlines:** **DM Sans** — High-weight (700), tight letter-spacing (`-0.02em`), and balanced line-height (`1.2`). Titles speak with quiet authority; they do not shout.
-* **Body/Paragraphs:** **DM Sans** — Regular/Medium weight, relaxed leading (`1.6`), max line width of 65 characters (`max-w-[65ch]`) to ensure comfortable editorial reading.
-* **Mono/Numbers:** **JetBrains Mono** — Applied strictly to database indexes, consensus ratios, reputation points, timestamps, and verifier identity hashes.
+* **Display/Headlines:** **Plus Jakarta Sans** — High-weight (700/800), tight letter-spacing (`-0.02em`), and balanced line-height (`1.2`). Titles speak with quiet editorial authority; they do not shout.
+* **Body/Paragraphs:** **Plus Jakarta Sans** — Regular/Medium weight (400/500), relaxed leading (`1.6`), max line width of 65 characters (`max-w-[65ch]`) to ensure comfortable editorial reading.
+* **Vernacular Script Support:** **Noto Sans Devanagari** (400, 500, 600, 700) — Native rendering for Hindi, Marathi, and regional Devanagari forwards with zero broken baselines or missing glyphs.
+* **Numbers & Timers (Tabular Metrics):** Native CSS **`tabular-nums`** — Applied globally via `font-variant-numeric: tabular-nums` and `font-feature-settings: "kern" 1, "liga" 1, "tnum" 1;`. All consensus ratios (`0/3`), countdown timers (`5d 23h left`), and case identifiers (`#C19`) align with fixed-width metrics at **0 KB extra network overhead**, eliminating developer code-font cosplay.
+* **Quoted Forward Quotes:** Clean Quarantined Forward Container — Romantic book serifs (such as Lora) are banned on viral forwards to avoid conferring literary prestige onto misinformation.
 * **Typography Scaling:** Powered by fluid CSS clamps:
   * `h1`: `clamp(2.5rem, 2vw + 2.00rem, 3.75rem)`
   * `h2`: `clamp(2rem, 1.5vw + 1.50rem, 3rem)`
   * `h3`: `clamp(1.5rem, 1vw + 1.25rem, 2.25rem)`
   * `body`: `clamp(1.00rem, 0.2vw + 0.90rem, 1.125rem)`
-* **Banned:** `Inter` is banned to prevent generic-looking UI. Generic serif fonts are banned.
+* **Banned:** Generic unstyled system fonts without pan-Indic fallbacks. Third-party monospace webfonts that look like software bug trackers or crypto terminals. Victorian book serifs on viral forward quotes.
 
 ---
 
@@ -113,7 +115,41 @@ FactStamp uses a warm-toned, high-contrast palette based on OKLCH mappings. Pure
 
 ---
 
-## 7. Anti-Patterns (Banned)
+---
+
+## 7. Theme Switching & Appearance System
+
+FactStamp implements a dual-surface visual design system supporting both Light and Dark modes with seamless semantic CSS token mappings:
+
+* **Pill Toggle Component (`<ThemeToggle />`):**
+  * Geometry: Compact pill container (`w-16 h-8 p-1 rounded-full`) with smooth transition duration (`duration-300`).
+  * Contrast Borders: `border-zinc-800` on dark canvas, `border-zinc-200` on light canvas.
+  * Kinetic Sliding Thumb: Elevated circle (`w-6 h-6 rounded-full`) with translated motion (`translate-x-0` on dark, `translate-x-8` on light).
+  * Dual-State Vector Glyphs: Lucide `Sun` (amber/gray) and `Moon` (white/blue) icons indicating both active and target states.
+  * Universal Accessibility: Fully keyboard navigable (`role="button"`, `tabIndex={0}`, `aria-label`, Space and Enter key listeners) and screen-reader compliant.
+* **Placement Surface Matrix:**
+  * Desktop Navigation Bar (`Navbar.tsx`)
+  * Mobile Drawer Navigation (`Navbar.tsx`)
+  * Admin Command Center Header (`Admin.tsx`)
+  * Admin Tools Tab Utility Grid (`Admin.tsx`)
+  * Admin Route Access Gate (`AdminRoute.tsx`)
+  * Sign In & Sign Up Authentication Cards (`AuthLayout.tsx`)
+  * Global Application Footer (`Footer.tsx`)
+
+---
+
+## 8. Authentication Security & Rate Limiting UI
+
+To safeguard user verifier accounts and the administrative console against credential-stuffing and brute-force attacks:
+
+* **Security Lockout Banner:** Prominent high-contrast alert container rendered when 5 consecutive failed attempts occur. Features a pulsing `ShieldAlert` icon, security explanation, and live ticking countdown clock (`formatLockoutRemaining()`).
+* **Live Lockout Countdown Clock:** Dynamic interval timer updating remaining lockout time second-by-second (e.g., `14:59` → `00:00`). Upon expiration, the form automatically clears errors and re-enables inputs.
+* **Brute-Force Guard Status Pill:** Subtle status indicator on the login form showing real-time attempt budget (`X/5 attempts left`) with `ShieldCheck` iconography.
+* **Standardized Error Messaging:** Eliminates username enumeration vulnerabilities by standardizing all credential errors into generic `Invalid email or password` copy.
+
+---
+
+## 9. Anti-Patterns (Banned)
 
 * **No Emojis:** Do not use emojis in headers, list items, or status tags. Use custom Lucide vector icons or official labels.
 * **No Pure Black:** Banish `#000000` entirely from canvas backgrounds and typography. Use off-black `oklch(0.14 0.020 55)` (#23221E) to preserve the soft warm aesthetic.
