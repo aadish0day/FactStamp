@@ -5,6 +5,7 @@ import { useEffect, useCallback, useRef, useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { InteractiveHoverButton } from '@/components/ui/InteractiveHoverButton'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { NotificationBell } from '@/components/NotificationBell'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -112,18 +113,7 @@ export function Navbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-3">
           {/* Theme Toggle */}
-          <Button
-            intent="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-5 h-5" aria-hidden="true" />
-            ) : (
-              <Moon className="w-5 h-5" aria-hidden="true" />
-            )}
-          </Button>
+          <ThemeToggle />
 
           {/* Notification Bell */}
           {user && <NotificationBell />}
@@ -243,6 +233,12 @@ export function Navbar() {
               </Link>
             )
           })}
+        </div>
+
+        {/* Mobile Theme Toggle Row */}
+        <div className="border-t border-[var(--color-border-soft)] px-6 py-3 flex items-center justify-between bg-[var(--color-surface-2)]/40">
+          <span className="text-xs font-semibold text-[var(--color-fg-2)]">Appearance</span>
+          <ThemeToggle />
         </div>
 
         {/* Bottom section — user info + actions */}

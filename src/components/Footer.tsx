@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ShieldAlert } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 export function Footer() {
   const { user } = useAuth()
@@ -22,6 +23,10 @@ export function Footer() {
             <p className="mt-3 text-sm text-[var(--color-fg-2)] max-w-xs leading-relaxed">
               Verify before you forward. A community-powered fact-checker fighting WhatsApp misinformation in India.
             </p>
+            <div className="mt-4 flex items-center gap-3">
+              <span className="text-xs text-[var(--color-fg-muted)] font-medium">Appearance:</span>
+              <ThemeToggle />
+            </div>
           </div>
 
           {/* Link columns */}

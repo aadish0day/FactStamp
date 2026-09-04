@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ArrowLeft, ShieldAlert, CheckCircle2, Forward, ShieldCheck, Users, Zap } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 import { VerdictPill } from '@/components/ui/VerdictPill'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const BENEFITS = [
   'Community-verified verdicts & consensus',
@@ -168,6 +169,11 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
 
         {/* ── Form Side (Right Panel) ── */}
         <main className="relative flex items-center justify-center p-5 lg:p-12 bg-[var(--color-bg)]">
+          {/* Theme Toggle Top-Right */}
+          <div className="absolute top-4 right-4 lg:top-6 lg:right-6 z-20">
+            <ThemeToggle />
+          </div>
+
           {/* Subtle background glow */}
           <div className="absolute w-72 h-72 rounded-full bg-[var(--color-brand-subtle)] opacity-40 blur-3xl pointer-events-none" />
 

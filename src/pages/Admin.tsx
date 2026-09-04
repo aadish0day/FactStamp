@@ -33,6 +33,8 @@ import {
   Layers,
   Award,
   Lock,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -57,9 +59,11 @@ import { VerdictPill } from '@/components/ui/VerdictPill'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { AnimatedCounter } from '@/components/AnimatedCounter'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useUsers } from '@/contexts/UsersContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { useNotifications } from '@/contexts/NotificationsContext'
 import {
   subscribeReportsRealtime,
@@ -104,6 +108,7 @@ const VERDICT_COLORS: Record<Verdict, string> = {
 
 export function Admin() {
   const { user } = useAuth()
+  const { theme, setTheme, toggleTheme } = useTheme()
   const { claims, flagClaim, deleteClaim, adminUpdateClaim, deleteVerification, expireOverdueClaims } = useClaims()
   const { users, adminUpdateUser, adminDeleteUser } = useUsers()
   const { addNotification } = useNotifications()
@@ -185,8 +190,8 @@ export function Admin() {
         userRoleFilter === 'all'
           ? true
           : userRoleFilter === 'admin'
-          ? Boolean(u.isAdmin || u.email.endsWith('@factstamp.app'))
-          : !u.isAdmin && !u.email.endsWith('@factstamp.app')
+          ? Boolean(u.isAdmin)
+          : !u.isAdmin
       return matchSearch && matchRole
     })
   }, [users, userSearch, userRoleFilter])
@@ -607,7 +612,7 @@ export function Admin() {
           </p>
         </div>
 
-        {/* Live Status Indicators & Lock Button */}
+        {/* Live Status Indicators, Theme Toggle & Lock Button */}
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -617,6 +622,10 @@ export function Admin() {
             <Server className="w-3.5 h-3.5 text-[var(--color-accent)]" />
             {isFirebaseConfigured ? 'Cloud Firestore' : 'Local Memory Store'}
           </div>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           <Button
             intent="secondary"
             size="sm"
@@ -957,7 +966,7 @@ export function Admin() {
                 </thead>
                 <tbody className="divide-y divide-[var(--color-border-soft)]">
                   {filteredUsers.map((u) => {
-                    const isAdminUser = Boolean(u.isAdmin || u.email.endsWith('@factstamp.app'))
+                    const isAdminUser = Boolean(u.isAdmin)
                     return (
                       <tr key={u.uid} className="hover:bg-[var(--color-surface-2)] transition-colors">
                         <td className="px-4 py-3.5">
@@ -1433,7 +1442,7 @@ export function Admin() {
       {activeTab === 'tools' && (
         <div className="space-y-8 animate-fade-in">
           {/* Quick Operations Utilities Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between">
               <div>
                 <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-brand)] mb-3">
@@ -1483,6 +1492,28 @@ export function Admin() {
               <Button intent="primary" size="sm" onClick={handleExportData} className="w-full text-xs">
                 Export JSON Data
               </Button>
+            </div>
+
+            <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-brand)] mb-3">
+                  {theme === 'dark' ? (
+                    <Moon className="w-5 h-5 text-blue-400" />
+                  ) : (
+                    <Sun className="w-5 h-5 text-amber-500" />
+                  )}
+                </div>
+                <h3 className="text-sm font-bold text-[var(--color-fg)] mb-1">
+                  Console Theme: {theme === 'dark' ? 'Dark' : 'Light'}
+                </h3>
+                <p className="text-xs text-[var(--color-fg-muted)] leading-relaxed mb-4">
+                  Switch the administration command center interface between dark and light appearance modes.
+                </p>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-soft)]">
+                <span className="text-xs text-[var(--color-fg-muted)] font-medium">Switch appearance</span>
+                <ThemeToggle />
+              </div>
             </div>
           </div>
 
