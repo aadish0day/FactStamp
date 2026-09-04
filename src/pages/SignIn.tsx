@@ -1,14 +1,43 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Lock, Mail, AlertCircle, Eye, EyeOff, Check } from 'lucide-react'
+import {
+  Lock,
+  Mail,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Check,
+  ShieldAlert,
+  Clock,
+  ShieldCheck,
+  KeyRound,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthLayout } from '@/components/AuthLayout'
 import { useAuth } from '@/contexts/AuthContext'
+import {
+  checkLoginRateLimit,
+  recordFailedLogin,
+  resetLoginAttempts,
+  formatLockoutRemaining,
+  MAX_LOGIN_ATTEMPTS,
+  sanitizeTextInput,
+  type LoginRateLimitResult,
+} from '@/lib/security'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const DEMO_ACCOUNTS = [
+  { name: 'FactStamp Admin', email: 'admin@factstamp.app', role: 'Super Admin', rep: '100%' },
+  { name: 'Priya Sharma', email: 'priya@factstamp.app', role: 'Platform Admin', rep: '95%' },
+  { name: 'Raj Patel', email: 'raj@factstamp.app', role: 'Senior Verifier', rep: '94%' },
+  { name: 'Vikram Singh', email: 'vikram@factstamp.app', role: 'Fact-Checker', rep: '91%' },
+]
 
 function GoogleIcon() {
   return (
@@ -33,15 +62,52 @@ export function SignIn() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showDemoAccounts, setShowDemoAccounts] = useState(false)
+
+  // Security: Rate limiting & Brute force protection
+  const [rateLimit, setRateLimit] = useState<LoginRateLimitResult>(() => checkLoginRateLimit())
+  const [lockoutRemaining, setLockoutRemaining] = useState<number>(0)
+
+  // Sync rate limit state when email changes & handle active countdown interval
+  const syncRateLimit = useCallback((targetEmail?: string) => {
+    const current = checkLoginRateLimit(targetEmail || email.trim())
+    setRateLimit(current)
+    setLockoutRemaining(current.lockoutRemainingMs)
+    return current
+  }, [email])
 
   useEffect(() => {
     requestAnimationFrame(() => document.getElementById('signin-email')?.focus())
   }, [])
 
+  // Live countdown timer while lockout is active
+  useEffect(() => {
+    const current = syncRateLimit(email.trim())
+
+    if (current.isLockedOut && current.lockoutRemainingMs > 0) {
+      const interval = setInterval(() => {
+        const updated = checkLoginRateLimit(email.trim())
+        setRateLimit(updated)
+        setLockoutRemaining(updated.lockoutRemainingMs)
+
+        if (!updated.isLockedOut) {
+          clearInterval(interval)
+          setErrors((prev) => ({ ...prev, form: '' }))
+          toast.success('Security Lockout Expired', {
+            description: 'You can now attempt to sign in again.',
+          })
+        }
+      }, 1000)
+
+      return () => clearInterval(interval)
+    }
+  }, [email, syncRateLimit])
+
   const fieldError = (name: string) => {
     if (name === 'email') {
-      if (!email.trim()) return 'Email address is required'
-      if (!EMAIL_RE.test(email.trim())) return 'Please enter a valid email address'
+      const trimmed = email.trim()
+      if (!trimmed) return 'Email address is required'
+      if (!EMAIL_RE.test(trimmed)) return 'Please enter a valid email address'
     }
     if (name === 'password') {
       if (!password) return 'Password is required'
@@ -58,10 +124,34 @@ export function SignIn() {
     revalidate(name)
   }
 
+  const handleFillDemoAccount = (accEmail: string) => {
+    setEmail(accEmail)
+    setPassword('FactStamp@2026')
+    setTouched({ email: true, password: true })
+    setErrors({})
+    syncRateLimit(accEmail)
+    toast.info(`Loaded ${accEmail}`, {
+      description: 'Credentials filled. Click "Sign In" to proceed.',
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitted(true)
     setTouched({ email: true, password: true })
+
+    const cleanEmail = sanitizeTextInput(email.trim().toLowerCase())
+
+    // 01. Proactive Rate Limit Enforcement
+    const currentStatus = checkLoginRateLimit(cleanEmail)
+    if (currentStatus.isLockedOut) {
+      setRateLimit(currentStatus)
+      setLockoutRemaining(currentStatus.lockoutRemainingMs)
+      toast.error('Account Temporarily Locked', {
+        description: `Too many failed attempts. Unlock in ${formatLockoutRemaining(currentStatus.lockoutRemainingMs)}.`,
+      })
+      return
+    }
 
     const newErrors: Record<string, string> = {}
     const emailErr = fieldError('email')
@@ -78,12 +168,17 @@ export function SignIn() {
 
     setLoading(true)
     try {
-      const profile = await login(email.trim(), password)
+      const profile = await login(cleanEmail, password)
+
+      // 02. Successful authentication: reset failed attempt counters
+      resetLoginAttempts(cleanEmail)
+      setRateLimit(checkLoginRateLimit(cleanEmail))
+
       toast.success('Welcome back!', {
-        description: 'Signed in successfully.',
+        description: `Signed in as ${profile?.displayName || 'Verifier'}.`,
       })
-      // Staff accounts go straight to the admin console; everyone else is
-      // redirected to the page the user originally tried to visit.
+
+      // Staff accounts navigate to admin command center; general users go to destination
       if (profile?.isAdmin) {
         navigate('/admin')
         return
@@ -91,11 +186,26 @@ export function SignIn() {
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname
       navigate(from || '/')
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Please check your credentials and try again.'
-      toast.error('Sign in failed', {
-        description: message,
-      })
-      setErrors((prev) => ({ ...prev, form: message }))
+      // 03. Failed authentication: increment failed attempts counter
+      const updatedLimit = recordFailedLogin(cleanEmail)
+      setRateLimit(updatedLimit)
+      setLockoutRemaining(updatedLimit.lockoutRemainingMs)
+
+      if (updatedLimit.isLockedOut) {
+        const errorMsg = `Account locked due to 5 consecutive failed attempts. Please wait ${formatLockoutRemaining(updatedLimit.lockoutRemainingMs)} before retrying.`
+        setErrors((prev) => ({ ...prev, form: errorMsg }))
+        toast.error('Security Lockout Triggered', {
+          description: errorMsg,
+        })
+      } else {
+        const remainingNote = `${updatedLimit.remainingAttempts} attempt${updatedLimit.remainingAttempts === 1 ? '' : 's'} remaining before temporary 15-minute lockout.`
+        const generalMsg = err instanceof Error ? err.message : 'Invalid email or password.'
+        const fullMsg = `${generalMsg} (${remainingNote})`
+        setErrors((prev) => ({ ...prev, form: fullMsg }))
+        toast.error('Sign In Failed', {
+          description: remainingNote,
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -105,6 +215,7 @@ export function SignIn() {
     try {
       setLoading(true)
       await loginWithGoogle()
+      resetLoginAttempts('global')
       toast.success('Signed in with Google', {
         description: 'Successfully authenticated via Google OAuth.',
       })
@@ -119,7 +230,7 @@ export function SignIn() {
   }
 
   const summaryItems = Object.entries(errors)
-    .filter(([, msg]) => msg)
+    .filter(([key, msg]) => key !== 'form' && msg)
     .map(([key, msg]) => ({
       key,
       msg,
@@ -130,9 +241,46 @@ export function SignIn() {
     <AuthLayout
       mode="signin"
       heading="Welcome back"
-      subheading="Sign in to your account to submit claims and participate in fact-checks."
+      subheading="Sign in to your verifier account to fact-check community claims and earn reputation."
     >
-      <Seo title="Sign In" description="Sign in to FactStamp to submit claims and help verify WhatsApp misinformation." />
+      <Seo title="Sign In — FactStamp" description="Sign in to FactStamp to participate in community fact-checks." />
+
+      {/* ── Security Lockout Banner (active when 5 failed attempts reached) ── */}
+      {rateLimit.isLockedOut && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="mb-5 p-4 rounded-[var(--radius-lg)] border border-[var(--color-v-false-border)] bg-[var(--color-v-false-bg)] text-center space-y-2 animate-pop-in shadow-[var(--shadow-sm)]"
+        >
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-v-false)]/15 text-[var(--color-v-false)] mb-0.5">
+            <ShieldAlert className="w-5 h-5" aria-hidden="true" />
+          </div>
+          <h3 className="text-xs font-extrabold uppercase tracking-wide text-[var(--color-v-false)]">
+            Security Rate Limit Active
+          </h3>
+          <p className="text-xs text-[var(--color-fg-2)] leading-relaxed">
+            Too many failed login attempts recorded. Sign-in is temporarily suspended to protect accounts against credential guessing.
+          </p>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] font-mono text-xs font-bold text-[var(--color-fg)] shadow-xs">
+            <Clock className="w-3.5 h-3.5 text-[var(--color-v-false)] animate-pulse" aria-hidden="true" />
+            <span>Unlocks in: {formatLockoutRemaining(lockoutRemaining)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Security Status Pill: Active Rate Limiting Guard ── */}
+      {!rateLimit.isLockedOut && (
+        <div className="flex items-center justify-between px-3 py-1.5 mb-4 rounded-lg bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] text-[11px] text-[var(--color-fg-muted)]">
+          <span className="flex items-center gap-1.5 font-medium">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
+            Brute-force protection enabled
+          </span>
+          <span className="font-mono text-[10px] font-bold">
+            {rateLimit.remainingAttempts}/{MAX_LOGIN_ATTEMPTS} attempts left
+          </span>
+        </div>
+      )}
+
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         {/* Error summary */}
         {submitted && summaryItems.length > 0 && (
@@ -144,9 +292,9 @@ export function SignIn() {
             }}
             role="alert"
           >
-            <strong className="block text-xs font-bold text-[var(--color-v-false)] mb-1.5 flex items-center gap-1.5">
+            <strong className="text-xs font-bold text-[var(--color-v-false)] mb-1.5 flex items-center gap-1.5">
               <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-              Please fix the following:
+              Please check the following:
             </strong>
             <ul className="flex flex-col gap-1">
               {summaryItems.map((it) => (
@@ -164,6 +312,7 @@ export function SignIn() {
           </div>
         )}
 
+        {/* Email input */}
         <div>
           <label htmlFor="signin-email" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mb-1.5">
             Email Address
@@ -173,9 +322,10 @@ export function SignIn() {
             type="email"
             inputMode="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder="verifier@factstamp.app"
             leftIcon={<Mail className="w-4 h-4 text-[var(--color-fg-muted)]" />}
             value={email}
+            disabled={rateLimit.isLockedOut}
             onChange={(e) => {
               setEmail(e.target.value)
               if (touched.email) {
@@ -198,6 +348,7 @@ export function SignIn() {
           )}
         </div>
 
+        {/* Password input */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label htmlFor="signin-password" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]">
@@ -209,21 +360,19 @@ export function SignIn() {
               onClick={async () => {
                 if (!email.trim()) {
                   toast.error('Enter your email first', {
-                    description: 'Please type your registered email to receive a reset link.',
+                    description: 'Please enter your email to receive password reset instructions.',
                   })
                   document.getElementById('signin-email')?.focus()
                   return
                 }
                 try {
                   await resetPassword(email.trim())
-                  toast.success('Reset link sent', {
-                    description: isFirebaseConfigured
-                      ? `Password reset instructions sent to ${email.trim()}.`
-                      : 'Password reset is simulated in demo mode. Select a demo user below to log in instantly.',
+                  toast.success('Reset Instructions Sent', {
+                    description: `Password reset email dispatched to ${email.trim()}.`,
                   })
                 } catch (err) {
-                  toast.error('Reset link failed', {
-                    description: err instanceof Error ? err.message : 'Please try again.',
+                  toast.error('Reset Failed', {
+                    description: err instanceof Error ? err.message : 'Please try again later.',
                   })
                 }
               }}
@@ -239,6 +388,7 @@ export function SignIn() {
               placeholder="••••••••"
               leftIcon={<Lock className="w-4 h-4 text-[var(--color-fg-muted)]" />}
               value={password}
+              disabled={rateLimit.isLockedOut}
               onChange={(e) => {
                 setPassword(e.target.value)
                 if (touched.password) {
@@ -266,21 +416,29 @@ export function SignIn() {
           )}
         </div>
 
-        {/* Form-level error */}
+        {/* Form-level error / Rate limit feedback */}
         {errors.form && (
-          <p className="text-xs font-semibold text-[var(--color-v-false)] animate-pop-in">
-            {errors.form}
-          </p>
+          <div
+            className="p-3 rounded-[var(--radius-md)] bg-[var(--color-v-false-bg)] border border-[var(--color-v-false-border)] text-xs font-semibold text-[var(--color-v-false)] flex items-start gap-2 animate-pop-in"
+            role="alert"
+          >
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <span>{errors.form}</span>
+          </div>
         )}
 
+        {/* Submit button */}
         <Button
           type="submit"
           intent="primary"
           size="lg"
           className="w-full mt-1 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all cursor-pointer font-bold"
           loading={loading}
+          disabled={rateLimit.isLockedOut || loading}
         >
-          Sign In
+          {rateLimit.isLockedOut
+            ? `Locked Out (${formatLockoutRemaining(lockoutRemaining)})`
+            : 'Sign In Securely'}
         </Button>
       </form>
 
@@ -297,10 +455,65 @@ export function SignIn() {
         size="lg"
         className="w-full font-semibold border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
         onClick={handleGoogle}
+        disabled={rateLimit.isLockedOut || loading}
       >
         <GoogleIcon />
         Continue with Google
       </Button>
+
+      {/* ── Demo Verifier Accounts Quick-Fill Helper ── */}
+      <div className="mt-6 pt-5 border-t border-[var(--color-border-soft)]">
+        <button
+          type="button"
+          onClick={() => setShowDemoAccounts(!showDemoAccounts)}
+          className="w-full flex items-center justify-between text-xs font-bold text-[var(--color-fg-2)] hover:text-[var(--color-fg)] transition-colors bg-transparent border-none cursor-pointer py-1"
+        >
+          <span className="flex items-center gap-2">
+            <KeyRound className="w-3.5 h-3.5 text-[var(--color-brand)]" aria-hidden="true" />
+            Demo Accounts for Testing
+          </span>
+          {showDemoAccounts ? (
+            <ChevronUp className="w-4 h-4 text-[var(--color-fg-muted)]" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-[var(--color-fg-muted)]" />
+          )}
+        </button>
+
+        {showDemoAccounts && (
+          <div className="mt-3 space-y-2 animate-fade-in">
+            <p className="text-[11px] text-[var(--color-fg-muted)] leading-relaxed">
+              Click any verified tester account to auto-fill credentials:
+            </p>
+            <div className="space-y-1.5">
+              {DEMO_ACCOUNTS.map((acc) => (
+                <button
+                  key={acc.email}
+                  type="button"
+                  onClick={() => handleFillDemoAccount(acc.email)}
+                  className="w-full text-left p-2 rounded-lg bg-[var(--color-surface-2)]/70 hover:bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] transition-colors cursor-pointer flex items-center justify-between text-xs group"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-[var(--color-fg)] truncate group-hover:text-[var(--color-brand)]">
+                      {acc.name}
+                    </p>
+                    <p className="text-[10px] text-[var(--color-fg-muted)] font-mono truncate">
+                      {acc.email}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0 ms-2">
+                    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--color-brand-subtle)] text-[var(--color-brand)] border border-[var(--color-brand-subtle)]">
+                      {acc.role}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-[var(--color-fg-muted)] text-center mt-2 font-mono">
+              Password for all seeded accounts: FactStamp@2026
+            </p>
+          </div>
+        )}
+      </div>
     </AuthLayout>
   )
 }

@@ -2,14 +2,17 @@ import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ShieldAlert, Lock, ArrowLeft, AlertCircle, User as UserIcon, Key } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { authenticateAdmin } from '@/services/firebaseService'
 import { toast } from 'sonner'
 import {
   checkLoginRateLimit,
   recordFailedLogin,
   resetLoginAttempts,
+  formatLockoutRemaining,
 } from '@/lib/security'
 
 interface AdminRouteProps {
@@ -20,6 +23,7 @@ const ADMIN_SESSION_KEY = 'fs_admin_session_unlocked'
 
 export function AdminRoute({ children }: AdminRouteProps) {
   const { user, isLoading, updateUser } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [usernameInput, setUsernameInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -63,8 +67,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
     // 08. Authentication: Brute-force rate limiting
     const rateLimit = checkLoginRateLimit()
     if (!rateLimit.allowed) {
-      const mins = Math.ceil(rateLimit.lockoutRemainingMs / 60_000)
-      setError(`Too many failed attempts. Account locked for ${mins} minute${mins > 1 ? 's' : ''}.`)
+      setError(`Too many failed attempts. Console locked for security. Try again in ${formatLockoutRemaining(rateLimit.lockoutRemainingMs)}.`)
       setIsSubmitting(false)
       return
     }
@@ -111,6 +114,11 @@ export function AdminRoute({ children }: AdminRouteProps) {
       <div className="w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-xl)] relative overflow-hidden">
         {/* Decorative Top Line */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[var(--color-brand)] via-[var(--color-accent)] to-[var(--color-brand)]" />
+
+        {/* Theme Toggle Button */}
+        <div className="absolute top-3.5 right-3.5 z-10">
+          <ThemeToggle />
+        </div>
 
         {/* Shield Icon Header */}
         <div className="flex flex-col items-center text-center mb-6">

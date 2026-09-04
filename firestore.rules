@@ -95,6 +95,7 @@ service cloud.firestore {
         && request.resource.data.submittedByName is string
         && request.resource.data.submittedByName.size() <= 100
         && request.resource.data.get('imageUrl', 'https://placeholder.com').matches('^(data:image/(jpeg|png|webp);base64,|https?://).*')
+        && request.resource.data.get('imageUrl', '').size() <= 800000
         && (request.resource.data.submittedBy == request.auth.uid || isAdmin() || isSeedUser());
 
       allow update: if request.auth != null

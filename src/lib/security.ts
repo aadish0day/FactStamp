@@ -51,26 +51,164 @@ export function sanitizeTextInput(input: string): string {
   return cleaned.trim()
 }
 
+// ─── 10. Quality & Anti-Misuse: Verdict Explanation Validation ───────────────
+
+export interface ExplanationValidationResult {
+  valid: boolean
+  error?: string
+  warning?: string
+  charCount: number
+  wordCount: number
+  minChars: number
+  maxChars: number
+  minWords: number
+}
+
 /**
- * Validate and sanitize a URL to ensure it uses only safe protocols.
- * Blocks javascript:, vbscript:, data: (except data:image), and file: URIs.
+ * Validates a verifier's explanation to prevent spam, low-effort cop-outs,
+ * excessive character padding, and malicious payloads.
  */
-export function sanitizeUrl(url: string): string {
-  if (!url || typeof url !== 'string') return ''
+export function validateVerdictExplanation(
+  rawText: string,
+  claimText?: string
+): ExplanationValidationResult {
+  const minChars = 50
+  const maxChars = 1500
+  const minWords = 8
 
-  const trimmed = url.trim()
+  const text = rawText.trim()
+  const charCount = text.length
+  const words = text ? text.split(/\s+/).filter(Boolean) : []
+  const wordCount = words.length
 
-  // Allow http, https, and data:image URIs only
-  if (
-    trimmed.startsWith('http://') ||
-    trimmed.startsWith('https://') ||
-    trimmed.startsWith('data:image/')
-  ) {
-    return trimmed
+  // 1. Minimum character length (defense against empty/incomplete verification)
+  if (charCount < minChars) {
+    return {
+      valid: false,
+      error: `Explanation is too short (${charCount}/${minChars} characters). Please detail why the source supports your verdict.`,
+      charCount,
+      wordCount,
+      minChars,
+      maxChars,
+      minWords,
+    }
   }
 
-  // Block everything else (javascript:, vbscript:, data:text, file:, etc.)
-  return ''
+  // 2. Maximum character length (defense against payload bloat & Firestore document limit)
+  if (charCount > maxChars) {
+    return {
+      valid: false,
+      error: `Explanation exceeds the maximum limit (${charCount}/${maxChars} characters). Please keep it concise.`,
+      charCount,
+      wordCount,
+      minChars,
+      maxChars,
+      minWords,
+    }
+  }
+
+  // 3. Minimum word count (prevents single-word gibberish string padding like 'aaaaa...')
+  if (wordCount < minWords) {
+    return {
+      valid: false,
+      error: `Explanation must contain at least ${minWords} words (currently ${wordCount}). Please write complete sentences explaining the facts.`,
+      charCount,
+      wordCount,
+      minChars,
+      maxChars,
+      minWords,
+    }
+  }
+
+  // 4. Excessive repetitive character spam (e.g., 'aaaaaa', '......', '!!!!!!')
+  if (/(.)\1{5,}/.test(text)) {
+    return {
+      valid: false,
+      error: 'Explanation contains repetitive character patterns. Please write substantive reasoning.',
+      charCount,
+      wordCount,
+      minChars,
+      maxChars,
+      minWords,
+    }
+  }
+
+  // 5. Repeated word spam (e.g., 'fake fake fake fake')
+  const lowerWords = words.map((w) => w.toLowerCase().replace(/[^a-z0-9]/g, ''))
+  for (let i = 0; i < lowerWords.length - 2; i++) {
+    if (lowerWords[i] && lowerWords[i] === lowerWords[i + 1] && lowerWords[i] === lowerWords[i + 2]) {
+      return {
+        valid: false,
+        error: 'Explanation contains repetitive words. Please provide diverse factual evidence.',
+        charCount,
+        wordCount,
+        minChars,
+        maxChars,
+        minWords,
+      }
+    }
+  }
+
+  // 6. Generic cop-out & filler phrases
+  const lower = text.toLowerCase()
+  const copOuts = [
+    'just trust me',
+    'trust me bro',
+    'check it yourself',
+    'search it on google',
+    'search google',
+    'idk',
+    'i don\'t know',
+    'random text to fill space',
+    'asdfasdf',
+    'qwertyuiop',
+  ]
+  for (const phrase of copOuts) {
+    if (lower.includes(phrase)) {
+      return {
+        valid: false,
+        error: 'Explanation contains low-effort filler phrases. Please cite concrete findings from the source.',
+        charCount,
+        wordCount,
+        minChars,
+        maxChars,
+        minWords,
+      }
+    }
+  }
+
+  // 7. Duplicate of claim text check (copy-pasting the claim back)
+  if (claimText && claimText.trim().length >= 30) {
+    const cleanClaim = claimText.trim().toLowerCase()
+    if (lower === cleanClaim || (lower.includes(cleanClaim) && text.length < claimText.length + 30)) {
+      return {
+        valid: false,
+        error: 'Explanation cannot simply repeat the claim text. Please explain your research findings.',
+        charCount,
+        wordCount,
+        minChars,
+        maxChars,
+        minWords,
+      }
+    }
+  }
+
+  // 8. Constructive quality guidance
+  let warning: string | undefined
+  const hasEvidenceTerms = /(source|report|article|study|ministry|official|evidence|archive|debunk|confirmed|stated|found|according|data|analysis|fact)/i.test(text)
+  if (!hasEvidenceTerms) {
+    warning = 'Tip: Mention specific evidence or quotes from your cited source to increase community trust.'
+  }
+
+  return {
+    valid: true,
+    warning,
+    charCount,
+    wordCount,
+    minChars,
+    maxChars,
+    minWords,
+  }
 }
 
 // ─── 17. File Upload Attack: Strict Validation ───────────────────────────────
@@ -199,106 +337,201 @@ export function clearSecuritySession(): void {
 
 // ─── 08. Authentication: Rate Limiting for Login Attempts ────────────────────
 
-const LOGIN_ATTEMPT_KEY = 'fs_login_attempts'
-const LOGIN_LOCKOUT_KEY = 'fs_login_lockout'
-const MAX_LOGIN_ATTEMPTS = 5
+const LOGIN_ATTEMPT_KEY_PREFIX = 'fs_login_attempts'
+const LOGIN_LOCKOUT_KEY_PREFIX = 'fs_login_lockout'
+export const MAX_LOGIN_ATTEMPTS = 5
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 
 export interface LoginRateLimitResult {
   allowed: boolean
   remainingAttempts: number
   lockoutRemainingMs: number
+  isLockedOut: boolean
+  totalAttempts: number
+}
+
+function getStorageItem(key: string): string | null {
+  try {
+    const local = localStorage.getItem(key)
+    if (local !== null) return local
+  } catch {}
+  try {
+    return sessionStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function setStorageItem(key: string, val: string): void {
+  try {
+    localStorage.setItem(key, val)
+  } catch {}
+  try {
+    sessionStorage.setItem(key, val)
+  } catch {}
+}
+
+function removeStorageItem(key: string): void {
+  try {
+    localStorage.removeItem(key)
+  } catch {}
+  try {
+    sessionStorage.removeItem(key)
+  } catch {}
+}
+
+function sanitizeIdentifierKey(identifier?: string): string {
+  if (!identifier) return 'global'
+  return identifier.toLowerCase().trim().replace(/[^a-z0-9@._-]/g, '_')
+}
+
+/**
+ * Format remaining lockout milliseconds into MM:SS format
+ */
+export function formatLockoutRemaining(remainingMs: number): string {
+  if (remainingMs <= 0) return '00:00'
+  const totalSeconds = Math.ceil(remainingMs / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
 /**
  * Check if a login attempt is permitted under the rate limit.
  * Returns remaining attempts and lockout status.
  */
-export function checkLoginRateLimit(): LoginRateLimitResult {
+export function checkLoginRateLimit(identifier?: string): LoginRateLimitResult {
   try {
-    const lockoutUntil = sessionStorage.getItem(LOGIN_LOCKOUT_KEY)
+    const key = sanitizeIdentifierKey(identifier)
+    const lockoutKey = `${LOGIN_LOCKOUT_KEY_PREFIX}_${key}`
+    const attemptKey = `${LOGIN_ATTEMPT_KEY_PREFIX}_${key}`
+
+    // 1. Check specific identifier lockout
+    const lockoutUntil = getStorageItem(lockoutKey)
     if (lockoutUntil) {
       const remaining = parseInt(lockoutUntil, 10) - Date.now()
       if (remaining > 0) {
-        return { allowed: false, remainingAttempts: 0, lockoutRemainingMs: remaining }
+        return {
+          allowed: false,
+          remainingAttempts: 0,
+          lockoutRemainingMs: remaining,
+          isLockedOut: true,
+          totalAttempts: MAX_LOGIN_ATTEMPTS,
+        }
       }
-      // Lockout expired, reset
-      sessionStorage.removeItem(LOGIN_LOCKOUT_KEY)
-      sessionStorage.removeItem(LOGIN_ATTEMPT_KEY)
+      // Lockout expired, clean up
+      removeStorageItem(lockoutKey)
+      removeStorageItem(attemptKey)
     }
 
-    const attempts = parseInt(sessionStorage.getItem(LOGIN_ATTEMPT_KEY) || '0', 10)
+    // 2. Also check global client lockout if identifier is specific
+    if (key !== 'global') {
+      const globalLockout = getStorageItem(`${LOGIN_LOCKOUT_KEY_PREFIX}_global`)
+      if (globalLockout) {
+        const remaining = parseInt(globalLockout, 10) - Date.now()
+        if (remaining > 0) {
+          return {
+            allowed: false,
+            remainingAttempts: 0,
+            lockoutRemainingMs: remaining,
+            isLockedOut: true,
+            totalAttempts: MAX_LOGIN_ATTEMPTS,
+          }
+        }
+        removeStorageItem(`${LOGIN_LOCKOUT_KEY_PREFIX}_global`)
+        removeStorageItem(`${LOGIN_ATTEMPT_KEY_PREFIX}_global`)
+      }
+    }
+
+    const attempts = parseInt(getStorageItem(attemptKey) || '0', 10)
+    const remainingAttempts = Math.max(0, MAX_LOGIN_ATTEMPTS - attempts)
+    const isLockedOut = remainingAttempts <= 0
+
     return {
-      allowed: attempts < MAX_LOGIN_ATTEMPTS,
-      remainingAttempts: Math.max(0, MAX_LOGIN_ATTEMPTS - attempts),
+      allowed: !isLockedOut,
+      remainingAttempts,
       lockoutRemainingMs: 0,
+      isLockedOut,
+      totalAttempts: attempts,
     }
   } catch {
-    return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS, lockoutRemainingMs: 0 }
+    return {
+      allowed: true,
+      remainingAttempts: MAX_LOGIN_ATTEMPTS,
+      lockoutRemainingMs: 0,
+      isLockedOut: false,
+      totalAttempts: 0,
+    }
   }
 }
 
 /**
  * Record a failed login attempt. Triggers lockout after MAX_LOGIN_ATTEMPTS.
+ * Returns the updated rate limit result.
  */
-export function recordFailedLogin(): void {
+export function recordFailedLogin(identifier?: string): LoginRateLimitResult {
   try {
-    const attempts = parseInt(sessionStorage.getItem(LOGIN_ATTEMPT_KEY) || '0', 10) + 1
-    sessionStorage.setItem(LOGIN_ATTEMPT_KEY, attempts.toString())
+    const key = sanitizeIdentifierKey(identifier)
+    const lockoutKey = `${LOGIN_LOCKOUT_KEY_PREFIX}_${key}`
+    const attemptKey = `${LOGIN_ATTEMPT_KEY_PREFIX}_${key}`
+
+    const attempts = parseInt(getStorageItem(attemptKey) || '0', 10) + 1
+    setStorageItem(attemptKey, attempts.toString())
+
+    // Also track global failed count
+    if (key !== 'global') {
+      const globalKey = `${LOGIN_ATTEMPT_KEY_PREFIX}_global`
+      const globalAttempts = parseInt(getStorageItem(globalKey) || '0', 10) + 1
+      setStorageItem(globalKey, globalAttempts.toString())
+      if (globalAttempts >= MAX_LOGIN_ATTEMPTS * 2) {
+        setStorageItem(`${LOGIN_LOCKOUT_KEY_PREFIX}_global`, (Date.now() + LOCKOUT_DURATION_MS).toString())
+      }
+    }
 
     if (attempts >= MAX_LOGIN_ATTEMPTS) {
-      sessionStorage.setItem(LOGIN_LOCKOUT_KEY, (Date.now() + LOCKOUT_DURATION_MS).toString())
+      const lockoutUntil = Date.now() + LOCKOUT_DURATION_MS
+      setStorageItem(lockoutKey, lockoutUntil.toString())
+      return {
+        allowed: false,
+        remainingAttempts: 0,
+        lockoutRemainingMs: LOCKOUT_DURATION_MS,
+        isLockedOut: true,
+        totalAttempts: attempts,
+      }
+    }
+
+    return {
+      allowed: true,
+      remainingAttempts: MAX_LOGIN_ATTEMPTS - attempts,
+      lockoutRemainingMs: 0,
+      isLockedOut: false,
+      totalAttempts: attempts,
     }
   } catch {
-    // ignore
+    return {
+      allowed: true,
+      remainingAttempts: 1,
+      lockoutRemainingMs: 0,
+      isLockedOut: false,
+      totalAttempts: 1,
+    }
   }
 }
 
 /**
  * Reset login attempts on successful authentication.
  */
-export function resetLoginAttempts(): void {
+export function resetLoginAttempts(identifier?: string): void {
   try {
-    sessionStorage.removeItem(LOGIN_ATTEMPT_KEY)
-    sessionStorage.removeItem(LOGIN_LOCKOUT_KEY)
+    const key = sanitizeIdentifierKey(identifier)
+    removeStorageItem(`${LOGIN_ATTEMPT_KEY_PREFIX}_${key}`)
+    removeStorageItem(`${LOGIN_LOCKOUT_KEY_PREFIX}_${key}`)
+    // Also reset global client counters
+    removeStorageItem(`${LOGIN_ATTEMPT_KEY_PREFIX}_global`)
+    removeStorageItem(`${LOGIN_LOCKOUT_KEY_PREFIX}_global`)
   } catch {
     // ignore
   }
 }
 
-// ─── 22. NoSQL Injection: Input Validation for Firestore Queries ─────────────
 
-/**
- * Validate that a value is safe to use as a Firestore document ID or field value.
- * Prevents NoSQL injection via specially crafted keys with $ operators or
- * __proto__ pollution.
- */
-export function isValidFirestoreValue(value: unknown): boolean {
-  if (value === null || value === undefined) return false
-
-  if (typeof value === 'string') {
-    // Block Firestore reserved prefixes and prototype pollution
-    if (value.startsWith('__') && value.endsWith('__')) return false
-    if (value.includes('$')) return false
-    if (value.length > 1500) return false // Firestore key limit
-    return true
-  }
-
-  if (typeof value === 'number') {
-    return Number.isFinite(value)
-  }
-
-  return typeof value === 'boolean'
-}
-
-/**
- * Validate a Firestore document ID (collection path segment).
- */
-export function isValidDocumentId(id: string): boolean {
-  if (!id || typeof id !== 'string') return false
-  if (id.length > 1500) return false
-  // Must not contain forward slashes or be a reserved Firestore path
-  if (id.includes('/') || id.startsWith('.')) return false
-  if (id === '__id__' || id === '__name__') return false
-  return true
-}
