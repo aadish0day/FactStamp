@@ -17,15 +17,15 @@ const CROSSFADE = {
 
 const INSTANT = { duration: 0 } as const;
 
-export type AsyncActionStatus = "idle" | "pending" | "success" | "error";
+type AsyncActionStatus = "idle" | "pending" | "success" | "error";
 
-export type UseAsyncActionOptions = {
+type UseAsyncActionOptions = {
   action: () => unknown;
   resetAfter?: number;
   onError?: (error: unknown) => void;
 };
 
-export function useAsyncAction({
+function useAsyncAction({
   action,
   resetAfter = 1400,
   onError,
@@ -311,5 +311,3 @@ export function LoadingButton({
     </>
   );
 }
-
-export default LoadingButton;

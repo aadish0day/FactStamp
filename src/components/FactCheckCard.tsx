@@ -17,7 +17,7 @@ const VERDICT_ICONS = {
 
 /**
  * Hardcoded palette for export-safe rendering.
- * html2canvas cannot parse oklch()/oklab() or CSS custom properties.
+ * html-to-image uses browser-native SVG <foreignObject> canvas rasterization, natively supporting Tailwind CSS v4 OKLCH tokens and custom properties.
  * Every color here is a plain hex string.
  */
 const P = {

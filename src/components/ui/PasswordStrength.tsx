@@ -24,21 +24,21 @@ const RUN_UP =
   /(?:0123|1234|2345|3456|4567|5678|6789|abcd|bcde|cdef|defg|qwer|wert|erty|asdf)/i
 const SYMBOL = /[!-/:-@[-`{-~]/
 
-export type PasswordRule = {
+type PasswordRule = {
   id: string
   label: string
   test: (value: string) => boolean
 }
 
-export type EvaluatedRule = PasswordRule & { met: boolean }
+type EvaluatedRule = PasswordRule & { met: boolean }
 
-export type UsePasswordStrengthOptions = {
+type UsePasswordStrengthOptions = {
   rules?: readonly PasswordRule[]
   labels?: readonly string[]
   announceDelay?: number
 }
 
-export type PasswordStrengthState = {
+type PasswordStrengthState = {
   score: number
   max: number
   label: string
@@ -47,7 +47,7 @@ export type PasswordStrengthState = {
   announcement: string
 }
 
-export const defaultPasswordRules: readonly PasswordRule[] = [
+const defaultPasswordRules: readonly PasswordRule[] = [
   { id: 'length', label: '12 characters or more', test: (v) => v.length >= 12 },
   {
     id: 'case',
@@ -60,7 +60,7 @@ export const defaultPasswordRules: readonly PasswordRule[] = [
 
 const defaultLabels = ['Empty', 'Weak', 'Fair', 'Good', 'Strong'] as const
 
-export function usePasswordStrength(
+function usePasswordStrength(
   value: string,
   {
     rules = defaultPasswordRules,
@@ -287,5 +287,3 @@ export function PasswordStrength({
     </div>
   )
 }
-
-export default PasswordStrength

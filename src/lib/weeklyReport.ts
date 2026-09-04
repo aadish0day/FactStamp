@@ -1,11 +1,11 @@
 import type { Claim } from './types'
 
-export interface WeeklyCategoryCount {
+interface WeeklyCategoryCount {
   category: string
   count: number
 }
 
-export interface WeeklyVerifierStat {
+interface WeeklyVerifierStat {
   name: string
   verifications: number
   accuracy: number

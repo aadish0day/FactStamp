@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
-export type ShimmerVariant =
+type ShimmerVariant =
   | 'default'
   | 'secondary'
   | 'destructive'
@@ -103,5 +103,3 @@ export function ShimmerText({
     </div>
   )
 }
-
-export default ShimmerText

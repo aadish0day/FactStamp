@@ -34,9 +34,9 @@ export function formatDistanceToNow(
 
 /**
  * Convert OKLCH color string (e.g., "oklch(0.5 0.18 48 / 0.8)") to standard sRGB string ("rgb(r,g,b)" or "rgba(r,g,b,a)").
- * Required because html2canvas internal parser does not support CSS Color Level 4 OKLCH syntax.
+ * Previously created for legacy JS CSS parser limitations.
  */
-export function parseOklchToRgb(oklchStr: string): string {
+function parseOklchToRgb(oklchStr: string): string {
   try {
     const inner = oklchStr.replace(/^oklch\(\s*/i, '').replace(/\s*\)$/, '')
     let parts: string[] = []
@@ -105,7 +105,7 @@ export function parseOklchToRgb(oklchStr: string): string {
   }
 }
 
-export function parseOklabToRgb(oklabStr: string): string {
+function parseOklabToRgb(oklabStr: string): string {
   try {
     const inner = oklabStr.replace(/^oklab\(\s*/i, '').replace(/\s*\)$/, '')
     let parts: string[] = []

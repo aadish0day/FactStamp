@@ -1,22 +1,3 @@
-export function ClaimCardSkeleton() {
-  return (
-    <div className="hairline-card p-6 animate-shimmer" aria-hidden="true">
-      <div className="flex items-center justify-between mb-3">
-        <div className="h-5 w-20 rounded-[var(--radius-sm)] bg-[var(--color-surface-2)]" />
-        <div className="h-4 w-16 rounded bg-[var(--color-surface-2)]" />
-      </div>
-      <div className="space-y-2 mb-4">
-        <div className="h-4 w-full rounded bg-[var(--color-surface-2)]" />
-        <div className="h-4 w-3/4 rounded bg-[var(--color-surface-2)]" />
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="h-6 w-24 rounded-[var(--radius-sm)] bg-[var(--color-surface-2)]" />
-        <div className="h-2 w-20 rounded-full bg-[var(--color-surface-2)]" />
-      </div>
-    </div>
-  )
-}
-
 export function NotificationListSkeleton() {
   return (
     <div className="p-2 animate-shimmer" aria-hidden="true">

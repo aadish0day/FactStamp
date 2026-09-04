@@ -57,5 +57,3 @@ export const FlowButton = React.forwardRef<
 })
 
 FlowButton.displayName = 'FlowButton'
-
-export default FlowButton

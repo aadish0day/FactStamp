@@ -1,5 +1,4 @@
 import { initializeApp, getApps, getApp } from 'firebase/app'
-import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics'
 import {
   getAuth,
   GoogleAuthProvider,
@@ -44,7 +43,7 @@ const firebaseConfig = {
 }
 
 /** Local Emulator Suite flag — run `npm run emulators` first, then set to true. */
-export const useFirebaseEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true'
+const useFirebaseEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true'
 
 /**
  * True when the app can talk to a Firebase backend: either real (non-demo)
@@ -57,20 +56,10 @@ export const isFirebaseConfigured = true
 // Initialize Firebase App instance safely
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
 
-// Analytics Instance (initialized conditionally in browser environment)
-export let analytics: Analytics | null = null
-if (typeof window !== 'undefined') {
-  isSupported().then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app)
-    }
-  }).catch(() => {})
-}
-
 // Core Firebase Services
 export const auth = getAuth(app)
 export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: true,
 })
 
 // Connect to the Local Emulator Suite when enabled (default ports)

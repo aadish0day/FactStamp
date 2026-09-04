@@ -22,7 +22,7 @@ function tokenize(text: string): Set<string> {
   )
 }
 
-export function jaccardSimilarity(a: string, b: string): number {
+function jaccardSimilarity(a: string, b: string): number {
   const setA = tokenize(a)
   const setB = tokenize(b)
 

@@ -24,6 +24,7 @@ export default defineConfig({
     // Security headers for dev server (mirrors production firebase.json headers)
     headers: {
       'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': "frame-ancestors 'none'",
       'X-Content-Type-Options': 'nosniff',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -42,7 +43,7 @@ export default defineConfig({
           'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
           'vendor-ui': ['lucide-react', 'framer-motion'],
           'vendor-charts': ['recharts'],
-          'vendor-html2canvas': ['html2canvas'],
+          'vendor-html-to-image': ['html-to-image'],
         },
       },
     },

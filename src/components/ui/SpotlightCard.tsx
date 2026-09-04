@@ -57,5 +57,3 @@ export function SpotlightCard({
     </div>
   )
 }
-
-export default SpotlightCard

@@ -716,7 +716,7 @@ export function Submit() {
               <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[var(--color-fg-muted)] block mb-1">
                 Submitted Forward Content
               </span>
-              <p className="text-sm sm:text-base text-[var(--color-fg)] font-medium leading-relaxed italic font-serif line-clamp-3">
+              <p className="text-sm sm:text-base text-[var(--color-fg)] font-normal leading-relaxed line-clamp-3">
                 &ldquo;{claimText}&rdquo;
               </p>
             </div>
