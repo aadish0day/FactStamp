@@ -32,12 +32,13 @@ import type { User, Claim, AppNotification, ClaimCategory, Verdict, SourceQualit
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   'auth/email-already-in-use': 'An account with this email already exists. Try signing in instead.',
   'auth/invalid-email': 'Please enter a valid email address.',
-  'auth/weak-password': 'Password should be at least 6 characters.',
-  'auth/user-not-found': 'No account found with this email. Check the address or sign up first.',
-  'auth/wrong-password': 'Incorrect password. Please try again.',
-  'auth/invalid-credential': 'Incorrect email or password. Please try again.',
-  'auth/too-many-requests': 'Too many failed attempts. Please wait a moment and try again.',
-  'auth/network-request-failed': 'Network error — check your connection and try again.',
+  'auth/weak-password': 'Password should be at least 8 characters.',
+  'auth/user-not-found': 'Invalid email or password. Please verify your credentials and try again.',
+  'auth/wrong-password': 'Invalid email or password. Please verify your credentials and try again.',
+  'auth/invalid-credential': 'Invalid email or password. Please verify your credentials and try again.',
+  'auth/invalid-login-credentials': 'Invalid email or password. Please verify your credentials and try again.',
+  'auth/too-many-requests': 'Account temporarily locked due to unusual activity. Please wait before retrying.',
+  'auth/network-request-failed': 'Network error — check your internet connection and try again.',
   'auth/popup-closed-by-user': 'Google sign-in was cancelled before completion.',
   'auth/popup-blocked': 'Google sign-in popup was blocked. Please allow popups for this site.',
   'auth/operation-not-allowed': 'This sign-in method is not enabled in the Firebase console.',
@@ -85,13 +86,6 @@ export async function signUpWithEmail(name: string, email: string, pass: string)
   return profileData
 }
 
-/**
- * Fetch a verifier profile document from Firestore by uid
- */
-export async function getUserProfile(uid: string): Promise<User | null> {
-  const snap = await getDoc(doc(db, COLLECTIONS.USERS, uid))
-  return snap.exists() ? (snap.data() as User) : null
-}
 
 /**
  * Update a verifier profile document in Firestore
@@ -253,7 +247,7 @@ function parseTimestamp(val: unknown): string {
  * Robustly normalizes raw Firestore document data into a clean Claim object.
  * Handles Timestamps, case variations, missing fields, and field alias fallbacks.
  */
-export function mapFirestoreDocToClaim(docId: string, data: Record<string, unknown>): Claim {
+function mapFirestoreDocToClaim(docId: string, data: Record<string, unknown>): Claim {
   const text = typeof data.text === 'string'
     ? data.text
     : typeof data.claimText === 'string'
@@ -346,8 +340,9 @@ export function subscribeClaimsRealtime(
 ): () => void {
   const claimsRef = collection(db, COLLECTIONS.CLAIMS)
   const q = query(claimsRef, orderBy('createdAt', 'desc'))
+  let innerUnsub: (() => void) | null = null
 
-  return onSnapshot(
+  const outerUnsub = onSnapshot(
     q,
     (snapshot) => {
       const claims: Claim[] = []
@@ -358,7 +353,7 @@ export function subscribeClaimsRealtime(
     },
     (err) => {
       console.warn('Realtime ordered query notice, falling back to simple listener:', err)
-      return onSnapshot(
+      innerUnsub = onSnapshot(
         claimsRef,
         (snapshot) => {
           const claims: Claim[] = []
@@ -375,6 +370,11 @@ export function subscribeClaimsRealtime(
       )
     }
   )
+
+  return () => {
+    outerUnsub()
+    if (innerUnsub) innerUnsub()
+  }
 }
 
 /**

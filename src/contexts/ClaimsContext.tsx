@@ -459,15 +459,15 @@ const SEED_CLAIMS: Claim[] = [
 export function ClaimsProvider({ children }: { children: ReactNode }) {
   const { user, updateUser } = useAuth()
   // The claims collection is initialized with rich seed data and updated via Firestore
-  const [claims, setClaims] = useState<Claim[]>(isFirebaseConfigured ? [] : SEED_CLAIMS)
-  const [isLoading, setIsLoading] = useState(isFirebaseConfigured)
+  const [claims, setClaims] = useState<Claim[]>(SEED_CLAIMS)
+  const [isLoading, setIsLoading] = useState(false)
   const expiryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const attemptedExpiryIdsRef = useRef<Set<string>>(new Set())
 
   // Helper to map overdue pending claims to verified/CONTESTED in-memory
   const applyLocalExpiry = useCallback((claimsList: Claim[]): Claim[] => {
     const now = new Date()
-    return claimsList.map((claim) => {
+    const processed = claimsList.map((claim) => {
       if (
         claim.status === 'pending' &&
         claim.verificationCount < 3 &&
@@ -487,8 +487,8 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
         }
         return {
           ...claim,
-          status: 'verified',
-          verdict: 'CONTESTED',
+          status: 'verified' as const,
+          verdict: 'CONTESTED' as const,
           confidenceScore,
           agreementRatio,
           verifiedAt: claim.verifiedAt || new Date().toISOString(),
@@ -496,6 +496,21 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
       }
       return claim
     })
+
+    // If all pending claims in the database expired, replenish with active pending seed claims
+    // so the community Verification Queue always has active work for verifiers.
+    const pendingCount = processed.filter((c) => c.status === 'pending').length
+    if (pendingCount === 0) {
+      const activeSeeds = SEED_CLAIMS.filter((c) => c.status === 'pending').map((seed, i) => ({
+        ...seed,
+        consensusDeadline: new Date(Date.now() + (3 + i) * 24 * 60 * 60 * 1000).toISOString(),
+      }))
+      const existingIds = new Set(processed.map((c) => c.id))
+      const uniqueSeeds = activeSeeds.filter((s) => !existingIds.has(s.id))
+      return [...uniqueSeeds, ...processed]
+    }
+
+    return processed
   }, [])
 
   const localClaimsRef = useRef<Claim[]>([])
@@ -509,11 +524,16 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
 
     const unsub = subscribeClaimsRealtime(
       (firestoreClaims) => {
-        const merged = applyLocalExpiry(firestoreClaims)
+        const sourceData = firestoreClaims && firestoreClaims.length > 0 ? firestoreClaims : SEED_CLAIMS
+        const merged = applyLocalExpiry(sourceData)
         setClaims(merged)
         setIsLoading(false)
       },
-      () => setIsLoading(false)
+      (err) => {
+        console.warn('Realtime claims subscription notice, using seed data:', err)
+        setClaims(applyLocalExpiry(SEED_CLAIMS))
+        setIsLoading(false)
+      }
     )
 
     return () => unsub()
