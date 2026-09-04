@@ -1,0 +1,399 @@
+{
+  "nodes": [
+    {
+      "id": "agent_skills_ui_ux_pro_max_skill_ui_ux_pro_max",
+      "label": "ui-ux-pro-max Skill",
+      "file_type": "document",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L1-L293",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "agent_skills_ui_ux_pro_max_skill_master_overrides_pattern",
+      "label": "Master + Overrides Pattern",
+      "file_type": "rationale",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L67-L91",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Hierarchical retrieval architecture where global design rules live in MASTER.md while page-specific deviations in pages/ override them during implementation."
+    },
+    {
+      "id": "agent_skills_ui_ux_pro_max_skill_design_system_workflow",
+      "label": "Design System Generation Workflow",
+      "file_type": "concept",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L48-L66",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "agent_skills_ui_ux_pro_max_skill_common_rules_for_professional_ui",
+      "label": "Common Rules for Professional UI",
+      "file_type": "rationale",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L219-L257",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Enforces UI quality standards regarding icon sets, hover state stability, WCAG light/dark mode contrast, and layout spacing to eliminate amateur AI aesthetics."
+    },
+    {
+      "id": "agent_skills_ui_ux_pro_max_skill_pre_delivery_checklist",
+      "label": "UI Pre-Delivery Checklist",
+      "file_type": "document",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L259-L293",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "github_workflows_ci_ci_workflow",
+      "label": "Continuous Integration Workflow",
+      "file_type": "code",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L1-L47",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "github_workflows_ci_concurrency_control",
+      "label": "Superseded Run Cancellation Strategy",
+      "file_type": "rationale",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L7-L11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Cancels in-progress workflow runs on rapid consecutive git pushes to conserve CI runner compute."
+    },
+    {
+      "id": "github_workflows_ci_typecheck_and_build",
+      "label": "Typecheck & Production Build Job",
+      "file_type": "code",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L13-L34",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "github_workflows_ci_docker_compose_config",
+      "label": "Validate Docker Compose Job",
+      "file_type": "code",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L35-L47",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "github_workflows_ci_docker_compose_validation_rationale",
+      "label": "Clean Docker Compose Validation Rationale",
+      "file_type": "rationale",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L42-L46",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Runs docker compose config with -q to quietly validate compose YAML syntax and structure without logging resolved configuration or failing on optional missing .env files."
+    },
+    {
+      "id": "index_html_document",
+      "label": "FactStamp HTML Entrypoint",
+      "file_type": "code",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L1-L57",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_content_security_policy",
+      "label": "Content Security Policy and Security Headers",
+      "file_type": "rationale",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L8-L19",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Enforces strict defense-in-depth headers including CSP, X-Frame-Options DENY, nosniff, strict referrer, and restricted Permissions-Policy to protect against XSS and clickjacking."
+    },
+    {
+      "id": "index_theme_initializer",
+      "label": "Early Theme Initialization Script",
+      "file_type": "code",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L41-L50",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Runs synchronous inline script before DOM rendering to read fs-theme localStorage or system preference and apply dark theme class, preventing flash of unstyled content (FOUC)."
+    },
+    {
+      "id": "index_root_container",
+      "label": "React Root Mount Point",
+      "file_type": "code",
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L53",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "agent_skills_ui_ux_pro_max_skill_ui_ux_pro_max",
+      "target": "agent_skills_ui_ux_pro_max_skill_master_overrides_pattern",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L67-L91",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_skills_ui_ux_pro_max_skill_ui_ux_pro_max",
+      "target": "agent_skills_ui_ux_pro_max_skill_design_system_workflow",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L48-L66",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_skills_ui_ux_pro_max_skill_ui_ux_pro_max",
+      "target": "agent_skills_ui_ux_pro_max_skill_common_rules_for_professional_ui",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L219-L257",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_skills_ui_ux_pro_max_skill_ui_ux_pro_max",
+      "target": "agent_skills_ui_ux_pro_max_skill_pre_delivery_checklist",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L259-L293",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_skills_ui_ux_pro_max_skill_ui_ux_pro_max",
+      "target": "design_design_system",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L48-L91",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_skills_ui_ux_pro_max_skill_master_overrides_pattern",
+      "target": "design_system_factstamp_master_tokens",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "github_workflows_ci_ci_workflow",
+      "target": "github_workflows_ci_typecheck_and_build",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L13-L34",
+      "weight": 1.0
+    },
+    {
+      "source": "github_workflows_ci_ci_workflow",
+      "target": "github_workflows_ci_docker_compose_config",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L35-L47",
+      "weight": 1.0
+    },
+    {
+      "source": "github_workflows_ci_concurrency_control",
+      "target": "github_workflows_ci_ci_workflow",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L7-L11",
+      "weight": 1.0
+    },
+    {
+      "source": "github_workflows_ci_docker_compose_validation_rationale",
+      "target": "github_workflows_ci_docker_compose_config",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L42-L46",
+      "weight": 1.0
+    },
+    {
+      "source": "github_workflows_ci_docker_compose_config",
+      "target": "docker_compose_services",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "github_workflows_ci_typecheck_and_build",
+      "target": "package_dependencies",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml",
+      "source_location": "L27-L34",
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_document",
+      "target": "index_root_container",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_document",
+      "target": "src_main",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_document",
+      "target": "index_theme_initializer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L41-L50",
+      "weight": 1.0
+    },
+    {
+      "source": "index_content_security_policy",
+      "target": "index_html_document",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L8-L19",
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_document",
+      "target": "public_favicon_shield",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_document",
+      "target": "public_og_cover",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "index_theme_initializer",
+      "target": "src_contexts_themecontext_themeprovider",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html",
+      "source_location": "L44",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "factstamp_theme_synchronization_flow",
+      "label": "Theme Synchronization and Zero-FOUC Pipeline",
+      "nodes": [
+        "index_theme_initializer",
+        "src_contexts_themecontext_themeprovider",
+        "src_components_ui_themetoggle"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/index.html"
+    },
+    {
+      "id": "continuous_integration_quality_gate",
+      "label": "CI Automated Verification Pipeline",
+      "nodes": [
+        "github_workflows_ci_ci_workflow",
+        "github_workflows_ci_typecheck_and_build",
+        "github_workflows_ci_docker_compose_config"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.github/workflows/ci.yml"
+    },
+    {
+      "id": "design_system_governance_framework",
+      "label": "Design System Governance Framework",
+      "nodes": [
+        "agent_skills_ui_ux_pro_max_skill_ui_ux_pro_max",
+        "agent_skills_ui_ux_pro_max_skill_master_overrides_pattern",
+        "agent_skills_ui_ux_pro_max_skill_common_rules_for_professional_ui"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/aadish/Documents/Github/FactStamp/.agent/skills/ui-ux-pro-max/SKILL.md"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
