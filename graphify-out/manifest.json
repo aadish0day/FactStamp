@@ -30,10 +30,10 @@
     "semantic_hash": "aab63085e323d4524ec7e4076d1ebe42"
   },
   "firebase.json": {
-    "mtime": 1787248737.312307,
-    "seen": 1788466862.5343897,
-    "ast_hash": "3812adaaea296a49b96add90b5657e29",
-    "semantic_hash": "3812adaaea296a49b96add90b5657e29"
+    "mtime": 1788540113.1671395,
+    "seen": 1788540399.9774387,
+    "ast_hash": "866253d5d4209c4b677b76db7175c723",
+    "semantic_hash": ""
   },
   "firestore.indexes.json": {
     "mtime": 1786771423.4581137,
@@ -42,9 +42,9 @@
     "semantic_hash": "3ebb6f059e42f55b9e802ef2be6e3d0d"
   },
   "package.json": {
-    "mtime": 1788468654.9188287,
-    "seen": 1788468684.118861,
-    "ast_hash": "33e10bf9009f68da87af921c1b7957ed",
+    "mtime": 1788539844.7911325,
+    "seen": 1788540399.9774487,
+    "ast_hash": "78201ffd759d016d7c7007717c777814",
     "semantic_hash": ""
   },
   "scripts/seed-db.mjs": {
@@ -396,9 +396,9 @@
     "semantic_hash": "e75747b790ee10be9cc7483777744f95"
   },
   "src/pages/Submit.tsx": {
-    "mtime": 1788470538.5346422,
-    "seen": 1788470562.8007658,
-    "ast_hash": "41343662eb75008f94931173039cdbed",
+    "mtime": 1788541190.1129286,
+    "seen": 1788541219.3543332,
+    "ast_hash": "158d3b11c9d9a50f3448096dd1566216",
     "semantic_hash": ""
   },
   "src/pages/VerifyDetail.tsx": {
@@ -432,9 +432,9 @@
     "semantic_hash": "033124d8ce78d8e8eaf7e3ce93088b89"
   },
   "vite.config.ts": {
-    "mtime": 1788468893.407373,
-    "seen": 1788468923.4509358,
-    "ast_hash": "17868af3a7cd768fba00b2d8bce6c1e5",
+    "mtime": 1788540118.4411018,
+    "seen": 1788540399.9777205,
+    "ast_hash": "40cd58b018fe0b8f7e31657ce75ac25b",
     "semantic_hash": ""
   },
   "DESIGN.md": {
@@ -510,9 +510,9 @@
     "semantic_hash": "9249e1af49f19a5cc1ede7381177ab83"
   },
   "index.html": {
-    "mtime": 1788470520.0967183,
-    "seen": 1788470562.8007853,
-    "ast_hash": "e7e64fedfdb30c16da1c33381b151d37",
+    "mtime": 1788540126.855259,
+    "seen": 1788540399.977758,
+    "ast_hash": "3fa99745cd7d381891aeb0cddbc3d13f",
     "semantic_hash": ""
   },
   "scripts/create-admin.mjs": {
@@ -531,6 +531,54 @@
     "mtime": 1788470723.1895897,
     "seen": 1788470750.1799653,
     "ast_hash": "78fc312ec5badeca1346523bd0c5a9ac",
+    "semantic_hash": ""
+  },
+  "public/tesseract/tesseract-core-lstm.wasm.js": {
+    "mtime": 1788539997.8569777,
+    "seen": 1788540399.9774525,
+    "ast_hash": "a3c227d2e04b7be5d1ef50d75f3a5ee3",
+    "semantic_hash": ""
+  },
+  "public/tesseract/tesseract-core-simd-lstm.wasm.js": {
+    "mtime": 1788539938.0057216,
+    "seen": 1788540399.977455,
+    "ast_hash": "2bd630487581a49b7d7cce1bfe42314c",
+    "semantic_hash": ""
+  },
+  "public/tesseract/tesseract-core.wasm.js": {
+    "mtime": 1788539938.0104227,
+    "seen": 1788540399.9774563,
+    "ast_hash": "7ec67b8a67ab4d41b74dd8df49db9224",
+    "semantic_hash": ""
+  },
+  "public/tesseract/worker.min.js": {
+    "mtime": 1788539938.0046346,
+    "seen": 1788540399.977459,
+    "ast_hash": "b1ab464237e687b323da236fff45ba05",
+    "semantic_hash": ""
+  },
+  "src/services/ocrService.ts": {
+    "mtime": 1788541174.7510278,
+    "seen": 1788541219.3543408,
+    "ast_hash": "b4b013c513f136a7238aec16e79492fb",
+    "semantic_hash": ""
+  },
+  "public/samples/whatsapp-health-sample.png": {
+    "mtime": 1788540060.723518,
+    "seen": 1788540399.9777675,
+    "ast_hash": "8fd3e633c6fb4247c48f888f9f84fd9c",
+    "semantic_hash": ""
+  },
+  "public/samples/whatsapp-scheme-sample.png": {
+    "mtime": 1788540060.7365177,
+    "seen": 1788540399.9777694,
+    "ast_hash": "b0c169ff3b59c3cb77b785b3dbb0eb87",
+    "semantic_hash": ""
+  },
+  "vercel.json": {
+    "mtime": 1788540919.5756836,
+    "seen": 1788540937.0457425,
+    "ast_hash": "cc00554f12ac14200eee51a1d9f23e30",
     "semantic_hash": ""
   }
 }

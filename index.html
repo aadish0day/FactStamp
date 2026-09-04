@@ -7,38 +7,62 @@
 
     <!-- ═══ Security Hardening Headers (Delivered via HTTP headers; fallback CSP for meta) ═══ -->
     <!-- 12. XSS: Content Security Policy (HTTP headers handle frame-ancestors and X-Frame-Options) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; frame-src https://accounts.google.com https://*.firebaseapp.com; base-uri 'self'; form-action 'self' https://accounts.google.com; object-src 'none';" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://apis.google.com https://www.gstatic.com https://cdn.jsdelivr.net; worker-src 'self' blob:; child-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' blob: data: https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://cdn.jsdelivr.net https://tessdata.projectnaptha.com ws://localhost:* http://localhost:* wss://localhost:* http://127.0.0.1:*; frame-src https://accounts.google.com https://*.firebaseapp.com; base-uri 'self'; form-action 'self' https://accounts.google.com; object-src 'none';"
+    />
     <!-- 09. Session: Referrer Leakage Prevention -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <meta name="theme-color" content="#ea580c" />
-    <meta name="description" content="FactStamp helps Indians verify viral WhatsApp forwards with transparent community-driven fact-checks." />
+    <meta
+      name="description"
+      content="FactStamp helps Indians verify viral WhatsApp forwards with transparent community-driven fact-checks."
+    />
     <title>FactStamp — India's Misinformation Fact-Checker</title>
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="FactStamp — Fact-Check WhatsApp Forwards" />
-    <meta property="og:description" content="Verify viral WhatsApp forwards with community evidence and shareable PNG cards." />
+    <meta
+      property="og:title"
+      content="FactStamp — Fact-Check WhatsApp Forwards"
+    />
+    <meta
+      property="og:description"
+      content="Verify viral WhatsApp forwards with community evidence and shareable PNG cards."
+    />
     <meta property="og:image" content="/og-cover.svg" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="FactStamp — Fact-Check WhatsApp Forwards" />
-    <meta name="twitter:description" content="Verify viral WhatsApp forwards with community evidence and shareable PNG cards." />
+    <meta
+      name="twitter:title"
+      content="FactStamp — Fact-Check WhatsApp Forwards"
+    />
+    <meta
+      name="twitter:description"
+      content="Verify viral WhatsApp forwards with community evidence and shareable PNG cards."
+    />
     <meta name="twitter:image" content="/og-cover.svg" />
 
     <!-- Google Fonts: Plus Jakarta Sans (Variable) + Noto Sans Devanagari -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap"
+      rel="stylesheet"
+    />
 
     <script>
       (function () {
         try {
-          var t = localStorage.getItem('fs-theme');
-          if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-          document.documentElement.setAttribute('data-theme', t);
-          if (t === 'dark') document.documentElement.classList.add('dark');
+          var t = localStorage.getItem("fs-theme");
+          if (!t)
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+          document.documentElement.setAttribute("data-theme", t);
+          if (t === "dark") document.documentElement.classList.add("dark");
         } catch (e) {}
       })();
     </script>

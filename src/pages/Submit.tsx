@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
@@ -23,6 +23,11 @@ import {
   Lightbulb,
   Check,
   LayoutDashboard,
+  Copy,
+  RefreshCw,
+  Cpu,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -37,6 +42,10 @@ import { findDuplicate } from '@/lib/duplicateDetection'
 import { cn } from '@/lib/utils'
 import { compressImageToDataUrl } from '@/lib/imageCompression'
 import { validateImageUpload, sanitizeTextInput } from '@/lib/security'
+import {
+  extractTextFromImage,
+  type OcrResult,
+} from '@/services/ocrService'
 import type { ClaimCategory } from '@/lib/types'
 
 type Tab = 'text' | 'image'
@@ -97,6 +106,21 @@ const SAMPLE_FORWARDS = [
   'Reserve Bank of India is closing all ATMs from 12 PM tonight due to system upgrade. Withdraw cash now!',
 ]
 
+const SAMPLE_SCREENSHOTS = [
+  {
+    title: 'Sample 1: Health Forward',
+    desc: 'Ginger & Tulsi respiratory remedy forward',
+    path: '/samples/whatsapp-health-sample.png',
+    badge: 'Health',
+  },
+  {
+    title: 'Sample 2: Govt Grant Scheme',
+    desc: 'Education Ministry student DBT grant notice',
+    path: '/samples/whatsapp-scheme-sample.png',
+    badge: 'Financial',
+  },
+]
+
 export function Submit() {
   const navigate = useNavigate()
   const { addClaim, claims } = useClaims()
@@ -113,6 +137,13 @@ export function Submit() {
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null)
   const [extracting, setExtracting] = useState(false)
   const [ocrProgress, setOcrProgress] = useState(0)
+  const [ocrStatus, setOcrStatus] = useState('')
+  const [ocrResult, setOcrResult] = useState<OcrResult | null>(null)
+  const [ocrError, setOcrError] = useState<string | null>(null)
+  const [currentFile, setCurrentFile] = useState<File | Blob | null>(null)
+  const [showEngineModal, setShowEngineModal] = useState(false)
+  const [viewRawOcr, setViewRawOcr] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [submittedClaimId, setSubmittedClaimId] = useState<string | null>(null)
 
@@ -123,6 +154,12 @@ export function Submit() {
     setDuplicateFound(null)
     setUploadedImage(null)
     setScreenshotUrl(null)
+    setCurrentFile(null)
+    setOcrResult(null)
+    setOcrError(null)
+    setOcrProgress(0)
+    setOcrStatus('')
+    setViewRawOcr(false)
     setActiveTab('text')
   }, [])
 
@@ -202,60 +239,157 @@ export function Submit() {
     if (file) handleFile(file)
   }
 
-  const handleFile = async (file: File) => {
-    // 17. File Upload Attack: Triple-layer validation (extension + MIME + magic bytes + size)
-    const validation = await validateImageUpload(file)
-    if (!validation.valid) {
-      toast.error('File rejected', { description: validation.error })
-      return
-    }
+  const processOcr = useCallback(
+    async (fileOrBlob: File | Blob) => {
+      setExtracting(true)
+      setOcrProgress(10)
+      setOcrStatus('Initializing AI OCR engine...')
+      setOcrError(null)
 
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      setUploadedImage(e.target?.result as string)
-      // Compress the screenshot client-side into a base64 data URL and store
-      // it on the claim document — no paid Firebase Storage tier required.
-      // On failure we return null so the claim is simply persisted without an
-      // image (the extracted text still goes through). The local preview is
-      // `uploadedImage`, independent of this persisted URL.
-      compressImageToDataUrl(file).then((dataUrl) => {
-        setScreenshotUrl(dataUrl)
-        if (!dataUrl) {
-          toast.warning('Screenshot not saved', {
-            description: 'The image will only exist as a local preview — the claim text can still be submitted.',
-          })
+      try {
+        const result = await extractTextFromImage(
+          fileOrBlob,
+          {},
+          (progress, status) => {
+            setOcrProgress(progress)
+            setOcrStatus(status)
+          }
+        )
+
+        setOcrResult(result)
+        setClaimText(result.cleanedText)
+        if (result.detectedCategory) {
+          setCategory(result.detectedCategory)
         }
-      })
-      simulateExtraction()
+
+        toast.success('Text extracted successfully!', {
+          description: `Extracted ${result.wordCount} words with ${result.confidence}% confidence. Category auto-selected.`,
+          icon: <ScanLine className="w-4 h-4 text-[var(--color-brand)]" />,
+        })
+      } catch (err: unknown) {
+        console.error('OCR Extraction error:', err)
+        const message =
+          err instanceof Error ? err.message : 'Could not extract text from this screenshot.'
+        setOcrError(message)
+        toast.error('OCR Extraction failed', {
+          description: message,
+        })
+      } finally {
+        setExtracting(false)
+      }
+    },
+    []
+  )
+
+  const handleFile = useCallback(
+    async (file: File) => {
+      // 17. File Upload Attack: Triple-layer validation (extension + MIME + magic bytes + size)
+      const validation = await validateImageUpload(file)
+      if (!validation.valid) {
+        toast.error('File rejected', { description: validation.error })
+        return
+      }
+
+      setCurrentFile(file)
+      setOcrError(null)
+
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string
+        setUploadedImage(dataUrl)
+        compressImageToDataUrl(file).then((compressedUrl) => {
+          setScreenshotUrl(compressedUrl)
+          if (!compressedUrl) {
+            toast.warning('Screenshot not saved', {
+              description:
+                'The image will only exist as a local preview — the claim text can still be submitted.',
+            })
+          }
+        })
+        processOcr(file)
+      }
+      reader.readAsDataURL(file)
+    },
+    [processOcr]
+  )
+
+  const handleLoadSample = useCallback(
+    async (samplePath: string, sampleTitle: string) => {
+      try {
+        setExtracting(true)
+        setOcrProgress(5)
+        setOcrStatus(`Loading ${sampleTitle}...`)
+        setOcrError(null)
+
+        const res = await fetch(samplePath)
+        if (!res.ok) throw new Error('Could not fetch sample image file')
+        const blob = await res.blob()
+        const filename = samplePath.split('/').pop() || 'sample.png'
+        const sampleFile = new File([blob], filename, { type: 'image/png' })
+
+        setCurrentFile(sampleFile)
+
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const dataUrl = e.target?.result as string
+          setUploadedImage(dataUrl)
+          setScreenshotUrl(dataUrl)
+        }
+        reader.readAsDataURL(blob)
+
+        await processOcr(sampleFile)
+      } catch (err: unknown) {
+        setExtracting(false)
+        const msg = err instanceof Error ? err.message : 'Could not fetch sample image'
+        toast.error('Failed to load sample', { description: msg })
+      }
+    },
+    [processOcr]
+  )
+
+  const handleCopyText = async () => {
+    const textToCopy = viewRawOcr && ocrResult ? ocrResult.rawText : claimText
+    if (!textToCopy) return
+    try {
+      await navigator.clipboard.writeText(textToCopy)
+      setIsCopied(true)
+      toast.success('Copied to clipboard!')
+      setTimeout(() => setIsCopied(false), 2000)
+    } catch {
+      toast.error('Failed to copy to clipboard')
     }
-    reader.readAsDataURL(file)
   }
 
-  const simulateExtraction = () => {
-    setExtracting(true)
-    setOcrProgress(15)
+  // Paste screenshot handler (Ctrl+V anywhere on submit page when not focused in input)
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const activeEl = document.activeElement
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+        return
+      }
+      const items = e.clipboardData?.items
+      if (!items) return
 
-    const interval = setInterval(() => {
-      setOcrProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(interval)
-          return 90
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile()
+          if (file) {
+            e.preventDefault()
+            setActiveTab('image')
+            handleFile(file)
+            toast.info('Image pasted from clipboard', {
+              description: 'Extracting text with AI OCR...',
+            })
+            break
+          }
         }
-        return prev + 25
-      })
-    }, 400)
+      }
+    }
 
-    setTimeout(() => {
-      clearInterval(interval)
-      setOcrProgress(100)
-      setClaimText('IIT Madras offering ₹50,000 scholarship for all government school students scoring above 90% in Class 12. Apply before deadline.')
-      setExtracting(false)
-      toast.success('Text extracted!', {
-        description: 'Extracted text from screenshot. Review and select category.',
-        icon: <ScanLine className="w-4 h-4 text-[var(--color-brand)]" />,
-      })
-    }, 1800)
-  }
+    window.addEventListener('paste', handlePaste)
+    return () => window.removeEventListener('paste', handlePaste)
+  }, [handleFile])
 
   if (!user) {
     return (
@@ -557,123 +691,421 @@ export function Submit() {
         {/* Image / OCR Tab */}
         {activeTab === 'image' && (
           <div className="space-y-6">
-            <div
-              className={cn(
-                'border-2 border-dashed rounded-[var(--radius-xl)] p-8 lg:p-12 text-center transition-all',
-                dragActive
-                  ? 'border-[var(--color-brand)] bg-[var(--color-brand-subtle)]'
-                  : 'border-[var(--color-border)] hover:border-[var(--color-brand)] bg-[var(--color-surface-2)]/30'
-              )}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <div className="w-14 h-14 rounded-full bg-[var(--color-brand-subtle)] flex items-center justify-center mx-auto mb-4">
-                <Upload className="w-7 h-7 text-[var(--color-brand)]" aria-hidden="true" />
+            {/* Engine Status Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)]">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="w-2 h-2 rounded-full bg-[var(--color-v-true)] animate-pulse" />
+                <span className="font-bold text-[var(--color-fg-2)]">OCR Engine:</span>
+                <span className="inline-flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1 rounded-md bg-[var(--color-surface)] border border-[var(--color-border-soft)] text-[var(--color-brand)] font-bold">
+                  <Cpu className="w-3 h-3 text-[var(--color-brand)]" />
+                  Neural WebAssembly OCR (100% Offline & Local)
+                </span>
               </div>
-              <h3 className="text-base font-bold text-[var(--color-fg)]">
-                Drag &amp; drop a WhatsApp screenshot here
-              </h3>
-              <p className="text-xs text-[var(--color-fg-muted)] mt-1.5 max-w-sm mx-auto leading-relaxed">
-                Our AI OCR will automatically extract text from your chat screenshot, newspaper clipping, or image forward.
-              </p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-                id="file-input"
-              />
-              <label
-                htmlFor="file-input"
-                className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] font-semibold whitespace-nowrap select-none px-5 py-2.5 text-xs bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-hover)] shadow-[var(--shadow-sm)] transition-all cursor-pointer mt-5"
+              <button
+                type="button"
+                onClick={() => setShowEngineModal(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-fg-muted)] hover:text-[var(--color-brand)] transition-colors cursor-pointer"
               >
-                Browse Files
-              </label>
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>About OCR Engine</span>
+              </button>
             </div>
 
+            {/* Dropzone Area (Shown when no image is uploaded yet) */}
+            {!uploadedImage && (
+              <div className="space-y-6">
+                <div
+                  className={cn(
+                    'border-2 border-dashed rounded-[var(--radius-xl)] p-8 lg:p-12 text-center transition-all cursor-pointer',
+                    dragActive
+                      ? 'border-[var(--color-brand)] bg-[var(--color-brand-subtle)] scale-[1.01]'
+                      : 'border-[var(--color-border)] hover:border-[var(--color-brand)] bg-[var(--color-surface-2)]/30'
+                  )}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => document.getElementById('file-input')?.click()}
+                >
+                  <div className="w-16 h-16 rounded-full bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-105">
+                    <Upload className="w-8 h-8 text-[var(--color-brand)]" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[var(--color-fg)]">
+                    Drag &amp; drop a WhatsApp screenshot here
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[var(--color-fg-muted)] mt-1.5 max-w-md mx-auto leading-relaxed">
+                    Our AI OCR will automatically extract text from your chat screenshot, newspaper clipping, or image forward.
+                  </p>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="file-input"
+                  />
+
+                  <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        document.getElementById('file-input')?.click()
+                      }}
+                      className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] font-semibold whitespace-nowrap select-none px-5 py-2.5 text-xs bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-hover)] shadow-[var(--shadow-sm)] transition-all cursor-pointer"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      Browse Files
+                    </button>
+                    <span className="text-[11px] font-mono text-[var(--color-fg-muted)]">
+                      Supports PNG, JPG, WebP (Max 5MB)
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] font-mono text-[var(--color-fg-muted)] mt-4">
+                    💡 Tip: You can also paste screenshots directly with <kbd className="px-1.5 py-0.5 rounded bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] font-bold">Ctrl+V</kbd>
+                  </p>
+                </div>
+
+                {/* Instant Sample Screenshots for Testing */}
+                <div className="pt-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-fg-muted)] flex items-center gap-1.5 mb-2.5">
+                    <Lightbulb className="w-3.5 h-3.5 text-[var(--color-brand)]" aria-hidden="true" />
+                    Or test instantly with a sample forward screenshot:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {SAMPLE_SCREENSHOTS.map((s, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        disabled={extracting}
+                        onClick={() => handleLoadSample(s.path, s.title)}
+                        className="flex items-center gap-3 p-3 text-left rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/70 hover:bg-[var(--color-brand-subtle)] border border-[var(--color-border-soft)] hover:border-[var(--color-brand)] transition-all cursor-pointer group disabled:opacity-50"
+                      >
+                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-black/5 border border-[var(--color-border-soft)]">
+                          <img
+                            src={s.path}
+                            alt={s.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-xs font-bold text-[var(--color-fg)] group-hover:text-[var(--color-brand)] transition-colors truncate">
+                              {s.title}
+                            </span>
+                            <span className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border-soft)] text-[var(--color-brand)]">
+                              {s.badge}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[var(--color-fg-muted)] truncate mt-0.5">
+                            {s.desc}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* When an image is uploaded: Show Preview + OCR Processing or Results */}
             {uploadedImage && (
-              <div className="relative rounded-[var(--radius-xl)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-2)] p-3">
-                <img
-                  src={uploadedImage}
-                  alt="Uploaded screenshot"
-                  className="w-full max-h-80 object-contain rounded-lg"
-                />
-                {extracting && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-bg)]/85 backdrop-blur-xs rounded-[var(--radius-xl)] p-6">
-                    <div className="text-center max-w-xs">
-                      <Loader2 className="w-9 h-9 animate-spin mx-auto mb-3 text-[var(--color-brand)]" />
-                      <p className="text-sm font-bold text-[var(--color-fg)] mb-1">Extracting text with AI OCR...</p>
-                      <div className="w-full h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden mb-4">
-                        <div
-                          className="h-full bg-[var(--color-brand)] transition-all duration-300 ease-out"
-                          style={{ width: `${ocrProgress}%` }}
+              <div className="space-y-6 animate-fade-in">
+                {/* Screenshot Display Card */}
+                <div className="relative rounded-[var(--radius-xl)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-2)] p-3">
+                  <img
+                    src={uploadedImage}
+                    alt="Uploaded screenshot"
+                    className="w-full max-h-80 object-contain rounded-lg mx-auto"
+                  />
+
+                  {/* Extraction Progress Overlay */}
+                  {extracting && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-bg)]/90 backdrop-blur-xs rounded-[var(--radius-xl)] p-6">
+                      <div className="text-center max-w-sm w-full">
+                        <div className="relative w-14 h-14 mx-auto mb-3 flex items-center justify-center">
+                          <Loader2 className="w-12 h-12 animate-spin text-[var(--color-brand)]" />
+                          <ScanLine className="w-6 h-6 text-[var(--color-fg)] absolute" />
+                        </div>
+                        <p className="text-base font-extrabold text-[var(--color-fg)] mb-1">
+                          Extracting text with AI OCR...
+                        </p>
+                        <p className="text-xs text-[var(--color-fg-2)] mb-4">
+                          {ocrStatus || 'Analyzing image and recognizing text...'}
+                        </p>
+                        <div className="w-full h-2 rounded-full bg-[var(--color-border)] overflow-hidden mb-2">
+                          <div
+                            className="h-full bg-[var(--color-brand)] transition-all duration-300 ease-out"
+                            style={{ width: `${ocrProgress}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-mono font-bold text-[var(--color-brand)] block mb-4">
+                          {ocrProgress}% completed
+                        </span>
+                        <Button
+                          intent="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setUploadedImage(null)
+                            setScreenshotUrl(null)
+                            setExtracting(false)
+                            setClaimText('')
+                            setOcrResult(null)
+                          }}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 me-1" />
+                          Cancel Extraction
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* OCR Error State */}
+                {ocrError && !extracting && (
+                  <div
+                    className="p-4 rounded-[var(--radius-lg)] bg-[var(--color-v-false-bg)] border border-[var(--color-v-false-border)] flex items-start gap-3 animate-pop-in"
+                    role="alert"
+                  >
+                    <AlertTriangle className="w-5 h-5 text-[var(--color-v-false)] flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-bold text-sm text-[var(--color-v-false)]">
+                        OCR Extraction Issue
+                      </p>
+                      <p className="text-xs text-[var(--color-fg-2)] mt-1">
+                        {ocrError}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          intent="outline"
+                          size="sm"
+                          onClick={() => currentFile && processOcr(currentFile)}
+                        >
+                          <RefreshCw className="w-3.5 h-3.5 me-1" />
+                          Retry OCR
+                        </Button>
+                        <Button
+                          intent="ghost"
+                          size="sm"
+                          onClick={() => setActiveTab('text')}
+                        >
+                          Switch to Manual Text Input
+                        </Button>
+                        <Button
+                          intent="ghost"
+                          size="sm"
+                          onClick={resetForm}
+                        >
+                          Upload Different Image
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Extracted Text Review & Edit Card */}
+                {ocrResult && !extracting && (
+                  <div className="space-y-4 animate-fade-in">
+                    {/* Top Stats Banner */}
+                    <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--color-v-true-bg)] border border-[var(--color-v-true-border)] flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-v-true)]/20 flex items-center justify-center flex-shrink-0">
+                          <Sparkles className="w-4 h-4 text-[var(--color-v-true)]" />
+                        </div>
+                        <div>
+                          <span className="font-bold text-sm text-[var(--color-v-true)] block">
+                            OCR Text Extracted Successfully
+                          </span>
+                          <span className="text-[11px] font-mono text-[var(--color-fg-muted)]">
+                            {ocrResult.wordCount} words • {claimText.length} characters • via WebAssembly OCR
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold px-2.5 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border-soft)] text-[var(--color-v-true)]">
+                          <CheckCircle2 className="w-3 h-3" />
+                          {ocrResult.confidence}% confidence
+                        </span>
+                        <CategoryBadge category={category} />
+                      </div>
+                    </div>
+
+                    {/* Direct-Editable Text Area */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor="ocr-extracted-text"
+                          className="block text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)]"
+                        >
+                          Review &amp; Polish Extracted Forward
+                        </label>
+                        <span className="text-[11px] text-[var(--color-fg-muted)]">
+                          Click to edit any typos directly before submitting
+                        </span>
+                      </div>
+
+                      <div className="relative rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-1 focus-within:border-[var(--color-accent)] focus-within:ring-2 focus-within:ring-[var(--color-accent-subtle)] transition-all">
+                        <Textarea
+                          id="ocr-extracted-text"
+                          rows={6}
+                          value={viewRawOcr ? ocrResult.rawText : claimText}
+                          onChange={(e) => {
+                            if (!viewRawOcr) setClaimText(e.target.value)
+                          }}
+                          readOnly={viewRawOcr}
+                          placeholder="Extracted message forward..."
+                          className="border-0 focus:ring-0 bg-transparent text-sm leading-relaxed p-3"
                         />
                       </div>
+
+                      {/* Character Count & Action Sub-bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={cn(
+                              'text-xs font-mono font-bold tabular-nums',
+                              claimText.trim().length < 20
+                                ? 'text-[var(--color-fg-muted)]'
+                                : claimText.trim().length > 500
+                                ? 'text-[var(--color-v-false)]'
+                                : 'text-[var(--color-v-true)]'
+                            )}
+                          >
+                            {claimText.trim().length} / 500 chars
+                          </span>
+                          {claimText.trim().length >= 20 && claimText.trim().length <= 500 && (
+                            <span className="text-xs text-[var(--color-v-true)] font-semibold flex items-center gap-1">
+                              <Check className="w-3.5 h-3.5" />
+                              Valid claim length
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setViewRawOcr(!viewRawOcr)}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] bg-transparent border-none cursor-pointer"
+                          >
+                            {viewRawOcr ? (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5" />
+                                <span>Show Cleaned Forward</span>
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Show Raw OCR Output</span>
+                              </>
+                            )}
+                          </button>
+                          <span className="text-[var(--color-border)]">|</span>
+                          <button
+                            type="button"
+                            onClick={handleCopyText}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-brand)] hover:text-[var(--color-brand-hover)] bg-transparent border-none cursor-pointer"
+                          >
+                            {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                            <span>{isCopied ? 'Copied!' : 'Copy Text'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Primary CTA Buttons */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                       <Button
-                        intent="ghost"
-                        size="sm"
+                        intent="primary"
+                        size="lg"
+                        className="flex-1 font-bold shadow-[var(--shadow-sm)]"
+                        disabled={claimText.trim().length < 20}
                         onClick={() => {
-                          setUploadedImage(null)
-                          setScreenshotUrl(null)
-                          setExtracting(false)
-                          setClaimText('')
+                          checkDuplicate()
+                          setActiveTab('text')
+                          toast.info('Extracted text loaded', {
+                            description: 'Review category and submit for verification.',
+                          })
                         }}
                       >
-                        <Trash2 className="w-3.5 h-3.5 me-1" />
-                        Cancel
+                        <Forward className="w-4 h-4 me-1.5" />
+                        Continue to Submit Claim
+                      </Button>
+                      <Button
+                        intent="secondary"
+                        size="lg"
+                        onClick={resetForm}
+                      >
+                        <Trash2 className="w-4 h-4 me-1" />
+                        Remove Image
                       </Button>
                     </div>
                   </div>
                 )}
               </div>
             )}
-
-            {uploadedImage && !extracting && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="p-3.5 rounded-[var(--radius-lg)] bg-[var(--color-v-true-bg)] border border-[var(--color-v-true-border)] flex items-start gap-2.5">
-                  <Sparkles className="w-4 h-4 text-[var(--color-v-true)] flex-shrink-0 mt-0.5" />
-                  <div className="text-xs">
-                    <span className="font-bold text-[var(--color-v-true)]">OCR Text Extracted Successfully:</span>
-                    <p className="text-[var(--color-fg-2)] mt-1 italic leading-relaxed">&ldquo;{claimText}&rdquo;</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <Button
-                    intent="primary"
-                    size="lg"
-                    className="flex-1 font-bold"
-                    onClick={() => {
-                      checkDuplicate()
-                      setActiveTab('text')
-                    }}
-                  >
-                    Continue with Extracted Text
-                  </Button>
-                  <Button
-                    intent="secondary"
-                    size="lg"
-                    onClick={() => {
-                      setUploadedImage(null)
-                      setScreenshotUrl(null)
-                      setClaimText('')
-                      setDragActive(false)
-                      toast('Image removed', {
-                        description: 'You can upload a different screenshot.',
-                      })
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 me-1" />
-                    Remove Image
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
+
+      {/* About OCR Engine Informational Modal */}
+      <Modal
+        open={showEngineModal}
+        onClose={() => setShowEngineModal(false)}
+        size="md"
+      >
+        <div className="py-2 px-1 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] flex items-center justify-center">
+              <Cpu className="w-5 h-5 text-[var(--color-brand)]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-[var(--color-fg)]">
+                About OCR Engine
+              </h3>
+              <p className="text-xs text-[var(--color-fg-muted)]">
+                Neural WebAssembly OCR (100% Offline &amp; Local)
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 text-xs text-[var(--color-fg-2)] leading-relaxed">
+            <div className="p-3.5 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[var(--color-fg)]">
+                  Client-Side WebAssembly Processing
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--color-v-true-bg)] text-[var(--color-v-true)] font-bold">
+                  100% Private &amp; Offline
+                </span>
+              </div>
+              <p>
+                FactStamp processes screenshots directly in your browser using neural LSTM WebAssembly. Your screenshots and media never leave your device.
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] space-y-1.5">
+              <span className="font-bold text-[var(--color-fg)]">
+                Zero Configuration &amp; No API Keys Required
+              </span>
+              <p>
+                No third-party cloud accounts, tokens, or external API keys are needed. Everything is bundled and executed locally with zero latency or privacy leakage.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end pt-2 border-t border-[var(--color-border-soft)]">
+            <Button
+              intent="primary"
+              size="sm"
+              onClick={() => setShowEngineModal(false)}
+            >
+              Got it
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Success Modal */}
       <Modal

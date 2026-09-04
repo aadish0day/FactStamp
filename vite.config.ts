@@ -44,6 +44,7 @@ export default defineConfig({
           'vendor-ui': ['lucide-react', 'framer-motion'],
           'vendor-charts': ['recharts'],
           'vendor-html-to-image': ['html-to-image'],
+          'vendor-ocr': ['tesseract.js'],
         },
       },
     },
