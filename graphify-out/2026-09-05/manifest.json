@@ -556,23 +556,5 @@
     "seen": 1788540937.0457425,
     "ast_hash": "cc00554f12ac14200eee51a1d9f23e30",
     "semantic_hash": ""
-  },
-  "design-system/factstamp/MASTER.md": {
-    "mtime": 1788553730.6605701,
-    "seen": 1788553754.6418304,
-    "ast_hash": "99c704754aedd930c219a5d45f1654f2",
-    "semantic_hash": ""
-  },
-  "design-system/factstamp/pages/dashboard.md": {
-    "mtime": 1788553730.6608286,
-    "seen": 1788553754.641833,
-    "ast_hash": "7501dad402a565a07acb58aa7c18ee90",
-    "semantic_hash": ""
-  },
-  "design-system/factstamp/pages/home.md": {
-    "mtime": 1788553730.6608815,
-    "seen": 1788553754.6418345,
-    "ast_hash": "debfd6a2dec15194ddc9a4aabe3544cf",
-    "semantic_hash": ""
   }
 }

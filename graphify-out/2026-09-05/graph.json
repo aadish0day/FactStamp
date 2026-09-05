@@ -59,6 +59,19 @@
       "source_location": "L29"
     },
     {
+      "id": "src_contexts_notificationscontext_notificationscontextvalue",
+      "label": "NotificationsContextValue",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "firebaseService.ts",
+      "file_type": "code",
+      "norm_label": "notificationscontextvalue",
+      "source_file": "src/contexts/NotificationsContext.tsx",
+      "source_location": "L52"
+    },
+    {
       "id": "src_contexts_userscontext_userscontextvalue",
       "label": "UsersContextValue",
       "_callable": true,
@@ -70,6 +83,19 @@
       "norm_label": "userscontextvalue",
       "source_file": "src/contexts/UsersContext.tsx",
       "source_location": "L13"
+    },
+    {
+      "id": "src_lib_types_appnotification",
+      "label": "AppNotification",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "firebaseService.ts",
+      "file_type": "code",
+      "norm_label": "appnotification",
+      "source_file": "src/lib/types.ts",
+      "source_location": "L25"
     },
     {
       "id": "src_lib_types_user",
@@ -150,16 +176,29 @@
       "source_location": "L35"
     },
     {
-      "id": "src_components_breadcrumbs_breadcrumbsprops",
-      "label": "BreadcrumbsProps",
+      "id": "src_components_errorboundary_errorboundaryprops",
+      "label": "ErrorBoundaryProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 12,
       "community_name": "VerifyDetail.tsx",
       "file_type": "code",
-      "norm_label": "breadcrumbsprops",
-      "source_file": "src/components/Breadcrumbs.tsx",
+      "norm_label": "errorboundaryprops",
+      "source_file": "src/components/ErrorBoundary.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "src_components_errorboundary_errorboundarystate",
+      "label": "ErrorBoundaryState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "VerifyDetail.tsx",
+      "file_type": "code",
+      "norm_label": "errorboundarystate",
+      "source_file": "src/components/ErrorBoundary.tsx",
       "source_location": "L14"
     },
     {
@@ -280,32 +319,6 @@
       "source_location": "L25"
     },
     {
-      "id": "src_components_authlayout_authlayoutprops",
-      "label": "AuthLayoutProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "authlayoutprops",
-      "source_file": "src/components/AuthLayout.tsx",
-      "source_location": "L21"
-    },
-    {
-      "id": "src_components_claimcard_claimcardprops",
-      "label": "ClaimCardProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "claimcardprops",
-      "source_file": "src/components/ClaimCard.tsx",
-      "source_location": "L10"
-    },
-    {
       "id": "src_components_ui_badge_badgeprops",
       "label": "BadgeProps",
       "_callable": true,
@@ -343,32 +356,6 @@
       "norm_label": "badgevariant",
       "source_file": "src/components/ui/Badge.tsx",
       "source_location": "L4"
-    },
-    {
-      "id": "src_components_ui_categorybadge_categorybadgeprops",
-      "label": "CategoryBadgeProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "categorybadgeprops",
-      "source_file": "src/components/ui/CategoryBadge.tsx",
-      "source_location": "L17"
-    },
-    {
-      "id": "src_components_ui_modal_modalprops",
-      "label": "ModalProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "modalprops",
-      "source_file": "src/components/ui/Modal.tsx",
-      "source_location": "L9"
     },
     {
       "id": "src_components_ui_verdictpill_verdictpillprops",
@@ -421,19 +408,6 @@
       "norm_label": "adminauditlog",
       "source_file": "src/lib/types.ts",
       "source_location": "L167"
-    },
-    {
-      "id": "src_lib_types_claimcategory",
-      "label": "ClaimCategory",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "claimcategory",
-      "source_file": "src/lib/types.ts",
-      "source_location": "L7"
     },
     {
       "id": "src_lib_types_claimstatus",
@@ -527,19 +501,6 @@
       "source_location": "L3"
     },
     {
-      "id": "src_lib_types_verification",
-      "label": "Verification",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "verification",
-      "source_file": "src/lib/types.ts",
-      "source_location": "L59"
-    },
-    {
       "id": "src_pages_admin_admintab",
       "label": "AdminTab",
       "_callable": true,
@@ -551,6 +512,19 @@
       "norm_label": "admintab",
       "source_file": "src/pages/Admin.tsx",
       "source_location": "L81"
+    },
+    {
+      "id": "src_components_claimcard_claimcardprops",
+      "label": "ClaimCardProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "Claim",
+      "file_type": "code",
+      "norm_label": "claimcardprops",
+      "source_file": "src/components/ClaimCard.tsx",
+      "source_location": "L10"
     },
     {
       "id": "src_components_factcheckcard_factcheckcardprops",
@@ -644,6 +618,19 @@
       "source_location": "L8"
     },
     {
+      "id": "src_components_authlayout_authlayoutprops",
+      "label": "AuthLayoutProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "authlayoutprops",
+      "source_file": "src/components/AuthLayout.tsx",
+      "source_location": "L21"
+    },
+    {
       "id": "src_components_protectedroute_protectedrouteprops",
       "label": "ProtectedRouteProps",
       "_callable": true,
@@ -657,30 +644,43 @@
       "source_location": "L4"
     },
     {
-      "id": "src_contexts_notificationscontext_notificationscontextvalue",
-      "label": "NotificationsContextValue",
+      "id": "src_components_ui_themetoggle_themetoggleprops",
+      "label": "ThemeToggleProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community": 17,
+      "community_name": "App.tsx",
       "file_type": "code",
-      "norm_label": "notificationscontextvalue",
-      "source_file": "src/contexts/NotificationsContext.tsx",
-      "source_location": "L52"
+      "norm_label": "themetoggleprops",
+      "source_file": "src/components/ui/ThemeToggle.tsx",
+      "source_location": "L5"
     },
     {
-      "id": "src_lib_types_appnotification",
-      "label": "AppNotification",
+      "id": "src_contexts_themecontext_theme",
+      "label": "Theme",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community": 17,
+      "community_name": "App.tsx",
       "file_type": "code",
-      "norm_label": "appnotification",
-      "source_file": "src/lib/types.ts",
-      "source_location": "L25"
+      "norm_label": "theme",
+      "source_file": "src/contexts/ThemeContext.tsx",
+      "source_location": "L3"
+    },
+    {
+      "id": "src_contexts_themecontext_themecontextvalue",
+      "label": "ThemeContextValue",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "themecontextvalue",
+      "source_file": "src/contexts/ThemeContext.tsx",
+      "source_location": "L5"
     },
     {
       "id": "src_lib_types_notificationtype",
@@ -689,7 +689,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
       "norm_label": "notificationtype",
       "source_file": "src/lib/types.ts",
@@ -707,6 +707,45 @@
       "norm_label": "animatedcounterprops",
       "source_file": "src/components/AnimatedCounter.tsx",
       "source_location": "L3"
+    },
+    {
+      "id": "src_components_breadcrumbs_breadcrumbsprops",
+      "label": "BreadcrumbsProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "breadcrumbsprops",
+      "source_file": "src/components/Breadcrumbs.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "src_components_dashboardchart_customtooltipprops",
+      "label": "CustomTooltipProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "customtooltipprops",
+      "source_file": "src/components/DashboardChart.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "src_components_dashboardchart_dashboardchartprops",
+      "label": "DashboardChartProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "dashboardchartprops",
+      "source_file": "src/components/DashboardChart.tsx",
+      "source_location": "L11"
     },
     {
       "id": "src_components_ui_avatar_avatarprops",
@@ -800,45 +839,6 @@
       "source_location": "L4"
     },
     {
-      "id": "src_components_ui_themetoggle_themetoggleprops",
-      "label": "ThemeToggleProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "themetoggleprops",
-      "source_file": "src/components/ui/ThemeToggle.tsx",
-      "source_location": "L5"
-    },
-    {
-      "id": "src_contexts_themecontext_theme",
-      "label": "Theme",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "theme",
-      "source_file": "src/contexts/ThemeContext.tsx",
-      "source_location": "L3"
-    },
-    {
-      "id": "src_contexts_themecontext_themecontextvalue",
-      "label": "ThemeContextValue",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "themecontextvalue",
-      "source_file": "src/contexts/ThemeContext.tsx",
-      "source_location": "L5"
-    },
-    {
       "id": "agent_skills_ui_ux_pro_max_scripts_core_bm25",
       "label": "BM25",
       "_callable": true,
@@ -889,19 +889,6 @@
       "norm_label": "aa",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L5"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_la",
-      "label": "La",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "tesseract-core-simd-lstm.wasm.js",
-      "file_type": "code",
-      "norm_label": "la",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L10"
     },
     {
       "id": "src_components_adminroute_adminrouteprops",
@@ -980,6 +967,45 @@
       "norm_label": "loginratelimitresult",
       "source_file": "src/lib/security.ts",
       "source_location": "L345"
+    },
+    {
+      "id": "src_components_ui_categorybadge_categorybadgeprops",
+      "label": "CategoryBadgeProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "Submit.tsx",
+      "file_type": "code",
+      "norm_label": "categorybadgeprops",
+      "source_file": "src/components/ui/CategoryBadge.tsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "src_components_ui_modal_modalprops",
+      "label": "ModalProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "Submit.tsx",
+      "file_type": "code",
+      "norm_label": "modalprops",
+      "source_file": "src/components/ui/Modal.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_lib_types_claimcategory",
+      "label": "ClaimCategory",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "Submit.tsx",
+      "file_type": "code",
+      "norm_label": "claimcategory",
+      "source_file": "src/lib/types.ts",
+      "source_location": "L7"
     },
     {
       "id": "src_pages_submit_tab",
@@ -1086,43 +1112,30 @@
       "source_location": "L22"
     },
     {
+      "id": "src_lib_types_verification",
+      "label": "Verification",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "verification",
+      "source_file": "src/lib/types.ts",
+      "source_location": "L59"
+    },
+    {
       "id": "src_components_errorboundary_errorboundary",
       "label": "ErrorBoundary",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "ErrorBoundary.tsx",
+      "community_name": "ErrorBoundary",
       "file_type": "code",
       "norm_label": "errorboundary",
       "source_file": "src/components/ErrorBoundary.tsx",
       "source_location": "L76"
-    },
-    {
-      "id": "src_components_errorboundary_errorboundaryprops",
-      "label": "ErrorBoundaryProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 72,
-      "community_name": "ErrorBoundary.tsx",
-      "file_type": "code",
-      "norm_label": "errorboundaryprops",
-      "source_file": "src/components/ErrorBoundary.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_components_errorboundary_errorboundarystate",
-      "label": "ErrorBoundaryState",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 72,
-      "community_name": "ErrorBoundary.tsx",
-      "file_type": "code",
-      "norm_label": "errorboundarystate",
-      "source_file": "src/components/ErrorBoundary.tsx",
-      "source_location": "L14"
     },
     {
       "id": "public_tesseract_tesseract_core_lstm_wasm_la",
@@ -1135,6 +1148,19 @@
       "file_type": "code",
       "norm_label": "la",
       "source_file": "public/tesseract/tesseract-core-lstm.wasm.js",
+      "source_location": "L10"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_la",
+      "label": "La",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 78,
+      "community_name": "La",
+      "file_type": "code",
+      "norm_label": "la",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L10"
     },
     {
@@ -1164,32 +1190,6 @@
       "source_location": "L5"
     },
     {
-      "id": "src_components_dashboardchart_customtooltipprops",
-      "label": "CustomTooltipProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "DashboardChart.tsx",
-      "file_type": "code",
-      "norm_label": "customtooltipprops",
-      "source_file": "src/components/DashboardChart.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_components_dashboardchart_dashboardchartprops",
-      "label": "DashboardChartProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "DashboardChart.tsx",
-      "file_type": "code",
-      "norm_label": "dashboardchartprops",
-      "source_file": "src/components/DashboardChart.tsx",
-      "source_location": "L11"
-    },
-    {
       "id": "src_contexts_authcontext_authprovider",
       "label": "AuthProvider()",
       "_callable": true,
@@ -1202,28 +1202,16 @@
       "source_location": "L55"
     },
     {
-      "id": "src_contexts_claimscontext_claimsprovider",
-      "label": "ClaimsProvider()",
+      "id": "src_contexts_notificationscontext_notificationsprovider",
+      "label": "NotificationsProvider()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "firebaseService.ts",
       "file_type": "code",
-      "norm_label": "claimsprovider()",
-      "source_file": "src/contexts/ClaimsContext.tsx",
-      "source_location": "L459"
-    },
-    {
-      "id": "src_contexts_claimscontext_computeupdatedclaim",
-      "label": "computeUpdatedClaim()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "computeupdatedclaim()",
-      "source_file": "src/contexts/ClaimsContext.tsx",
-      "source_location": "L83"
+      "norm_label": "notificationsprovider()",
+      "source_file": "src/contexts/NotificationsContext.tsx",
+      "source_location": "L70"
     },
     {
       "id": "src_contexts_userscontext_usersprovider",
@@ -1236,42 +1224,6 @@
       "norm_label": "usersprovider()",
       "source_file": "src/contexts/UsersContext.tsx",
       "source_location": "L35"
-    },
-    {
-      "id": "src_lib_confidencescore_calculateconfidencescore",
-      "label": "calculateConfidenceScore()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "calculateconfidencescore()",
-      "source_file": "src/lib/confidenceScore.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "src_lib_confidencescore_determinesourcequality",
-      "label": "determineSourceQuality()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "determinesourcequality()",
-      "source_file": "src/lib/confidenceScore.ts",
-      "source_location": "L65"
-    },
-    {
-      "id": "src_lib_confidencescore_sourcequalitytoscore",
-      "label": "sourceQualityToScore()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "sourcequalitytoscore()",
-      "source_file": "src/lib/confidenceScore.ts",
-      "source_location": "L79"
     },
     {
       "id": "src_lib_security_clearsecuritysession",
@@ -1310,18 +1262,6 @@
       "source_location": "L302"
     },
     {
-      "id": "src_pages_admin_admin",
-      "label": "Admin()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "admin()",
-      "source_file": "src/pages/Admin.tsx",
-      "source_location": "L99"
-    },
-    {
       "id": "src_services_firebaseservice_addauditlogtofirestore",
       "label": "addAuditLogToFirestore()",
       "_callable": true,
@@ -1332,42 +1272,6 @@
       "norm_label": "addauditlogtofirestore()",
       "source_file": "src/services/firebaseService.ts",
       "source_location": "L626"
-    },
-    {
-      "id": "src_services_firebaseservice_addclaimtofirestore",
-      "label": "addClaimToFirestore()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "addclaimtofirestore()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L186"
-    },
-    {
-      "id": "src_services_firebaseservice_admindeleteverification",
-      "label": "adminDeleteVerification()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "admindeleteverification()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L512"
-    },
-    {
-      "id": "src_services_firebaseservice_adminoverrideclaim",
-      "label": "adminOverrideClaim()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "adminoverrideclaim()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L501"
     },
     {
       "id": "src_services_firebaseservice_adminupdateuserdoc",
@@ -1394,18 +1298,6 @@
       "source_location": "L572"
     },
     {
-      "id": "src_services_firebaseservice_deleteclaimfromfirestore",
-      "label": "deleteClaimFromFirestore()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "deleteclaimfromfirestore()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L480"
-    },
-    {
       "id": "src_services_firebaseservice_deleteuserfromfirestore",
       "label": "deleteUserFromFirestore()",
       "_callable": true,
@@ -1416,18 +1308,6 @@
       "norm_label": "deleteuserfromfirestore()",
       "source_file": "src/services/firebaseService.ts",
       "source_location": "L487"
-    },
-    {
-      "id": "src_services_firebaseservice_flagclaimforexpeditedreview",
-      "label": "flagClaimForExpeditedReview()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "flagclaimforexpeditedreview()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L465"
     },
     {
       "id": "src_services_firebaseservice_getautherrormessage",
@@ -1442,40 +1322,28 @@
       "source_location": "L47"
     },
     {
-      "id": "src_services_firebaseservice_getsingleclaimfromfirestore",
-      "label": "getSingleClaimFromFirestore()",
+      "id": "src_services_firebaseservice_markallnotificationsread",
+      "label": "markAllNotificationsRead()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "firebaseService.ts",
       "file_type": "code",
-      "norm_label": "getsingleclaimfromfirestore()",
+      "norm_label": "markallnotificationsread()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L321"
+      "source_location": "L447"
     },
     {
-      "id": "src_services_firebaseservice_mapfirestoredoctoclaim",
-      "label": "mapFirestoreDocToClaim()",
+      "id": "src_services_firebaseservice_marknotificationread",
+      "label": "markNotificationRead()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "firebaseService.ts",
       "file_type": "code",
-      "norm_label": "mapfirestoredoctoclaim()",
+      "norm_label": "marknotificationread()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L250"
-    },
-    {
-      "id": "src_services_firebaseservice_parsetimestamp",
-      "label": "parseTimestamp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "parsetimestamp()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L225"
+      "source_location": "L442"
     },
     {
       "id": "src_services_firebaseservice_resetpassword",
@@ -1538,40 +1406,16 @@
       "source_location": "L58"
     },
     {
-      "id": "src_services_firebaseservice_subscribeauditlogsrealtime",
-      "label": "subscribeAuditLogsRealtime()",
+      "id": "src_services_firebaseservice_subscribenotificationsrealtime",
+      "label": "subscribeNotificationsRealtime()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "firebaseService.ts",
       "file_type": "code",
-      "norm_label": "subscribeauditlogsrealtime()",
+      "norm_label": "subscribenotificationsrealtime()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L639"
-    },
-    {
-      "id": "src_services_firebaseservice_subscribeclaimsrealtime",
-      "label": "subscribeClaimsRealtime()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "subscribeclaimsrealtime()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L337"
-    },
-    {
-      "id": "src_services_firebaseservice_subscribereportsrealtime",
-      "label": "subscribeReportsRealtime()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "subscribereportsrealtime()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L531"
+      "source_location": "L413"
     },
     {
       "id": "src_services_firebaseservice_subscribeusersrealtime",
@@ -1584,18 +1428,6 @@
       "norm_label": "subscribeusersrealtime()",
       "source_file": "src/services/firebaseService.ts",
       "source_location": "L385"
-    },
-    {
-      "id": "src_services_firebaseservice_updateclaiminfirestore",
-      "label": "updateClaimInFirestore()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "updateclaiminfirestore()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L205"
     },
     {
       "id": "src_services_firebaseservice_updatereportinfirestore",
@@ -1694,15 +1526,15 @@
       "source_location": "L63"
     },
     {
-      "id": "src_components_breadcrumbs_breadcrumbs",
-      "label": "Breadcrumbs()",
+      "id": "src_components_errorboundary_fallbackcontent",
+      "label": "FallbackContent()",
       "_callable": true,
       "_origin": "ast",
       "community": 12,
       "community_name": "VerifyDetail.tsx",
       "file_type": "code",
-      "norm_label": "breadcrumbs()",
-      "source_file": "src/components/Breadcrumbs.tsx",
+      "norm_label": "fallbackcontent()",
+      "source_file": "src/components/ErrorBoundary.tsx",
       "source_location": "L20"
     },
     {
@@ -1742,30 +1574,6 @@
       "source_location": "L10"
     },
     {
-      "id": "src_lib_security_sanitizetextinput",
-      "label": "sanitizeTextInput()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "sanitizetextinput()",
-      "source_file": "src/lib/security.ts",
-      "source_location": "L40"
-    },
-    {
-      "id": "src_lib_security_validateverdictexplanation",
-      "label": "validateVerdictExplanation()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "validateverdictexplanation()",
-      "source_file": "src/lib/security.ts",
-      "source_location": "L71"
-    },
-    {
       "id": "src_pages_notfound_notfound",
       "label": "NotFound()",
       "_callable": true,
@@ -1788,18 +1596,6 @@
       "norm_label": "timeremaining()",
       "source_file": "src/pages/VerifyDetail.tsx",
       "source_location": "L60"
-    },
-    {
-      "id": "src_pages_verifydetail_verifydetail",
-      "label": "VerifyDetail()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "verifydetail()",
-      "source_file": "src/pages/VerifyDetail.tsx",
-      "source_location": "L86"
     },
     {
       "id": "src_pages_verifyqueue_claimdossiercard",
@@ -1838,88 +1634,40 @@
       "source_location": "L42"
     },
     {
-      "id": "src_pages_verifyqueue_verifyqueue",
-      "label": "VerifyQueue()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "verifyqueue()",
-      "source_file": "src/pages/VerifyQueue.tsx",
-      "source_location": "L104"
-    },
-    {
-      "id": "src_components_authlayout_authlayout",
-      "label": "AuthLayout()",
+      "id": "src_services_firebaseservice_parsetimestamp",
+      "label": "parseTimestamp()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
       "community_name": "Admin.tsx",
       "file_type": "code",
-      "norm_label": "authlayout()",
-      "source_file": "src/components/AuthLayout.tsx",
-      "source_location": "L28"
+      "norm_label": "parsetimestamp()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L225"
     },
     {
-      "id": "src_components_ui_modal_modal",
-      "label": "Modal()",
+      "id": "src_services_firebaseservice_subscribeauditlogsrealtime",
+      "label": "subscribeAuditLogsRealtime()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
       "community_name": "Admin.tsx",
       "file_type": "code",
-      "norm_label": "modal()",
-      "source_file": "src/components/ui/Modal.tsx",
-      "source_location": "L17"
+      "norm_label": "subscribeauditlogsrealtime()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L639"
     },
     {
-      "id": "src_pages_profile_computeverifierstats",
-      "label": "computeVerifierStats()",
+      "id": "src_services_firebaseservice_subscribereportsrealtime",
+      "label": "subscribeReportsRealtime()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
       "community_name": "Admin.tsx",
       "file_type": "code",
-      "norm_label": "computeverifierstats()",
-      "source_file": "src/pages/Profile.tsx",
-      "source_location": "L137"
-    },
-    {
-      "id": "src_pages_profile_profile",
-      "label": "Profile()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "profile()",
-      "source_file": "src/pages/Profile.tsx",
-      "source_location": "L153"
-    },
-    {
-      "id": "src_pages_profile_replevel",
-      "label": "repLevel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "replevel()",
-      "source_file": "src/pages/Profile.tsx",
-      "source_location": "L42"
-    },
-    {
-      "id": "src_pages_profile_sparkline",
-      "label": "Sparkline()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "sparkline()",
-      "source_file": "src/pages/Profile.tsx",
-      "source_location": "L84"
+      "norm_label": "subscribereportsrealtime()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L531"
     },
     {
       "id": "src_components_factcheckcard_collectdomains",
@@ -1956,6 +1704,18 @@
       "norm_label": "truncatetext()",
       "source_file": "src/components/FactCheckCard.tsx",
       "source_location": "L37"
+    },
+    {
+      "id": "src_lib_weeklyreport_computeweeklyreport",
+      "label": "computeWeeklyReport()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "Claim",
+      "file_type": "code",
+      "norm_label": "computeweeklyreport()",
+      "source_file": "src/lib/weeklyReport.ts",
+      "source_location": "L33"
     },
     {
       "id": "public_tesseract_worker_min_a",
@@ -2894,6 +2654,18 @@
       "source_location": "L69"
     },
     {
+      "id": "src_components_authlayout_authlayout",
+      "label": "AuthLayout()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "authlayout()",
+      "source_file": "src/components/AuthLayout.tsx",
+      "source_location": "L28"
+    },
+    {
       "id": "src_components_footer_footer",
       "label": "Footer()",
       "_callable": true,
@@ -2904,6 +2676,18 @@
       "norm_label": "footer()",
       "source_file": "src/components/Footer.tsx",
       "source_location": "L6"
+    },
+    {
+      "id": "src_components_navbar_navbar",
+      "label": "Navbar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "navbar()",
+      "source_file": "src/components/Navbar.tsx",
+      "source_location": "L14"
     },
     {
       "id": "src_components_onlinestatusbar_onlinestatusbar",
@@ -2930,16 +2714,28 @@
       "source_location": "L8"
     },
     {
-      "id": "src_contexts_authcontext_useauth",
-      "label": "useAuth()",
+      "id": "src_components_ui_themetoggle_themetoggle",
+      "label": "ThemeToggle()",
       "_callable": true,
       "_origin": "ast",
       "community": 17,
       "community_name": "App.tsx",
       "file_type": "code",
-      "norm_label": "useauth()",
-      "source_file": "src/contexts/AuthContext.tsx",
-      "source_location": "L226"
+      "norm_label": "themetoggle()",
+      "source_file": "src/components/ui/ThemeToggle.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_contexts_themecontext_usetheme",
+      "label": "useTheme()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "usetheme()",
+      "source_file": "src/contexts/ThemeContext.tsx",
+      "source_location": "L49"
     },
     {
       "id": "src_pages_signup_googleicon",
@@ -2971,7 +2767,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
       "norm_label": "notificationbell()",
       "source_file": "src/components/NotificationBell.tsx",
@@ -2983,7 +2779,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
       "norm_label": "claimdetailskeleton()",
       "source_file": "src/components/ui/Skeletons.tsx",
@@ -2995,23 +2791,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
       "norm_label": "notificationlistskeleton()",
       "source_file": "src/components/ui/Skeletons.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_contexts_notificationscontext_notificationsprovider",
-      "label": "NotificationsProvider()",
+      "id": "src_contexts_authcontext_useauth",
+      "label": "useAuth()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
-      "norm_label": "notificationsprovider()",
-      "source_file": "src/contexts/NotificationsContext.tsx",
-      "source_location": "L70"
+      "norm_label": "useauth()",
+      "source_file": "src/contexts/AuthContext.tsx",
+      "source_location": "L226"
+    },
+    {
+      "id": "src_contexts_claimscontext_useclaims",
+      "label": "useClaims()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "useclaims()",
+      "source_file": "src/contexts/ClaimsContext.tsx",
+      "source_location": "L838"
     },
     {
       "id": "src_contexts_notificationscontext_usenotifications",
@@ -3019,59 +2827,179 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
       "norm_label": "usenotifications()",
       "source_file": "src/contexts/NotificationsContext.tsx",
       "source_location": "L154"
     },
     {
-      "id": "src_services_firebaseservice_markallnotificationsread",
-      "label": "markAllNotificationsRead()",
+      "id": "src_contexts_userscontext_useusers",
+      "label": "useUsers()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
-      "norm_label": "markallnotificationsread()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L447"
+      "norm_label": "useusers()",
+      "source_file": "src/contexts/UsersContext.tsx",
+      "source_location": "L107"
     },
     {
-      "id": "src_services_firebaseservice_marknotificationread",
-      "label": "markNotificationRead()",
+      "id": "src_lib_utils_formatdistancetonow",
+      "label": "formatDistanceToNow()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
-      "norm_label": "marknotificationread()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L442"
+      "norm_label": "formatdistancetonow()",
+      "source_file": "src/lib/utils.ts",
+      "source_location": "L10"
     },
     {
-      "id": "src_services_firebaseservice_subscribenotificationsrealtime",
-      "label": "subscribeNotificationsRealtime()",
+      "id": "src_pages_admin_admin",
+      "label": "Admin()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
-      "norm_label": "subscribenotificationsrealtime()",
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L413"
+      "norm_label": "admin()",
+      "source_file": "src/pages/Admin.tsx",
+      "source_location": "L99"
     },
     {
-      "id": "src_components_navbar_navbar",
-      "label": "Navbar()",
+      "id": "src_pages_claimdetail_claimdetail",
+      "label": "ClaimDetail()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "claimdetail()",
+      "source_file": "src/pages/ClaimDetail.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "src_pages_dashboard_dashboard",
+      "label": "Dashboard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "dashboard()",
+      "source_file": "src/pages/Dashboard.tsx",
+      "source_location": "L45"
+    },
+    {
+      "id": "src_pages_profile_computeverifierstats",
+      "label": "computeVerifierStats()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "computeverifierstats()",
+      "source_file": "src/pages/Profile.tsx",
+      "source_location": "L137"
+    },
+    {
+      "id": "src_pages_profile_profile",
+      "label": "Profile()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "profile()",
+      "source_file": "src/pages/Profile.tsx",
+      "source_location": "L153"
+    },
+    {
+      "id": "src_pages_profile_replevel",
+      "label": "repLevel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "replevel()",
+      "source_file": "src/pages/Profile.tsx",
+      "source_location": "L42"
+    },
+    {
+      "id": "src_pages_profile_sparkline",
+      "label": "Sparkline()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "sparkline()",
+      "source_file": "src/pages/Profile.tsx",
+      "source_location": "L84"
+    },
+    {
+      "id": "src_pages_verifydetail_verifydetail",
+      "label": "VerifyDetail()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "verifydetail()",
+      "source_file": "src/pages/VerifyDetail.tsx",
+      "source_location": "L86"
+    },
+    {
+      "id": "src_pages_verifyqueue_verifyqueue",
+      "label": "VerifyQueue()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "Profile.tsx",
+      "file_type": "code",
+      "norm_label": "verifyqueue()",
+      "source_file": "src/pages/VerifyQueue.tsx",
+      "source_location": "L104"
+    },
+    {
+      "id": "src_components_breadcrumbs_breadcrumbs",
+      "label": "Breadcrumbs()",
       "_callable": true,
       "_origin": "ast",
       "community": 19,
       "community_name": "cn",
       "file_type": "code",
-      "norm_label": "navbar()",
-      "source_file": "src/components/Navbar.tsx",
-      "source_location": "L14"
+      "norm_label": "breadcrumbs()",
+      "source_file": "src/components/Breadcrumbs.tsx",
+      "source_location": "L20"
+    },
+    {
+      "id": "src_components_dashboardchart_customtooltip",
+      "label": "CustomTooltip()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "customtooltip()",
+      "source_file": "src/components/DashboardChart.tsx",
+      "source_location": "L20"
+    },
+    {
+      "id": "src_components_dashboardchart_dashboardchart",
+      "label": "DashboardChart()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "dashboardchart()",
+      "source_file": "src/components/DashboardChart.tsx",
+      "source_location": "L34"
     },
     {
       "id": "src_components_ui_avatar_avatar",
@@ -3122,54 +3050,6 @@
       "source_location": "L10"
     },
     {
-      "id": "src_components_ui_themetoggle_themetoggle",
-      "label": "ThemeToggle()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "themetoggle()",
-      "source_file": "src/components/ui/ThemeToggle.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_contexts_claimscontext_useclaims",
-      "label": "useClaims()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "useclaims()",
-      "source_file": "src/contexts/ClaimsContext.tsx",
-      "source_location": "L838"
-    },
-    {
-      "id": "src_contexts_themecontext_usetheme",
-      "label": "useTheme()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "usetheme()",
-      "source_file": "src/contexts/ThemeContext.tsx",
-      "source_location": "L49"
-    },
-    {
-      "id": "src_contexts_userscontext_useusers",
-      "label": "useUsers()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "useusers()",
-      "source_file": "src/contexts/UsersContext.tsx",
-      "source_location": "L107"
-    },
-    {
       "id": "src_lib_utils_cn",
       "label": "cn()",
       "_callable": true,
@@ -3180,54 +3060,6 @@
       "norm_label": "cn()",
       "source_file": "src/lib/utils.ts",
       "source_location": "L4"
-    },
-    {
-      "id": "src_lib_utils_formatdistancetonow",
-      "label": "formatDistanceToNow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "formatdistancetonow()",
-      "source_file": "src/lib/utils.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "src_lib_weeklyreport_computeweeklyreport",
-      "label": "computeWeeklyReport()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "computeweeklyreport()",
-      "source_file": "src/lib/weeklyReport.ts",
-      "source_location": "L33"
-    },
-    {
-      "id": "src_pages_claimdetail_claimdetail",
-      "label": "ClaimDetail()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "claimdetail()",
-      "source_file": "src/pages/ClaimDetail.tsx",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_pages_dashboard_dashboard",
-      "label": "Dashboard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "dashboard()",
-      "source_file": "src/pages/Dashboard.tsx",
-      "source_location": "L45"
     },
     {
       "id": "src_pages_home_home",
@@ -4910,6 +4742,18 @@
       "source_location": "L5"
     },
     {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_b",
+      "label": "B()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "tesseract-core-simd-lstm.wasm.js",
+      "file_type": "code",
+      "norm_label": "b()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L32"
+    },
+    {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_c",
       "label": "c()",
       "_callable": true,
@@ -4956,6 +4800,30 @@
       "norm_label": "d()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L116"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fchmod",
+      "label": "fchmod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "tesseract-core-simd-lstm.wasm.js",
+      "file_type": "code",
+      "norm_label": "fchmod()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L49"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fchown",
+      "label": "fchown()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "tesseract-core-simd-lstm.wasm.js",
+      "file_type": "code",
+      "norm_label": "fchown()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L49"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_flags",
@@ -5088,30 +4956,6 @@
       "norm_label": ".__destroy__()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L122"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_la_constructor",
-      "label": ".constructor()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "tesseract-core-simd-lstm.wasm.js",
-      "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L10"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_la_hg",
-      "label": ".hg()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "tesseract-core-simd-lstm.wasm.js",
-      "file_type": "code",
-      "norm_label": ".hg()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L10"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_lchown",
@@ -5292,6 +5136,18 @@
       "norm_label": ".__destroy__()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L146"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_tb",
+      "label": "Tb()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "tesseract-core-simd-lstm.wasm.js",
+      "file_type": "code",
+      "norm_label": "tb()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L58"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ti",
@@ -5544,6 +5400,18 @@
       "norm_label": "setstorageitem()",
       "source_file": "src/lib/security.ts",
       "source_location": "L365"
+    },
+    {
+      "id": "src_lib_security_validateverdictexplanation",
+      "label": "validateVerdictExplanation()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "security.ts",
+      "file_type": "code",
+      "norm_label": "validateverdictexplanation()",
+      "source_file": "src/lib/security.ts",
+      "source_location": "L71"
     },
     {
       "id": "src_pages_signin_googleicon",
@@ -6084,6 +5952,18 @@
       "norm_label": "s()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L162"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_s_clear",
+      "label": ".Clear()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "S",
+      "file_type": "code",
+      "norm_label": ".clear()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L179"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_s_clearadaptiveclassifier",
@@ -7358,6 +7238,30 @@
       "source_location": "L130"
     },
     {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o",
+      "label": "O()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": "o()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L144"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_addimage",
+      "label": ".AddImage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": ".addimage()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L145"
+    },
+    {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_begindocument",
       "label": ".BeginDocument()",
       "_callable": true,
@@ -7370,19 +7274,7 @@
       "source_location": "L145"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_r",
-      "label": "r()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "F",
-      "file_type": "code",
-      "norm_label": "r()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L4"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_r_destroy",
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_destroy",
       "label": ".__destroy__()",
       "_callable": true,
       "_origin": "ast",
@@ -7391,7 +7283,55 @@
       "file_type": "code",
       "norm_label": ".__destroy__()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L155"
+      "source_location": "L146"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_enddocument",
+      "label": ".EndDocument()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": ".enddocument()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L145"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_file_extension",
+      "label": ".file_extension()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": ".file_extension()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L145"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_happy",
+      "label": ".happy()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": ".happy()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L145"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_imagenum",
+      "label": ".imagenum()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": ".imagenum()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L145"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_s_adapttowordstr",
@@ -7574,6 +7514,42 @@
       "source_location": "L164"
     },
     {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui",
+      "label": "ui()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": "ui()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L148"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui_destroy",
+      "label": ".__destroy__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": ".__destroy__()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L149"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui_get_script_from_script_id",
+      "label": ".get_script_from_script_id()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": ".get_script_from_script_id()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L148"
+    },
+    {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui_get_script_id_from_name",
       "label": ".get_script_id_from_name()",
       "_callable": true,
@@ -7582,6 +7558,18 @@
       "community_name": "F",
       "file_type": "code",
       "norm_label": ".get_script_id_from_name()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L149"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui_get_script_table_size",
+      "label": ".get_script_table_size()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "F",
+      "file_type": "code",
+      "norm_label": ".get_script_table_size()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L149"
     },
@@ -11918,6 +11906,18 @@
       "source_location": "L19"
     },
     {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fstat",
+      "label": "fstat()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "$h",
+      "file_type": "code",
+      "norm_label": "fstat()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L48"
+    },
+    {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_h",
       "label": "$h()",
       "_callable": true,
@@ -12038,6 +12038,18 @@
       "source_location": "L42"
     },
     {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kb",
+      "label": "Kb()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "$h",
+      "file_type": "code",
+      "norm_label": "kb()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L33"
+    },
+    {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kf",
       "label": "Kf()",
       "_callable": true,
@@ -12050,16 +12062,40 @@
       "source_location": "L19"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_s_clear",
-      "label": ".Clear()",
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kg",
+      "label": "Kg()",
       "_callable": true,
       "_origin": "ast",
       "community": 50,
       "community_name": "$h",
       "file_type": "code",
-      "norm_label": ".clear()",
+      "norm_label": "kg()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L179"
+      "source_location": "L43"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kg_c",
+      "label": "c()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "$h",
+      "file_type": "code",
+      "norm_label": "c()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L43"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kg_d",
+      "label": "d()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "$h",
+      "file_type": "code",
+      "norm_label": "d()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L43"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_symlink",
@@ -12566,18 +12602,6 @@
       "source_location": "L188"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ha",
-      "label": "Ha()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": "ha()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L7"
-    },
-    {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_i_getbaseline",
       "label": ".getBaseline()",
       "_callable": true,
@@ -12650,138 +12674,6 @@
       "source_location": "L131"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ii",
-      "label": "ii()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": "ii()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L119"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ii_destroy",
-      "label": ".__destroy__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": ".__destroy__()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L119"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ii_getvalue",
-      "label": ".getValue()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": ".getvalue()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L187"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ja",
-      "label": "Ja()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": "ja()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L8"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ri",
-      "label": "ri()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": "ri()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L146"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ri_destroy",
-      "label": ".__destroy__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": ".__destroy__()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L146"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ri_getvalue",
-      "label": ".getValue()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": ".getvalue()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L187"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_s_allwordconfidences",
-      "label": ".AllWordConfidences()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": ".allwordconfidences()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L178"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_vi",
-      "label": "vi()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": "vi()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L149"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_vi_destroy",
-      "label": ".__destroy__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": ".__destroy__()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L149"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_vi_getvalue",
-      "label": ".getValue()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Ai",
-      "file_type": "code",
-      "norm_label": ".getvalue()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L187"
-    },
-    {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_yi",
       "label": "yi()",
       "_callable": true,
@@ -12818,16 +12710,16 @@
       "source_location": "L187"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_bg",
-      "label": "bg()",
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_close",
+      "label": "close()",
       "_callable": true,
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
-      "norm_label": "bg()",
+      "norm_label": "close()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L25"
+      "source_location": "L16"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fg",
@@ -12835,11 +12727,71 @@
       "_callable": true,
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
       "norm_label": "fg()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L17"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fsync",
+      "label": "fsync()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "r",
+      "file_type": "code",
+      "norm_label": "fsync()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L16"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ja",
+      "label": "Ja()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "r",
+      "file_type": "code",
+      "norm_label": "ja()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L8"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_lstat",
+      "label": "lstat()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "r",
+      "file_type": "code",
+      "norm_label": "lstat()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L48"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_r",
+      "label": "r()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "r",
+      "file_type": "code",
+      "norm_label": "r()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_r_destroy",
+      "label": ".__destroy__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "r",
+      "file_type": "code",
+      "norm_label": ".__destroy__()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L155"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_rb",
@@ -12847,7 +12799,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
       "norm_label": "rb()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -12859,11 +12811,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
       "norm_label": "read()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L16"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_readfile",
+      "label": "readFile()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "r",
+      "file_type": "code",
+      "norm_label": "readfile()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L54"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_sb",
@@ -12871,7 +12835,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
       "norm_label": "sb()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -12883,11 +12847,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
       "norm_label": "h()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L36"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_stat",
+      "label": "stat()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "r",
+      "file_type": "code",
+      "norm_label": "stat()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L48"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_writefile",
+      "label": "writeFile()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "r",
+      "file_type": "code",
+      "norm_label": "writefile()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L55"
     },
     {
       "id": "public_tesseract_tesseract_core_wasm_a",
@@ -13291,95 +13279,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": "bi()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L116"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o",
-      "label": "O()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "O",
-      "file_type": "code",
-      "norm_label": "o()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L144"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_addimage",
-      "label": ".AddImage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "O",
-      "file_type": "code",
-      "norm_label": ".addimage()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L145"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_destroy",
-      "label": ".__destroy__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "O",
-      "file_type": "code",
-      "norm_label": ".__destroy__()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L146"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_enddocument",
-      "label": ".EndDocument()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "O",
-      "file_type": "code",
-      "norm_label": ".enddocument()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L145"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_file_extension",
-      "label": ".file_extension()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "O",
-      "file_type": "code",
-      "norm_label": ".file_extension()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L145"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_happy",
-      "label": ".happy()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "O",
-      "file_type": "code",
-      "norm_label": ".happy()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L145"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_o_imagenum",
-      "label": ".imagenum()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "O",
-      "file_type": "code",
-      "norm_label": ".imagenum()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L145"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_pi",
@@ -13387,7 +13291,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": "pi()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -13399,7 +13303,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": ".confidence()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -13411,7 +13315,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": ".__destroy__()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -13423,7 +13327,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": ".getutf8text()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -13435,11 +13339,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": ".next()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L142"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_sg",
+      "label": "sg()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "bi",
+      "file_type": "code",
+      "norm_label": "sg()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L54"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_si",
@@ -13447,7 +13363,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": "si()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -13459,7 +13375,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": ".confidence()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -13471,7 +13387,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": ".__destroy__()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -13483,7 +13399,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": ".getutf8text()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -13495,11 +13411,47 @@
       "_callable": true,
       "_origin": "ast",
       "community": 57,
-      "community_name": "O",
+      "community_name": "bi",
       "file_type": "code",
       "norm_label": ".next()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L147"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_t",
+      "label": "T()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "bi",
+      "file_type": "code",
+      "norm_label": "t()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L181"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_t_print_scores",
+      "label": ".print_scores()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "bi",
+      "file_type": "code",
+      "norm_label": ".print_scores()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L181"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_tg",
+      "label": "tg()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "bi",
+      "file_type": "code",
+      "norm_label": "tg()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L42"
     },
     {
       "id": "public_tesseract_tesseract_core_wasm_bg",
@@ -13826,6 +13778,18 @@
       "source_location": "L181"
     },
     {
+      "id": "src_components_ui_modal_modal",
+      "label": "Modal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "Submit.tsx",
+      "file_type": "code",
+      "norm_label": "modal()",
+      "source_file": "src/components/ui/Modal.tsx",
+      "source_location": "L17"
+    },
+    {
       "id": "src_lib_imagecompression_compressimagetodataurl",
       "label": "compressImageToDataUrl()",
       "_callable": true,
@@ -13848,6 +13812,18 @@
       "norm_label": "estimatebytes()",
       "source_file": "src/lib/imageCompression.ts",
       "source_location": "L65"
+    },
+    {
+      "id": "src_lib_security_sanitizetextinput",
+      "label": "sanitizeTextInput()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "Submit.tsx",
+      "file_type": "code",
+      "norm_label": "sanitizetextinput()",
+      "source_file": "src/lib/security.ts",
+      "source_location": "L40"
     },
     {
       "id": "src_lib_security_validateimageupload",
@@ -14546,6 +14522,138 @@
       "source_location": "L187"
     },
     {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ha",
+      "label": "Ha()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": "ha()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L7"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ii",
+      "label": "ii()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": "ii()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L119"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ii_destroy",
+      "label": ".__destroy__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": ".__destroy__()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L119"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ii_getvalue",
+      "label": ".getValue()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": ".getvalue()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L187"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ri",
+      "label": "ri()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": "ri()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L146"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ri_destroy",
+      "label": ".__destroy__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": ".__destroy__()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L146"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ri_getvalue",
+      "label": ".getValue()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": ".getvalue()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L187"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_s_allwordconfidences",
+      "label": ".AllWordConfidences()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": ".allwordconfidences()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L178"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_vi",
+      "label": "vi()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": "vi()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L149"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_vi_destroy",
+      "label": ".__destroy__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": ".__destroy__()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L149"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_vi_getvalue",
+      "label": ".getValue()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "Ha",
+      "file_type": "code",
+      "norm_label": ".getvalue()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L187"
+    },
+    {
       "id": "public_tesseract_tesseract_core_lstm_wasm_close",
       "label": "close()",
       "_callable": true,
@@ -14930,16 +15038,184 @@
       "source_location": "L25"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_close",
-      "label": "close()",
+      "id": "src_contexts_claimscontext_claimsprovider",
+      "label": "ClaimsProvider()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "claimsprovider()",
+      "source_file": "src/contexts/ClaimsContext.tsx",
+      "source_location": "L459"
+    },
+    {
+      "id": "src_contexts_claimscontext_computeupdatedclaim",
+      "label": "computeUpdatedClaim()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "computeupdatedclaim()",
+      "source_file": "src/contexts/ClaimsContext.tsx",
+      "source_location": "L83"
+    },
+    {
+      "id": "src_lib_confidencescore_calculateconfidencescore",
+      "label": "calculateConfidenceScore()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "calculateconfidencescore()",
+      "source_file": "src/lib/confidenceScore.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "src_lib_confidencescore_determinesourcequality",
+      "label": "determineSourceQuality()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "determinesourcequality()",
+      "source_file": "src/lib/confidenceScore.ts",
+      "source_location": "L65"
+    },
+    {
+      "id": "src_lib_confidencescore_sourcequalitytoscore",
+      "label": "sourceQualityToScore()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "sourcequalitytoscore()",
+      "source_file": "src/lib/confidenceScore.ts",
+      "source_location": "L79"
+    },
+    {
+      "id": "src_services_firebaseservice_addclaimtofirestore",
+      "label": "addClaimToFirestore()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "addclaimtofirestore()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L186"
+    },
+    {
+      "id": "src_services_firebaseservice_admindeleteverification",
+      "label": "adminDeleteVerification()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "admindeleteverification()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L512"
+    },
+    {
+      "id": "src_services_firebaseservice_adminoverrideclaim",
+      "label": "adminOverrideClaim()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "adminoverrideclaim()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L501"
+    },
+    {
+      "id": "src_services_firebaseservice_deleteclaimfromfirestore",
+      "label": "deleteClaimFromFirestore()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "deleteclaimfromfirestore()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L480"
+    },
+    {
+      "id": "src_services_firebaseservice_flagclaimforexpeditedreview",
+      "label": "flagClaimForExpeditedReview()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "flagclaimforexpeditedreview()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L465"
+    },
+    {
+      "id": "src_services_firebaseservice_getsingleclaimfromfirestore",
+      "label": "getSingleClaimFromFirestore()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "getsingleclaimfromfirestore()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L321"
+    },
+    {
+      "id": "src_services_firebaseservice_mapfirestoredoctoclaim",
+      "label": "mapFirestoreDocToClaim()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "mapfirestoredoctoclaim()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L250"
+    },
+    {
+      "id": "src_services_firebaseservice_subscribeclaimsrealtime",
+      "label": "subscribeClaimsRealtime()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "subscribeclaimsrealtime()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L337"
+    },
+    {
+      "id": "src_services_firebaseservice_updateclaiminfirestore",
+      "label": "updateClaimInFirestore()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "updateclaiminfirestore()",
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L205"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_bg",
+      "label": "bg()",
       "_callable": true,
       "_origin": "ast",
       "community": 71,
       "community_name": "write",
       "file_type": "code",
-      "norm_label": "close()",
+      "norm_label": "bg()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L16"
+      "source_location": "L25"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_eg",
@@ -14954,18 +15230,6 @@
       "source_location": "L25"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fsync",
-      "label": "fsync()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 71,
-      "community_name": "write",
-      "file_type": "code",
-      "norm_label": "fsync()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L16"
-    },
-    {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_isfile",
       "label": "isFile()",
       "_callable": true,
@@ -14976,18 +15240,6 @@
       "norm_label": "isfile()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
       "source_location": "L42"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_lstat",
-      "label": "lstat()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 71,
-      "community_name": "write",
-      "file_type": "code",
-      "norm_label": "lstat()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L48"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_nf",
@@ -15014,28 +15266,28 @@
       "source_location": "L21"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_readfile",
-      "label": "readFile()",
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_t_destroy",
+      "label": ".__destroy__()",
       "_callable": true,
       "_origin": "ast",
       "community": 71,
       "community_name": "write",
       "file_type": "code",
-      "norm_label": "readfile()",
+      "norm_label": ".__destroy__()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L54"
+      "source_location": "L182"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_stat",
-      "label": "stat()",
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_wg",
+      "label": "wg()",
       "_callable": true,
       "_origin": "ast",
       "community": 71,
       "community_name": "write",
       "file_type": "code",
-      "norm_label": "stat()",
+      "norm_label": "wg()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L48"
+      "source_location": "L17"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_write",
@@ -15050,24 +15302,12 @@
       "source_location": "L16"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_writefile",
-      "label": "writeFile()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 71,
-      "community_name": "write",
-      "file_type": "code",
-      "norm_label": "writefile()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L55"
-    },
-    {
       "id": "src_components_errorboundary_errorboundary_componentdidcatch",
       "label": ".componentDidCatch()",
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "ErrorBoundary.tsx",
+      "community_name": "ErrorBoundary",
       "file_type": "code",
       "norm_label": ".componentdidcatch()",
       "source_file": "src/components/ErrorBoundary.tsx",
@@ -15079,7 +15319,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "ErrorBoundary.tsx",
+      "community_name": "ErrorBoundary",
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "src/components/ErrorBoundary.tsx",
@@ -15091,7 +15331,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "ErrorBoundary.tsx",
+      "community_name": "ErrorBoundary",
       "file_type": "code",
       "norm_label": ".getderivedstatefromerror()",
       "source_file": "src/components/ErrorBoundary.tsx",
@@ -15103,7 +15343,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "ErrorBoundary.tsx",
+      "community_name": "ErrorBoundary",
       "file_type": "code",
       "norm_label": ".handleretry()",
       "source_file": "src/components/ErrorBoundary.tsx",
@@ -15115,23 +15355,59 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "ErrorBoundary.tsx",
+      "community_name": "ErrorBoundary",
       "file_type": "code",
       "norm_label": ".render()",
       "source_file": "src/components/ErrorBoundary.tsx",
       "source_location": "L99"
     },
     {
-      "id": "src_components_errorboundary_fallbackcontent",
-      "label": "FallbackContent()",
+      "id": "src_lib_duplicatedetection_findduplicate",
+      "label": "findDuplicate()",
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "ErrorBoundary.tsx",
+      "community_name": "ErrorBoundary",
       "file_type": "code",
-      "norm_label": "fallbackcontent()",
-      "source_file": "src/components/ErrorBoundary.tsx",
-      "source_location": "L20"
+      "norm_label": "findduplicate()",
+      "source_file": "src/lib/duplicateDetection.ts",
+      "source_location": "L41"
+    },
+    {
+      "id": "src_lib_duplicatedetection_jaccardsimilarity",
+      "label": "jaccardSimilarity()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "ErrorBoundary",
+      "file_type": "code",
+      "norm_label": "jaccardsimilarity()",
+      "source_file": "src/lib/duplicateDetection.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "src_lib_duplicatedetection_normalize",
+      "label": "normalize()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "ErrorBoundary",
+      "file_type": "code",
+      "norm_label": "normalize()",
+      "source_file": "src/lib/duplicateDetection.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_lib_duplicatedetection_tokenize",
+      "label": "tokenize()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "ErrorBoundary",
+      "file_type": "code",
+      "norm_label": "tokenize()",
+      "source_file": "src/lib/duplicateDetection.ts",
+      "source_location": "L17"
     },
     {
       "id": "public_tesseract_tesseract_core_wasm_createnode",
@@ -15554,6 +15830,30 @@
       "source_location": "L10"
     },
     {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_la_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 78,
+      "community_name": "La",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L10"
+    },
+    {
+      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_la_hg",
+      "label": ".hg()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 78,
+      "community_name": "La",
+      "file_type": "code",
+      "norm_label": ".hg()",
+      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
+      "source_location": "L10"
+    },
+    {
       "id": "public_tesseract_tesseract_core_wasm_la_constructor",
       "label": ".constructor()",
       "_callable": true,
@@ -15806,114 +16106,6 @@
       "source_location": "L162"
     },
     {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_b",
-      "label": "B()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "b()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L32"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fchmod",
-      "label": "fchmod()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "fchmod()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L49"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fchown",
-      "label": "fchown()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "fchown()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L49"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_fstat",
-      "label": "fstat()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "fstat()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L48"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kb",
-      "label": "Kb()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "kb()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L33"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kg",
-      "label": "Kg()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "kg()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L43"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kg_c",
-      "label": "c()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "c()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L43"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_kg_d",
-      "label": "d()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "d()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L43"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_tb",
-      "label": "Tb()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "B",
-      "file_type": "code",
-      "norm_label": "tb()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L58"
-    },
-    {
       "id": "scripts_seed_db_api",
       "label": "api()",
       "_callable": true,
@@ -16068,198 +16260,6 @@
       "norm_label": "writedoc()",
       "source_file": "scripts/seed-db.mjs",
       "source_location": "L533"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_sg",
-      "label": "sg()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "T",
-      "file_type": "code",
-      "norm_label": "sg()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L54"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_t",
-      "label": "T()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "T",
-      "file_type": "code",
-      "norm_label": "t()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L181"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_t_destroy",
-      "label": ".__destroy__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "T",
-      "file_type": "code",
-      "norm_label": ".__destroy__()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L182"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_t_print_scores",
-      "label": ".print_scores()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "T",
-      "file_type": "code",
-      "norm_label": ".print_scores()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L181"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_tg",
-      "label": "tg()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "T",
-      "file_type": "code",
-      "norm_label": "tg()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L42"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_wg",
-      "label": "wg()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "T",
-      "file_type": "code",
-      "norm_label": "wg()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L17"
-    },
-    {
-      "id": "src_components_dashboardchart_customtooltip",
-      "label": "CustomTooltip()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "DashboardChart.tsx",
-      "file_type": "code",
-      "norm_label": "customtooltip()",
-      "source_file": "src/components/DashboardChart.tsx",
-      "source_location": "L20"
-    },
-    {
-      "id": "src_components_dashboardchart_dashboardchart",
-      "label": "DashboardChart()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "DashboardChart.tsx",
-      "file_type": "code",
-      "norm_label": "dashboardchart()",
-      "source_file": "src/components/DashboardChart.tsx",
-      "source_location": "L34"
-    },
-    {
-      "id": "src_lib_duplicatedetection_findduplicate",
-      "label": "findDuplicate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "duplicateDetection.ts",
-      "file_type": "code",
-      "norm_label": "findduplicate()",
-      "source_file": "src/lib/duplicateDetection.ts",
-      "source_location": "L41"
-    },
-    {
-      "id": "src_lib_duplicatedetection_jaccardsimilarity",
-      "label": "jaccardSimilarity()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "duplicateDetection.ts",
-      "file_type": "code",
-      "norm_label": "jaccardsimilarity()",
-      "source_file": "src/lib/duplicateDetection.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "src_lib_duplicatedetection_normalize",
-      "label": "normalize()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "duplicateDetection.ts",
-      "file_type": "code",
-      "norm_label": "normalize()",
-      "source_file": "src/lib/duplicateDetection.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_lib_duplicatedetection_tokenize",
-      "label": "tokenize()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "duplicateDetection.ts",
-      "file_type": "code",
-      "norm_label": "tokenize()",
-      "source_file": "src/lib/duplicateDetection.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui",
-      "label": "ui()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 93,
-      "community_name": "ui",
-      "file_type": "code",
-      "norm_label": "ui()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L148"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui_destroy",
-      "label": ".__destroy__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 93,
-      "community_name": "ui",
-      "file_type": "code",
-      "norm_label": ".__destroy__()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L149"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui_get_script_from_script_id",
-      "label": ".get_script_from_script_id()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 93,
-      "community_name": "ui",
-      "file_type": "code",
-      "norm_label": ".get_script_from_script_id()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L148"
-    },
-    {
-      "id": "public_tesseract_tesseract_core_simd_lstm_wasm_ui_get_script_table_size",
-      "label": ".get_script_table_size()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 93,
-      "community_name": "ui",
-      "file_type": "code",
-      "norm_label": ".get_script_table_size()",
-      "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
-      "source_location": "L149"
     },
     {
       "id": "index_html_document",
@@ -16434,48 +16434,48 @@
       "source_location": "L41"
     },
     {
-      "id": "src_contexts_claimscontext",
-      "label": "ClaimsContext.tsx",
+      "id": "src_contexts_notificationscontext",
+      "label": "NotificationsContext.tsx",
       "_origin": "ast",
       "community": 0,
       "community_name": "firebaseService.ts",
       "file_type": "code",
-      "norm_label": "claimscontext.tsx",
-      "source_file": "src/contexts/ClaimsContext.tsx",
+      "norm_label": "notificationscontext.tsx",
+      "source_file": "src/contexts/NotificationsContext.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_contexts_claimscontext_claimscontext",
-      "label": "ClaimsContext",
+      "id": "src_contexts_notificationscontext_default_seed_notifications",
+      "label": "DEFAULT_SEED_NOTIFICATIONS",
       "_origin": "ast",
       "community": 0,
       "community_name": "firebaseService.ts",
       "file_type": "code",
-      "norm_label": "claimscontext",
-      "source_file": "src/contexts/ClaimsContext.tsx",
-      "source_location": "L74"
+      "norm_label": "default_seed_notifications",
+      "source_file": "src/contexts/NotificationsContext.tsx",
+      "source_location": "L11"
     },
     {
-      "id": "src_contexts_claimscontext_defaultclaimscontext",
-      "label": "defaultClaimsContext",
+      "id": "src_contexts_notificationscontext_defaultnotificationscontext",
+      "label": "defaultNotificationsContext",
       "_origin": "ast",
       "community": 0,
       "community_name": "firebaseService.ts",
       "file_type": "code",
-      "norm_label": "defaultclaimscontext",
-      "source_file": "src/contexts/ClaimsContext.tsx",
-      "source_location": "L51"
+      "norm_label": "defaultnotificationscontext",
+      "source_file": "src/contexts/NotificationsContext.tsx",
+      "source_location": "L60"
     },
     {
-      "id": "src_contexts_claimscontext_seed_claims",
-      "label": "SEED_CLAIMS",
+      "id": "src_contexts_notificationscontext_notificationscontext",
+      "label": "NotificationsContext",
       "_origin": "ast",
       "community": 0,
       "community_name": "firebaseService.ts",
       "file_type": "code",
-      "norm_label": "seed_claims",
-      "source_file": "src/contexts/ClaimsContext.tsx",
-      "source_location": "L134"
+      "norm_label": "notificationscontext",
+      "source_file": "src/contexts/NotificationsContext.tsx",
+      "source_location": "L68"
     },
     {
       "id": "src_contexts_userscontext",
@@ -16509,39 +16509,6 @@
       "norm_label": "userscontext",
       "source_file": "src/contexts/UsersContext.tsx",
       "source_location": "L27"
-    },
-    {
-      "id": "src_lib_confidencescore",
-      "label": "confidenceScore.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "confidencescore.ts",
-      "source_file": "src/lib/confidenceScore.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_confidencescore_hq_domains",
-      "label": "HQ_DOMAINS",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "hq_domains",
-      "source_file": "src/lib/confidenceScore.ts",
-      "source_location": "L62"
-    },
-    {
-      "id": "src_lib_confidencescore_mq_domains",
-      "label": "MQ_DOMAINS",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "code",
-      "norm_label": "mq_domains",
-      "source_file": "src/lib/confidenceScore.ts",
-      "source_location": "L63"
     },
     {
       "id": "src_lib_firebase",
@@ -16610,6 +16577,17 @@
       "source_location": "L72"
     },
     {
+      "id": "src_lib_firebase_isfirebaseconfigured",
+      "label": "isFirebaseConfigured",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "firebaseService.ts",
+      "file_type": "code",
+      "norm_label": "isfirebaseconfigured",
+      "source_file": "src/lib/firebase.ts",
+      "source_location": "L54"
+    },
+    {
       "id": "src_services_firebaseservice",
       "label": "firebaseService.ts",
       "_origin": "ast",
@@ -16630,17 +16608,6 @@
       "norm_label": "auth_error_messages",
       "source_file": "src/services/firebaseService.ts",
       "source_location": "L32"
-    },
-    {
-      "id": "src_contexts_claimscontext_rationale_785",
-      "label": "NOTE: These getters are called during render (e.g. ClaimDetail), so they",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "firebaseService.ts",
-      "file_type": "rationale",
-      "norm_label": "note: these getters are called during render (e.g. claimdetail), so they",
-      "source_file": "src/contexts/ClaimsContext.tsx",
-      "source_location": "L785"
     },
     {
       "id": "src_main",
@@ -16838,6 +16805,17 @@
       "source_location": "L26"
     },
     {
+      "id": "src_app_verifydetail",
+      "label": "VerifyDetail",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "VerifyDetail.tsx",
+      "file_type": "code",
+      "norm_label": "verifydetail",
+      "source_file": "src/App.tsx",
+      "source_location": "L22"
+    },
+    {
       "id": "src_app_verifyqueue",
       "label": "VerifyQueue",
       "_origin": "ast",
@@ -16849,26 +16827,15 @@
       "source_location": "L21"
     },
     {
-      "id": "src_components_breadcrumbs",
-      "label": "Breadcrumbs.tsx",
+      "id": "src_components_errorboundary",
+      "label": "ErrorBoundary.tsx",
       "_origin": "ast",
       "community": 12,
       "community_name": "VerifyDetail.tsx",
       "file_type": "code",
-      "norm_label": "breadcrumbs.tsx",
-      "source_file": "src/components/Breadcrumbs.tsx",
+      "norm_label": "errorboundary.tsx",
+      "source_file": "src/components/ErrorBoundary.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_breadcrumbs_label_map",
-      "label": "LABEL_MAP",
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "label_map",
-      "source_file": "src/components/Breadcrumbs.tsx",
-      "source_location": "L5"
     },
     {
       "id": "src_components_seo",
@@ -16926,6 +16893,17 @@
       "source_location": "L5"
     },
     {
+      "id": "src_components_ui_categorybadge_categorybadge",
+      "label": "CategoryBadge",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "VerifyDetail.tsx",
+      "file_type": "code",
+      "norm_label": "categorybadge",
+      "source_file": "src/components/ui/CategoryBadge.tsx",
+      "source_location": "L22"
+    },
+    {
       "id": "src_components_ui_emptystate",
       "label": "EmptyState.tsx",
       "_origin": "ast",
@@ -16979,50 +16957,6 @@
       "norm_label": "sourcequalitydot",
       "source_file": "src/components/ui/SourceQualityDot.tsx",
       "source_location": "L17"
-    },
-    {
-      "id": "src_components_verdictstamp",
-      "label": "VerdictStamp.tsx",
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "verdictstamp.tsx",
-      "source_file": "src/components/VerdictStamp.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_verdictstamp_verdict_icons",
-      "label": "VERDICT_ICONS",
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "verdict_icons",
-      "source_file": "src/components/VerdictStamp.tsx",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_components_verdictstamp_verdictstamp",
-      "label": "VerdictStamp",
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "verdictstamp",
-      "source_file": "src/components/VerdictStamp.tsx",
-      "source_location": "L35"
-    },
-    {
-      "id": "src_lib_types_verdict_meta",
-      "label": "VERDICT_META",
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "VerifyDetail.tsx",
-      "file_type": "code",
-      "norm_label": "verdict_meta",
-      "source_file": "src/lib/types.ts",
-      "source_location": "L74"
     },
     {
       "id": "src_pages_claimdetail",
@@ -17124,61 +17058,6 @@
       "source_location": "L27"
     },
     {
-      "id": "src_app_profile",
-      "label": "Profile",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "profile",
-      "source_file": "src/App.tsx",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_components_authlayout",
-      "label": "AuthLayout.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "authlayout.tsx",
-      "source_file": "src/components/AuthLayout.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_authlayout_benefits",
-      "label": "BENEFITS",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "benefits",
-      "source_file": "src/components/AuthLayout.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "src_components_authlayout_stats",
-      "label": "STATS",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "stats",
-      "source_file": "src/components/AuthLayout.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_components_claimcard",
-      "label": "ClaimCard.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "claimcard.tsx",
-      "source_file": "src/components/ClaimCard.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "src_components_ui_badge",
       "label": "Badge.tsx",
       "_origin": "ast",
@@ -17245,28 +17124,6 @@
       "source_location": "L6"
     },
     {
-      "id": "src_components_ui_categorybadge_categorybadge",
-      "label": "CategoryBadge",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "categorybadge",
-      "source_file": "src/components/ui/CategoryBadge.tsx",
-      "source_location": "L22"
-    },
-    {
-      "id": "src_components_ui_modal",
-      "label": "Modal.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "modal.tsx",
-      "source_file": "src/components/ui/Modal.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "src_components_ui_verdictpill",
       "label": "VerdictPill.tsx",
       "_origin": "ast",
@@ -17289,15 +17146,37 @@
       "source_location": "L7"
     },
     {
-      "id": "src_components_ui_verdictpill_verdictpill",
-      "label": "VerdictPill",
+      "id": "src_components_verdictstamp",
+      "label": "VerdictStamp.tsx",
       "_origin": "ast",
       "community": 13,
       "community_name": "Admin.tsx",
       "file_type": "code",
-      "norm_label": "verdictpill",
-      "source_file": "src/components/ui/VerdictPill.tsx",
-      "source_location": "L19"
+      "norm_label": "verdictstamp.tsx",
+      "source_file": "src/components/VerdictStamp.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_verdictstamp_verdict_icons",
+      "label": "VERDICT_ICONS",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Admin.tsx",
+      "file_type": "code",
+      "norm_label": "verdict_icons",
+      "source_file": "src/components/VerdictStamp.tsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_components_verdictstamp_verdictstamp",
+      "label": "VerdictStamp",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Admin.tsx",
+      "file_type": "code",
+      "norm_label": "verdictstamp",
+      "source_file": "src/components/VerdictStamp.tsx",
+      "source_location": "L35"
     },
     {
       "id": "src_lib_types",
@@ -17309,6 +17188,17 @@
       "norm_label": "types.ts",
       "source_file": "src/lib/types.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "src_lib_types_verdict_meta",
+      "label": "VERDICT_META",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Admin.tsx",
+      "file_type": "code",
+      "norm_label": "verdict_meta",
+      "source_file": "src/lib/types.ts",
+      "source_location": "L74"
     },
     {
       "id": "src_pages_admin",
@@ -17342,17 +17232,6 @@
       "norm_label": "verdict_colors",
       "source_file": "src/pages/Admin.tsx",
       "source_location": "L91"
-    },
-    {
-      "id": "src_pages_profile",
-      "label": "Profile.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "Admin.tsx",
-      "file_type": "code",
-      "norm_label": "profile.tsx",
-      "source_file": "src/pages/Profile.tsx",
-      "source_location": "L1"
     },
     {
       "id": "src_components_factcheckcard",
@@ -17454,6 +17333,39 @@
       "source_location": "L20"
     },
     {
+      "id": "src_app_dashboard",
+      "label": "Dashboard",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "dashboard",
+      "source_file": "src/App.tsx",
+      "source_location": "L23"
+    },
+    {
+      "id": "src_app_home",
+      "label": "Home",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "home",
+      "source_file": "src/App.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_app_profile",
+      "label": "Profile",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "profile",
+      "source_file": "src/App.tsx",
+      "source_location": "L24"
+    },
+    {
       "id": "src_app_signup",
       "label": "SignUp",
       "_origin": "ast",
@@ -17465,15 +17377,37 @@
       "source_location": "L18"
     },
     {
-      "id": "src_app_verifydetail",
-      "label": "VerifyDetail",
+      "id": "src_components_authlayout",
+      "label": "AuthLayout.tsx",
       "_origin": "ast",
       "community": 17,
       "community_name": "App.tsx",
       "file_type": "code",
-      "norm_label": "verifydetail",
-      "source_file": "src/App.tsx",
-      "source_location": "L22"
+      "norm_label": "authlayout.tsx",
+      "source_file": "src/components/AuthLayout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_authlayout_benefits",
+      "label": "BENEFITS",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "benefits",
+      "source_file": "src/components/AuthLayout.tsx",
+      "source_location": "L8"
+    },
+    {
+      "id": "src_components_authlayout_stats",
+      "label": "STATS",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "stats",
+      "source_file": "src/components/AuthLayout.tsx",
+      "source_location": "L15"
     },
     {
       "id": "src_components_footer",
@@ -17484,6 +17418,17 @@
       "file_type": "code",
       "norm_label": "footer.tsx",
       "source_file": "src/components/Footer.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_navbar",
+      "label": "Navbar.tsx",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "navbar.tsx",
+      "source_file": "src/components/Navbar.tsx",
       "source_location": "L1"
     },
     {
@@ -17507,6 +17452,39 @@
       "norm_label": "protectedroute.tsx",
       "source_file": "src/components/ProtectedRoute.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_ui_themetoggle",
+      "label": "ThemeToggle.tsx",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "themetoggle.tsx",
+      "source_file": "src/components/ui/ThemeToggle.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_contexts_themecontext",
+      "label": "ThemeContext.tsx",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "themecontext.tsx",
+      "source_file": "src/contexts/ThemeContext.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_contexts_themecontext_themecontext",
+      "label": "ThemeContext",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "themecontext",
+      "source_file": "src/contexts/ThemeContext.tsx",
+      "source_location": "L11"
     },
     {
       "id": "src_pages_signup",
@@ -17546,7 +17524,7 @@
       "label": "NotificationBell.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
       "norm_label": "notificationbell.tsx",
       "source_file": "src/components/NotificationBell.tsx",
@@ -17557,7 +17535,7 @@
       "label": "TYPE_CONFIG",
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
       "norm_label": "type_config",
       "source_file": "src/components/NotificationBell.tsx",
@@ -17568,88 +17546,22 @@
       "label": "Skeletons.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
       "norm_label": "skeletons.tsx",
       "source_file": "src/components/ui/Skeletons.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_contexts_notificationscontext",
-      "label": "NotificationsContext.tsx",
+      "id": "src_pages_profile",
+      "label": "Profile.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "NotificationsContext.tsx",
+      "community_name": "Profile.tsx",
       "file_type": "code",
-      "norm_label": "notificationscontext.tsx",
-      "source_file": "src/contexts/NotificationsContext.tsx",
+      "norm_label": "profile.tsx",
+      "source_file": "src/pages/Profile.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_contexts_notificationscontext_default_seed_notifications",
-      "label": "DEFAULT_SEED_NOTIFICATIONS",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "NotificationsContext.tsx",
-      "file_type": "code",
-      "norm_label": "default_seed_notifications",
-      "source_file": "src/contexts/NotificationsContext.tsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "src_contexts_notificationscontext_defaultnotificationscontext",
-      "label": "defaultNotificationsContext",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "NotificationsContext.tsx",
-      "file_type": "code",
-      "norm_label": "defaultnotificationscontext",
-      "source_file": "src/contexts/NotificationsContext.tsx",
-      "source_location": "L60"
-    },
-    {
-      "id": "src_contexts_notificationscontext_notificationscontext",
-      "label": "NotificationsContext",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "NotificationsContext.tsx",
-      "file_type": "code",
-      "norm_label": "notificationscontext",
-      "source_file": "src/contexts/NotificationsContext.tsx",
-      "source_location": "L68"
-    },
-    {
-      "id": "src_lib_firebase_isfirebaseconfigured",
-      "label": "isFirebaseConfigured",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "NotificationsContext.tsx",
-      "file_type": "code",
-      "norm_label": "isfirebaseconfigured",
-      "source_file": "src/lib/firebase.ts",
-      "source_location": "L54"
-    },
-    {
-      "id": "src_app_dashboard",
-      "label": "Dashboard",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "dashboard",
-      "source_file": "src/App.tsx",
-      "source_location": "L23"
-    },
-    {
-      "id": "src_app_home",
-      "label": "Home",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "home",
-      "source_file": "src/App.tsx",
-      "source_location": "L16"
     },
     {
       "id": "src_components_animatedcounter",
@@ -17674,6 +17586,39 @@
       "source_location": "L10"
     },
     {
+      "id": "src_components_breadcrumbs",
+      "label": "Breadcrumbs.tsx",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "breadcrumbs.tsx",
+      "source_file": "src/components/Breadcrumbs.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_breadcrumbs_label_map",
+      "label": "LABEL_MAP",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "label_map",
+      "source_file": "src/components/Breadcrumbs.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_components_claimcard",
+      "label": "ClaimCard.tsx",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "claimcard.tsx",
+      "source_file": "src/components/ClaimCard.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_claimcard_claimcard",
       "label": "ClaimCard",
       "_origin": "ast",
@@ -17685,15 +17630,26 @@
       "source_location": "L16"
     },
     {
-      "id": "src_components_navbar",
-      "label": "Navbar.tsx",
+      "id": "src_components_dashboardchart",
+      "label": "DashboardChart.tsx",
       "_origin": "ast",
       "community": 19,
       "community_name": "cn",
       "file_type": "code",
-      "norm_label": "navbar.tsx",
-      "source_file": "src/components/Navbar.tsx",
+      "norm_label": "dashboardchart.tsx",
+      "source_file": "src/components/DashboardChart.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_dashboardchart_category_colors",
+      "label": "CATEGORY_COLORS",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "cn",
+      "file_type": "code",
+      "norm_label": "category_colors",
+      "source_file": "src/components/DashboardChart.tsx",
+      "source_location": "L3"
     },
     {
       "id": "src_components_ui_avatar",
@@ -17817,37 +17773,15 @@
       "source_location": "L1"
     },
     {
-      "id": "src_components_ui_themetoggle",
-      "label": "ThemeToggle.tsx",
+      "id": "src_components_ui_verdictpill_verdictpill",
+      "label": "VerdictPill",
       "_origin": "ast",
       "community": 19,
       "community_name": "cn",
       "file_type": "code",
-      "norm_label": "themetoggle.tsx",
-      "source_file": "src/components/ui/ThemeToggle.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_contexts_themecontext",
-      "label": "ThemeContext.tsx",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "themecontext.tsx",
-      "source_file": "src/contexts/ThemeContext.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_contexts_themecontext_themecontext",
-      "label": "ThemeContext",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "cn",
-      "file_type": "code",
-      "norm_label": "themecontext",
-      "source_file": "src/contexts/ThemeContext.tsx",
-      "source_location": "L11"
+      "norm_label": "verdictpill",
+      "source_file": "src/components/ui/VerdictPill.tsx",
+      "source_location": "L19"
     },
     {
       "id": "src_lib_utils",
@@ -18433,17 +18367,6 @@
       "source_location": "L9"
     },
     {
-      "id": "src_components_ui_input_textarea",
-      "label": "Textarea",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "security.ts",
-      "file_type": "code",
-      "norm_label": "textarea",
-      "source_file": "src/components/ui/Input.tsx",
-      "source_location": "L47"
-    },
-    {
       "id": "src_lib_security",
       "label": "security.ts",
       "_origin": "ast",
@@ -18987,7 +18910,7 @@
       "label": "C",
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
       "norm_label": "c",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -18998,7 +18921,7 @@
       "label": ".bg()",
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
       "norm_label": ".bg()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -19009,7 +18932,7 @@
       "label": ".read()",
       "_origin": "ast",
       "community": 54,
-      "community_name": ".bg",
+      "community_name": "r",
       "file_type": "code",
       "norm_label": ".read()",
       "source_file": "public/tesseract/tesseract-core-simd-lstm.wasm.js",
@@ -19058,6 +18981,28 @@
       "norm_label": "submit",
       "source_file": "src/App.tsx",
       "source_location": "L19"
+    },
+    {
+      "id": "src_components_ui_input_textarea",
+      "label": "Textarea",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "Submit.tsx",
+      "file_type": "code",
+      "norm_label": "textarea",
+      "source_file": "src/components/ui/Input.tsx",
+      "source_location": "L47"
+    },
+    {
+      "id": "src_components_ui_modal",
+      "label": "Modal.tsx",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "Submit.tsx",
+      "file_type": "code",
+      "norm_label": "modal.tsx",
+      "source_file": "src/components/ui/Modal.tsx",
+      "source_location": "L1"
     },
     {
       "id": "src_lib_imagecompression",
@@ -19289,210 +19234,6 @@
       "norm_label": "typecheck",
       "source_file": "package.json",
       "source_location": "L10"
-    },
-    {
-      "id": "design_system_factstamp_master",
-      "label": "MASTER.md",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "master.md",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "design_system_factstamp_master_additional_forbidden_patterns",
-      "label": "Additional Forbidden Patterns",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "additional forbidden patterns",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L179"
-    },
-    {
-      "id": "design_system_factstamp_master_anti_patterns_do_not_use",
-      "label": "Anti-Patterns (Do NOT Use)",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "anti-patterns (do not use)",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L174"
-    },
-    {
-      "id": "design_system_factstamp_master_buttons",
-      "label": "Buttons",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "buttons",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L66"
-    },
-    {
-      "id": "design_system_factstamp_master_cards",
-      "label": "Cards",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "cards",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L98"
-    },
-    {
-      "id": "design_system_factstamp_master_color_palette",
-      "label": "Color Palette",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "color palette",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L17"
-    },
-    {
-      "id": "design_system_factstamp_master_component_specs",
-      "label": "Component Specs",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "component specs",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L64"
-    },
-    {
-      "id": "design_system_factstamp_master_design_system_master_file",
-      "label": "Design System Master File",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "design system master file",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "design_system_factstamp_master_global_rules",
-      "label": "Global Rules",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "global rules",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L15"
-    },
-    {
-      "id": "design_system_factstamp_master_inputs",
-      "label": "Inputs",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "inputs",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L116"
-    },
-    {
-      "id": "design_system_factstamp_master_modals",
-      "label": "Modals",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "modals",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L134"
-    },
-    {
-      "id": "design_system_factstamp_master_page_pattern",
-      "label": "Page Pattern",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "page pattern",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L164"
-    },
-    {
-      "id": "design_system_factstamp_master_pre_delivery_checklist",
-      "label": "Pre-Delivery Checklist",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "pre-delivery checklist",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L190"
-    },
-    {
-      "id": "design_system_factstamp_master_shadow_depths",
-      "label": "Shadow Depths",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "shadow depths",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L53"
-    },
-    {
-      "id": "design_system_factstamp_master_spacing_variables",
-      "label": "Spacing Variables",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "spacing variables",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L41"
-    },
-    {
-      "id": "design_system_factstamp_master_style_guidelines",
-      "label": "Style Guidelines",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "style guidelines",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L154"
-    },
-    {
-      "id": "design_system_factstamp_master_typography",
-      "label": "Typography",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "Design System Master File",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "typography",
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L29"
     },
     {
       "id": "public_tesseract_tesseract_core_lstm_wasm_sb_c",
@@ -19792,134 +19533,102 @@
       "source_location": "L23"
     },
     {
-      "id": "design_system_factstamp_pages_dashboard",
-      "label": "dashboard.md",
+      "id": "src_contexts_claimscontext",
+      "label": "ClaimsContext.tsx",
       "_origin": "ast",
       "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "dashboard.md",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "claimscontext.tsx",
+      "source_file": "src/contexts/ClaimsContext.tsx",
       "source_location": "L1"
     },
     {
-      "id": "design_system_factstamp_pages_dashboard_color_overrides",
-      "label": "Color Overrides",
+      "id": "src_contexts_claimscontext_claimscontext",
+      "label": "ClaimsContext",
       "_origin": "ast",
       "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "color overrides",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L28"
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "claimscontext",
+      "source_file": "src/contexts/ClaimsContext.tsx",
+      "source_location": "L74"
     },
     {
-      "id": "design_system_factstamp_pages_dashboard_component_overrides",
-      "label": "Component Overrides",
+      "id": "src_contexts_claimscontext_defaultclaimscontext",
+      "label": "defaultClaimsContext",
       "_origin": "ast",
       "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "component overrides",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L32"
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "defaultclaimscontext",
+      "source_file": "src/contexts/ClaimsContext.tsx",
+      "source_location": "L51"
     },
     {
-      "id": "design_system_factstamp_pages_dashboard_dashboard_page_overrides",
-      "label": "Dashboard Page Overrides",
+      "id": "src_contexts_claimscontext_seed_claims",
+      "label": "SEED_CLAIMS",
       "_origin": "ast",
       "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "dashboard page overrides",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "seed_claims",
+      "source_file": "src/contexts/ClaimsContext.tsx",
+      "source_location": "L134"
+    },
+    {
+      "id": "src_lib_confidencescore",
+      "label": "confidenceScore.ts",
+      "_origin": "ast",
+      "community": 70,
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "confidencescore.ts",
+      "source_file": "src/lib/confidenceScore.ts",
       "source_location": "L1"
     },
     {
-      "id": "design_system_factstamp_pages_dashboard_layout_overrides",
-      "label": "Layout Overrides",
+      "id": "src_lib_confidencescore_hq_domains",
+      "label": "HQ_DOMAINS",
       "_origin": "ast",
       "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "layout overrides",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L14"
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "hq_domains",
+      "source_file": "src/lib/confidenceScore.ts",
+      "source_location": "L62"
     },
     {
-      "id": "design_system_factstamp_pages_dashboard_page_specific_components",
-      "label": "Page-Specific Components",
+      "id": "src_lib_confidencescore_mq_domains",
+      "label": "MQ_DOMAINS",
       "_origin": "ast",
       "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "page-specific components",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L38"
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "code",
+      "norm_label": "mq_domains",
+      "source_file": "src/lib/confidenceScore.ts",
+      "source_location": "L63"
     },
     {
-      "id": "design_system_factstamp_pages_dashboard_page_specific_rules",
-      "label": "Page-Specific Rules",
+      "id": "src_contexts_claimscontext_rationale_785",
+      "label": "NOTE: These getters are called during render (e.g. ClaimDetail), so they",
       "_origin": "ast",
       "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "page-specific rules",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L12"
+      "community_name": "ClaimsContext.tsx",
+      "file_type": "rationale",
+      "norm_label": "note: these getters are called during render (e.g. claimdetail), so they",
+      "source_file": "src/contexts/ClaimsContext.tsx",
+      "source_location": "L785"
     },
     {
-      "id": "design_system_factstamp_pages_dashboard_recommendations",
-      "label": "Recommendations",
-      "_origin": "ast",
-      "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "recommendations",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L44"
-    },
-    {
-      "id": "design_system_factstamp_pages_dashboard_spacing_overrides",
-      "label": "Spacing Overrides",
-      "_origin": "ast",
-      "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "spacing overrides",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L20"
-    },
-    {
-      "id": "design_system_factstamp_pages_dashboard_typography_overrides",
-      "label": "Typography Overrides",
-      "_origin": "ast",
-      "community": 70,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "typography overrides",
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_components_errorboundary",
-      "label": "ErrorBoundary.tsx",
+      "id": "src_lib_duplicatedetection",
+      "label": "duplicateDetection.ts",
       "_origin": "ast",
       "community": 72,
-      "community_name": "ErrorBoundary.tsx",
+      "community_name": "ErrorBoundary",
       "file_type": "code",
-      "norm_label": "errorboundary.tsx",
-      "source_file": "src/components/ErrorBoundary.tsx",
+      "norm_label": "duplicatedetection.ts",
+      "source_file": "src/lib/duplicateDetection.ts",
       "source_location": "L1"
     },
     {
@@ -19976,126 +19685,6 @@
       "norm_label": "version",
       "source_file": "package.json",
       "source_location": "L4"
-    },
-    {
-      "id": "design_system_factstamp_pages_home",
-      "label": "home.md",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "home.md",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_color_overrides",
-      "label": "Color Overrides",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "color overrides",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L28"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_component_overrides",
-      "label": "Component Overrides",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "component overrides",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L32"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_home_page_overrides",
-      "label": "Home Page Overrides",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "home page overrides",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_layout_overrides",
-      "label": "Layout Overrides",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "layout overrides",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L14"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_page_specific_components",
-      "label": "Page-Specific Components",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "page-specific components",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L40"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_page_specific_rules",
-      "label": "Page-Specific Rules",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "page-specific rules",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L12"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_recommendations",
-      "label": "Recommendations",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "recommendations",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L46"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_spacing_overrides",
-      "label": "Spacing Overrides",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "spacing overrides",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L20"
-    },
-    {
-      "id": "design_system_factstamp_pages_home_typography_overrides",
-      "label": "Typography Overrides",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "Page-Specific Rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "typography overrides",
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L24"
     },
     {
       "id": "agent_skills_ui_ux_pro_max_skill",
@@ -20592,39 +20181,6 @@
       "norm_label": "verified_seeds",
       "source_file": "scripts/seed-db.mjs",
       "source_location": "L98"
-    },
-    {
-      "id": "src_components_dashboardchart",
-      "label": "DashboardChart.tsx",
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "DashboardChart.tsx",
-      "file_type": "code",
-      "norm_label": "dashboardchart.tsx",
-      "source_file": "src/components/DashboardChart.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_dashboardchart_category_colors",
-      "label": "CATEGORY_COLORS",
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "DashboardChart.tsx",
-      "file_type": "code",
-      "norm_label": "category_colors",
-      "source_file": "src/components/DashboardChart.tsx",
-      "source_location": "L3"
-    },
-    {
-      "id": "src_lib_duplicatedetection",
-      "label": "duplicateDetection.ts",
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "duplicateDetection.ts",
-      "file_type": "code",
-      "norm_label": "duplicatedetection.ts",
-      "source_file": "src/lib/duplicateDetection.ts",
-      "source_location": "L1"
     },
     {
       "id": "design_design_system",
@@ -43165,380 +42721,6 @@
       "confidence_score": 1.0,
       "source_file": "CHANGELOG.md",
       "source_location": "L77",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master",
-      "target": "design_system_factstamp_master_design_system_master_file",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_anti_patterns_do_not_use",
-      "target": "design_system_factstamp_master_additional_forbidden_patterns",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L179",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_component_specs",
-      "target": "design_system_factstamp_master_inputs",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L116",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_component_specs",
-      "target": "design_system_factstamp_master_modals",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L134",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_component_specs",
-      "target": "design_system_factstamp_master_buttons",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L66",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_component_specs",
-      "target": "design_system_factstamp_master_cards",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L98",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_design_system_master_file",
-      "target": "design_system_factstamp_master_global_rules",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_design_system_master_file",
-      "target": "design_system_factstamp_master_style_guidelines",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L154",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_design_system_master_file",
-      "target": "design_system_factstamp_master_anti_patterns_do_not_use",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L174",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_design_system_master_file",
-      "target": "design_system_factstamp_master_pre_delivery_checklist",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L190",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_design_system_master_file",
-      "target": "design_system_factstamp_master_component_specs",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L64",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_global_rules",
-      "target": "design_system_factstamp_master_color_palette",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_global_rules",
-      "target": "design_system_factstamp_master_typography",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L29",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_global_rules",
-      "target": "design_system_factstamp_master_spacing_variables",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L41",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_global_rules",
-      "target": "design_system_factstamp_master_shadow_depths",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L53",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_master_style_guidelines",
-      "target": "design_system_factstamp_master_page_pattern",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/MASTER.md",
-      "source_location": "L164",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard",
-      "target": "design_system_factstamp_pages_dashboard_dashboard_page_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard_dashboard_page_overrides",
-      "target": "design_system_factstamp_pages_dashboard_page_specific_rules",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard_dashboard_page_overrides",
-      "target": "design_system_factstamp_pages_dashboard_page_specific_components",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L38",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard_dashboard_page_overrides",
-      "target": "design_system_factstamp_pages_dashboard_recommendations",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L44",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard_page_specific_rules",
-      "target": "design_system_factstamp_pages_dashboard_layout_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard_page_specific_rules",
-      "target": "design_system_factstamp_pages_dashboard_spacing_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L20",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard_page_specific_rules",
-      "target": "design_system_factstamp_pages_dashboard_typography_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard_page_specific_rules",
-      "target": "design_system_factstamp_pages_dashboard_color_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_dashboard_page_specific_rules",
-      "target": "design_system_factstamp_pages_dashboard_component_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/dashboard.md",
-      "source_location": "L32",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home",
-      "target": "design_system_factstamp_pages_home_home_page_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home_home_page_overrides",
-      "target": "design_system_factstamp_pages_home_page_specific_rules",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home_home_page_overrides",
-      "target": "design_system_factstamp_pages_home_page_specific_components",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L40",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home_home_page_overrides",
-      "target": "design_system_factstamp_pages_home_recommendations",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L46",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home_page_specific_rules",
-      "target": "design_system_factstamp_pages_home_layout_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home_page_specific_rules",
-      "target": "design_system_factstamp_pages_home_spacing_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L20",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home_page_specific_rules",
-      "target": "design_system_factstamp_pages_home_typography_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home_page_specific_rules",
-      "target": "design_system_factstamp_pages_home_color_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "design_system_factstamp_pages_home_page_specific_rules",
-      "target": "design_system_factstamp_pages_home_component_overrides",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "design-system/factstamp/pages/home.md",
-      "source_location": "L32",
       "weight": 1.0
     },
     {

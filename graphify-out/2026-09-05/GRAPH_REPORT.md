@@ -1,11 +1,11 @@
 # Graph Report - FactStamp  (2026-09-05)
 
 ## Corpus Check
-- 89 files · ~78,671 words
+- 86 files · ~77,583 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1743 nodes · 3640 edges · 94 communities (65 shown, 26 thin omitted)
+- 1706 nodes · 3606 edges · 89 communities (59 shown, 27 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 206 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
@@ -33,7 +33,7 @@
 - Claim
 - worker.min.js
 - App.tsx
-- NotificationsContext.tsx
+- Profile.tsx
 - cn
 - tesseract-core-lstm.wasm.js
 - tesseract-core.wasm.js
@@ -66,10 +66,10 @@
 - open
 - Ai
 - Ai
-- .bg
+- r
 - A
 - open
-- O
+- bi
 - r
 - bi
 - z
@@ -78,19 +78,19 @@
 - LoadingButton.tsx
 - scripts
 - Ha
-- Design System Master File
+- Ha
 - r
 - $h
 - write
-- Page-Specific Rules
+- ClaimsContext.tsx
 - write
-- ErrorBoundary.tsx
+- ErrorBoundary
 - $h
 - package.json
 - Ha
 - B
 - La
-- Page-Specific Rules
+- La
 - La
 - Aa
 - hi
@@ -101,11 +101,6 @@
 - V
 - wi
 - xi
-- B
-- T
-- DashboardChart.tsx
-- duplicateDetection.ts
-- ui
 
 ## God Nodes (most connected - your core abstractions)
 1. `S()` - 67 edges
@@ -139,11 +134,11 @@
 - **FactStamp Consensus and Verification Flow** — readme_factstamp, readme_quorum_consensus_engine, readme_shareable_png_cards [INFERRED 0.85]
 - **Theme Synchronization and Zero-FOUC Pipeline** — index_theme_initializer, src_contexts_themecontext_themeprovider, src_components_ui_themetoggle [INFERRED 0.85]
 
-## Communities (94 total, 26 thin omitted)
+## Communities (89 total, 27 thin omitted)
 
 ### Community 0 - "firebaseService.ts"
-Cohesion: 0.07
-Nodes (56): AuthContext, AuthContextValue, AuthProvider(), defaultAuthContext, ClaimsContext, ClaimsProvider(), computeUpdatedClaim(), defaultClaimsContext (+48 more)
+Cohesion: 0.09
+Nodes (42): AuthContext, AuthContextValue, AuthProvider(), defaultAuthContext, DEFAULT_SEED_NOTIFICATIONS, defaultNotificationsContext, NotificationsContext, NotificationsContextValue (+34 more)
 
 ### Community 1 - "FactStamp Platform"
 Cohesion: 0.12
@@ -155,7 +150,7 @@ Nodes (42): BM25, detect_domain(), _load_csv(), Lowercase, split, remove punctua
 
 ### Community 3 - "security.ts"
 Cohesion: 0.14
-Nodes (25): SignIn, AdminRoute(), AdminRouteProps, Input, InputProps, Textarea, TextareaProps, ALLOWED_IMAGE_EXTENSIONS (+17 more)
+Nodes (25): SignIn, AdminRoute(), AdminRouteProps, Input, InputProps, TextareaProps, ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_MIMES (+17 more)
 
 ### Community 4 - "dependencies"
 Cohesion: 0.08
@@ -166,8 +161,8 @@ Cohesion: 0.12
 Nodes (17): firebase-tools, devDependencies, firebase-tools, tailwindcss, @tailwindcss/vite, @types/react, @types/react-dom, typescript (+9 more)
 
 ### Community 6 - "Submit.tsx"
-Cohesion: 0.15
-Nodes (17): Submit, compressImageToDataUrl(), estimateBytes(), validateImageUpload(), CATEGORY_OPTIONS, SAMPLE_FORWARDS, SAMPLE_SCREENSHOTS, Submit() (+9 more)
+Cohesion: 0.11
+Nodes (23): Submit, CategoryBadgeProps, Textarea, Modal(), ModalProps, compressImageToDataUrl(), estimateBytes(), sanitizeTextInput() (+15 more)
 
 ### Community 7 - "compilerOptions"
 Cohesion: 0.08
@@ -190,36 +185,36 @@ Cohesion: 0.25
 Nodes (7): FactStamp Development Changelog & Architecture Milestones, Milestone 1: Admin Command Center Dark / Light Theme Toggle, Milestone 2: Graphify Codebase Knowledge Graph Integration, Milestone 3: Universal Sliding Dual-Icon Theme Toggle Across All Pages, Milestone 4: Verification Queue Settlement & Dynamic Replenishment, Milestone 5: Authentication Security Hardening & Rate Limiting System, Milestone 6: High-Trust Pan-Indic Typography Architecture
 
 ### Community 12 - "VerifyDetail.tsx"
-Cohesion: 0.07
-Nodes (38): NotFound, VerifyQueue, Breadcrumbs(), BreadcrumbsProps, LABEL_MAP, Seo(), SeoProps, Button (+30 more)
+Cohesion: 0.08
+Nodes (32): NotFound, VerifyDetail, VerifyQueue, ErrorBoundaryProps, ErrorBoundaryState, Seo(), SeoProps, Button (+24 more)
 
 ### Community 13 - "Admin.tsx"
-Cohesion: 0.08
-Nodes (38): Profile, AuthLayout(), AuthLayoutProps, BENEFITS, STATS, ClaimCardProps, Badge, BadgeProps (+30 more)
+Cohesion: 0.11
+Nodes (28): Badge, BadgeProps, BadgeSize, BadgeVariant, sizeClasses, variantClasses, CATEGORY_CONFIG, VERDICT_BADGE_VARIANT (+20 more)
 
 ### Community 14 - "Continuous Integration Workflow"
 Cohesion: 0.33
 Nodes (6): Docker Compose Environment, Continuous Integration Workflow, Superseded Run Cancellation Strategy, Validate Docker Compose Job, Clean Docker Compose Validation Rationale, Typecheck & Production Build Job
 
 ### Community 15 - "Claim"
-Cohesion: 0.17
-Nodes (13): collectDomains(), FactCheckCard(), FactCheckCardProps, P, truncateText(), VERDICT_ICONS, AddClaimInput, ClaimsContextValue (+5 more)
+Cohesion: 0.15
+Nodes (15): ClaimCardProps, collectDomains(), FactCheckCard(), FactCheckCardProps, P, truncateText(), VERDICT_ICONS, AddClaimInput (+7 more)
 
 ### Community 16 - "worker.min.js"
 Cohesion: 0.11
 Nodes (67): a(), B(), c(), a(), s(), ct(), d(), dt() (+59 more)
 
 ### Community 17 - "App.tsx"
-Cohesion: 0.16
-Nodes (12): Admin, ClaimDetail, SignUp, VerifyDetail, Footer(), OnlineStatusBar(), ProtectedRoute(), ProtectedRouteProps (+4 more)
+Cohesion: 0.09
+Nodes (24): Admin, ClaimDetail, Dashboard, Home, Profile, SignUp, AuthLayout(), AuthLayoutProps (+16 more)
 
-### Community 18 - "NotificationsContext.tsx"
-Cohesion: 0.15
-Nodes (16): NotificationBell(), TYPE_CONFIG, ClaimDetailSkeleton(), NotificationListSkeleton(), DEFAULT_SEED_NOTIFICATIONS, defaultNotificationsContext, NotificationsContext, NotificationsContextValue (+8 more)
+### Community 18 - "Profile.tsx"
+Cohesion: 0.18
+Nodes (18): NotificationBell(), TYPE_CONFIG, ClaimDetailSkeleton(), NotificationListSkeleton(), useAuth(), useClaims(), useNotifications(), useUsers() (+10 more)
 
 ### Community 19 - "cn"
 Cohesion: 0.08
-Nodes (39): Dashboard, Home, AnimatedCounter, AnimatedCounterProps, ClaimCard, Navbar(), Avatar(), AvatarProps (+31 more)
+Nodes (32): AnimatedCounter, AnimatedCounterProps, Breadcrumbs(), BreadcrumbsProps, LABEL_MAP, ClaimCard, CATEGORY_COLORS, CustomTooltipProps (+24 more)
 
 ### Community 20 - "tesseract-core-lstm.wasm.js"
 Cohesion: 0.06
@@ -239,11 +234,11 @@ Nodes (7): api(), args, env, run(), toField(), toFields(), updateMask()
 
 ### Community 24 - "tesseract-core-simd-lstm.wasm.js"
 Cohesion: 0.05
-Nodes (22): Aa, chown(), gb(), hb(), hi(), ji(), ki(), La (+14 more)
+Nodes (25): Aa, B(), chown(), fchmod(), fchown(), gb(), hb(), hi() (+17 more)
 
 ### Community 34 - "F"
-Cohesion: 0.15
-Nodes (3): F(), G(), r()
+Cohesion: 0.10
+Nodes (4): F(), G(), O(), ui()
 
 ### Community 38 - "F"
 Cohesion: 0.10
@@ -278,20 +273,16 @@ Cohesion: 0.20
 Nodes (19): A(), Jg(), Lb(), Mh(), Nh(), Oh(), ph(), qh() (+11 more)
 
 ### Community 50 - "$h"
-Cohesion: 0.15
-Nodes (7): createNode(), $h(), a(), hg(), isFIFO(), Kf(), symlink()
+Cohesion: 0.12
+Nodes (12): createNode(), fstat(), $h(), a(), hg(), isFIFO(), Kb(), Kf() (+4 more)
 
 ### Community 51 - "open"
 Cohesion: 0.17
 Nodes (16): Bb(), chmod(), create(), Db(), lchmod(), lh(), Mb(), mkdir() (+8 more)
 
-### Community 53 - "Ai"
-Cohesion: 0.11
-Nodes (7): Ai(), Ha(), ii(), Ja(), ri(), vi(), yi()
-
-### Community 54 - ".bg"
-Cohesion: 0.33
-Nodes (7): bg(), Fg(), Rb(), read(), Sb(), C, h()
+### Community 54 - "r"
+Cohesion: 0.17
+Nodes (14): close(), Fg(), fsync(), Ja(), lstat(), r(), Rb(), read() (+6 more)
 
 ### Community 55 - "A"
 Cohesion: 0.13
@@ -301,9 +292,9 @@ Nodes (19): A(), chown(), Fg(), Fh(), fstat(), Gg(), c(), d() (+11 more)
 Cohesion: 0.20
 Nodes (14): Bb(), chmod(), create(), Db(), lchmod(), Mb(), mkdir(), open() (+6 more)
 
-### Community 57 - "O"
-Cohesion: 0.11
-Nodes (4): bi(), O(), pi(), si()
+### Community 57 - "bi"
+Cohesion: 0.13
+Nodes (6): bi(), pi(), sg(), si(), T(), tg()
 
 ### Community 58 - "r"
 Cohesion: 0.19
@@ -337,9 +328,9 @@ Nodes (11): scripts, build, create:admin, create:user, dev, emulators, emulators
 Cohesion: 0.18
 Nodes (4): Ha(), ii(), ri(), vi()
 
-### Community 66 - "Design System Master File"
-Cohesion: 0.12
-Nodes (16): Additional Forbidden Patterns, Anti-Patterns (Do NOT Use), Buttons, Cards, Color Palette, Component Specs, Design System Master File, Global Rules (+8 more)
+### Community 66 - "Ha"
+Cohesion: 0.18
+Nodes (4): Ha(), ii(), ri(), vi()
 
 ### Community 67 - "r"
 Cohesion: 0.16
@@ -349,17 +340,17 @@ Nodes (15): close(), Fg(), fsync(), a(), Ja(), lstat(), r(), Rb() (+7 more)
 Cohesion: 0.20
 Nodes (10): ag(), close(), fsync(), isFile(), Jf(), Lf(), oh(), write() (+2 more)
 
-### Community 70 - "Page-Specific Rules"
-Cohesion: 0.20
-Nodes (9): Color Overrides, Component Overrides, Dashboard Page Overrides, Layout Overrides, Page-Specific Components, Page-Specific Rules, Recommendations, Spacing Overrides (+1 more)
+### Community 70 - "ClaimsContext.tsx"
+Cohesion: 0.16
+Nodes (21): ClaimsContext, ClaimsProvider(), computeUpdatedClaim(), defaultClaimsContext, NOTE: These getters are called during render (e.g. ClaimDetail), so they, SEED_CLAIMS, calculateConfidenceScore(), determineSourceQuality() (+13 more)
 
 ### Community 71 - "write"
-Cohesion: 0.18
-Nodes (11): close(), eg(), fsync(), isFile(), lstat(), Nf(), Pf(), readFile() (+3 more)
+Cohesion: 0.25
+Nodes (7): bg(), eg(), isFile(), Nf(), Pf(), wg(), write()
 
-### Community 72 - "ErrorBoundary.tsx"
-Cohesion: 0.20
-Nodes (3): ErrorBoundary, ErrorBoundaryProps, ErrorBoundaryState
+### Community 72 - "ErrorBoundary"
+Cohesion: 0.24
+Nodes (5): ErrorBoundary, findDuplicate(), jaccardSimilarity(), normalize(), tokenize()
 
 ### Community 73 - "$h"
 Cohesion: 0.17
@@ -377,48 +368,28 @@ Nodes (4): Ha(), ii(), ri(), vi()
 Cohesion: 0.25
 Nodes (9): B(), fchmod(), fchown(), fstat(), Kb(), Kg(), c(), d() (+1 more)
 
-### Community 78 - "Page-Specific Rules"
-Cohesion: 0.20
-Nodes (9): Color Overrides, Component Overrides, Home Page Overrides, Layout Overrides, Page-Specific Components, Page-Specific Rules, Recommendations, Spacing Overrides (+1 more)
-
 ### Community 82 - "vercel.json"
 Cohesion: 0.33
 Nodes (5): cleanUrls, headers, rewrites, $schema, trailingSlash
 
-### Community 89 - "B"
-Cohesion: 0.25
-Nodes (9): B(), fchmod(), fchown(), fstat(), Kb(), Kg(), c(), d() (+1 more)
-
-### Community 90 - "T"
-Cohesion: 0.33
-Nodes (4): sg(), T(), tg(), wg()
-
-### Community 91 - "DashboardChart.tsx"
-Cohesion: 0.33
-Nodes (4): CATEGORY_COLORS, CustomTooltipProps, DashboardChart(), DashboardChartProps
-
-### Community 92 - "duplicateDetection.ts"
-Cohesion: 0.80
-Nodes (4): findDuplicate(), jaccardSimilarity(), normalize(), tokenize()
-
 ## Knowledge Gaps
-- **241 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+236 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 721 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **26 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **216 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+211 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 693 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **27 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `f()` connect `worker.min.js` to `A`, `A`, `A`?**
-  _High betweenness centrality (0.217) - this node is a cross-community bridge._
+  _High betweenness centrality (0.230) - this node is a cross-community bridge._
 - **Why does `A()` connect `A` to `r`, `B`, `z`, `worker.min.js`, `tesseract-core-lstm.wasm.js`, `S`?**
-  _High betweenness centrality (0.147) - this node is a cross-community bridge._
-- **Why does `A()` connect `A` to `open`, `write`, `worker.min.js`, `$h`, `.bg`, `tesseract-core-simd-lstm.wasm.js`, `B`, `T`, `z`, `S`?**
-  _High betweenness centrality (0.138) - this node is a cross-community bridge._
+  _High betweenness centrality (0.154) - this node is a cross-community bridge._
+- **Why does `A()` connect `A` to `worker.min.js`, `$h`, `r`, `tesseract-core-simd-lstm.wasm.js`, `bi`, `open`, `z`, `S`?**
+  _High betweenness centrality (0.149) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
-  _241 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _216 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `firebaseService.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.0745637228979376 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09158186864014801 - nodes in this community are weakly interconnected._
 - **Should `FactStamp Platform` be split into smaller, more focused modules?**
   _Cohesion score 0.125 - nodes in this community are weakly interconnected._
 - **Should `UI-UX Search & BM25 Core` be split into smaller, more focused modules?**
