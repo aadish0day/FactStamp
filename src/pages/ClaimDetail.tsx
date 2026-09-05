@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Download, ShieldCheck, Share2, Plus, RefreshCw, ChevronDown } from 'lucide-react'
+import { Download, ShieldCheck, Plus, RefreshCw, ChevronDown } from 'lucide-react'
 import { formatDistanceToNow } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Seo } from '@/components/Seo'

@@ -313,11 +313,6 @@ p {
   animation: pop-in 200ms var(--ease-out-quart) forwards;
 }
 
-/* Stagger item reveal */
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 
 /* Skip-to-content link — hidden until focused */
 .skip-link {
@@ -354,16 +349,6 @@ p {
 
 .animate-fade-in {
   animation: fadeIn 360ms ease-out both;
-}
-
-@keyframes borderBeam {
-  to {
-    offset-distance: 100%;
-  }
-}
-
-.animate-border-beam {
-  animation: borderBeam var(--duration) linear infinite;
 }
 
 @keyframes marquee {

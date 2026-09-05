@@ -9,7 +9,6 @@ import {
   AlertCircle,
   ArrowUpDown,
   Search,
-  Plus,
   Award,
   Sparkles,
   ExternalLink,

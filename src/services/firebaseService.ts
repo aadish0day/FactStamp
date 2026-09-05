@@ -593,13 +593,6 @@ export async function updateReportInFirestore(
 }
 
 /**
- * Delete a moderation report from Firestore
- */
-export async function deleteReportFromFirestore(reportId: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTIONS.REPORTS, reportId))
-}
-
-/**
  * Authenticate an administrator session directly against Firebase Auth and Firestore DB
  *
  * The Firestore profile document (users/{uid}.isAdmin) is the SINGLE source of

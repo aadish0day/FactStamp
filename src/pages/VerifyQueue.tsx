@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   Clock,
   ArrowRight,
-  Timer,
   RotateCcw,
   Search,
   Zap,

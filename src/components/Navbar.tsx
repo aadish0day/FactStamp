@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Menu, X, ShieldAlert, Sun, Moon, User, Star, LogOut } from 'lucide-react'
+import { Menu, X, ShieldAlert, User, Star, LogOut } from 'lucide-react'
 import { useEffect, useCallback, useRef, useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
