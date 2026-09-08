@@ -1331,7 +1331,7 @@
       "file_type": "code",
       "norm_label": "addauditlogtofirestore()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L633"
+      "source_location": "L626"
     },
     {
       "id": "src_services_firebaseservice_addclaimtofirestore",
@@ -1355,7 +1355,7 @@
       "file_type": "code",
       "norm_label": "admindeleteverification()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L519"
+      "source_location": "L512"
     },
     {
       "id": "src_services_firebaseservice_adminoverrideclaim",
@@ -1367,7 +1367,7 @@
       "file_type": "code",
       "norm_label": "adminoverrideclaim()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L508"
+      "source_location": "L501"
     },
     {
       "id": "src_services_firebaseservice_adminupdateuserdoc",
@@ -1379,7 +1379,7 @@
       "file_type": "code",
       "norm_label": "adminupdateuserdoc()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L501"
+      "source_location": "L494"
     },
     {
       "id": "src_services_firebaseservice_createmoderationreport",
@@ -1391,7 +1391,7 @@
       "file_type": "code",
       "norm_label": "createmoderationreport()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L579"
+      "source_location": "L572"
     },
     {
       "id": "src_services_firebaseservice_deleteclaimfromfirestore",
@@ -1403,7 +1403,7 @@
       "file_type": "code",
       "norm_label": "deleteclaimfromfirestore()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L487"
+      "source_location": "L480"
     },
     {
       "id": "src_services_firebaseservice_deleteuserfromfirestore",
@@ -1415,7 +1415,7 @@
       "file_type": "code",
       "norm_label": "deleteuserfromfirestore()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L494"
+      "source_location": "L487"
     },
     {
       "id": "src_services_firebaseservice_flagclaimforexpeditedreview",
@@ -1427,7 +1427,7 @@
       "file_type": "code",
       "norm_label": "flagclaimforexpeditedreview()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L472"
+      "source_location": "L465"
     },
     {
       "id": "src_services_firebaseservice_getautherrormessage",
@@ -1547,7 +1547,7 @@
       "file_type": "code",
       "norm_label": "subscribeauditlogsrealtime()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L646"
+      "source_location": "L639"
     },
     {
       "id": "src_services_firebaseservice_subscribeclaimsrealtime",
@@ -1571,7 +1571,7 @@
       "file_type": "code",
       "norm_label": "subscribereportsrealtime()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L538"
+      "source_location": "L531"
     },
     {
       "id": "src_services_firebaseservice_subscribeusersrealtime",
@@ -1607,7 +1607,7 @@
       "file_type": "code",
       "norm_label": "updatereportinfirestore()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L592"
+      "source_location": "L585"
     },
     {
       "id": "src_services_firebaseservice_updateuserprofile",
@@ -2939,7 +2939,7 @@
       "file_type": "code",
       "norm_label": "useauth()",
       "source_file": "src/contexts/AuthContext.tsx",
-      "source_location": "L233"
+      "source_location": "L226"
     },
     {
       "id": "src_pages_signup_googleicon",
@@ -3035,7 +3035,7 @@
       "file_type": "code",
       "norm_label": "markallnotificationsread()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L454"
+      "source_location": "L447"
     },
     {
       "id": "src_services_firebaseservice_marknotificationread",
@@ -3047,7 +3047,7 @@
       "file_type": "code",
       "norm_label": "marknotificationread()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L449"
+      "source_location": "L442"
     },
     {
       "id": "src_services_firebaseservice_subscribenotificationsrealtime",
@@ -3059,7 +3059,7 @@
       "file_type": "code",
       "norm_label": "subscribenotificationsrealtime()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L420"
+      "source_location": "L413"
     },
     {
       "id": "src_components_navbar_navbar",
@@ -5579,7 +5579,7 @@
       "file_type": "code",
       "norm_label": "authenticateadmin()",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L610"
+      "source_location": "L603"
     },
     {
       "id": "public_tesseract_tesseract_core_lstm_wasm_jh",
@@ -15971,7 +15971,7 @@
       "file_type": "code",
       "norm_label": "deletecollection()",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L566"
+      "source_location": "L554"
     },
     {
       "id": "scripts_seed_db_ensureaccount",
@@ -16007,7 +16007,7 @@
       "file_type": "code",
       "norm_label": "main()",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L592"
+      "source_location": "L580"
     },
     {
       "id": "scripts_seed_db_tofield",
@@ -16067,7 +16067,7 @@
       "file_type": "code",
       "norm_label": "writedoc()",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L545"
+      "source_location": "L533"
     },
     {
       "id": "public_tesseract_tesseract_core_simd_lstm_wasm_sg",
@@ -33420,7 +33420,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L568",
+      "source_location": "L556",
       "weight": 1.0
     },
     {
@@ -33432,7 +33432,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L514",
+      "source_location": "L513",
       "weight": 1.0
     },
     {
@@ -33444,7 +33444,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L600",
+      "source_location": "L588",
       "weight": 1.0
     },
     {
@@ -33456,7 +33456,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L609",
+      "source_location": "L597",
       "weight": 1.0
     },
     {
@@ -33468,7 +33468,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L626",
+      "source_location": "L614",
       "weight": 1.0
     },
     {
@@ -33480,7 +33480,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L696",
+      "source_location": "L684",
       "weight": 1.0
     },
     {
@@ -33492,7 +33492,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L699",
+      "source_location": "L687",
       "weight": 1.0
     },
     {
@@ -33504,7 +33504,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L709",
+      "source_location": "L697",
       "weight": 1.0
     },
     {
@@ -33516,7 +33516,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L726",
+      "source_location": "L714",
       "weight": 1.0
     },
     {
@@ -33540,7 +33540,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L551",
+      "source_location": "L539",
       "weight": 1.0
     },
     {
@@ -33552,7 +33552,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L554",
+      "source_location": "L542",
       "weight": 1.0
     },
     {
@@ -33564,7 +33564,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L557",
+      "source_location": "L545",
       "weight": 1.0
     },
     {
@@ -34044,7 +34044,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/contexts/AuthContext.tsx",
-      "source_location": "L155",
+      "source_location": "L148",
       "weight": 1.0
     },
     {
@@ -34056,7 +34056,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/contexts/AuthContext.tsx",
-      "source_location": "L159",
+      "source_location": "L152",
       "weight": 1.0
     },
     {
@@ -34068,7 +34068,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/contexts/AuthContext.tsx",
-      "source_location": "L169",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
@@ -34080,7 +34080,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/contexts/AuthContext.tsx",
-      "source_location": "L182",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -34092,7 +34092,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/contexts/AuthContext.tsx",
-      "source_location": "L218",
+      "source_location": "L211",
       "weight": 1.0
     },
     {
@@ -35292,7 +35292,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L637",
+      "source_location": "L630",
       "weight": 1.0
     },
     {
@@ -35316,7 +35316,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L512",
+      "source_location": "L505",
       "weight": 1.0
     },
     {
@@ -35328,7 +35328,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L502",
+      "source_location": "L495",
       "weight": 1.0
     },
     {
@@ -35340,7 +35340,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L616",
+      "source_location": "L609",
       "weight": 1.0
     },
     {
@@ -35352,7 +35352,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L583",
+      "source_location": "L576",
       "weight": 1.0
     },
     {
@@ -35388,7 +35388,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L660",
+      "source_location": "L653",
       "weight": 1.0
     },
     {
@@ -35412,7 +35412,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L559",
+      "source_location": "L552",
       "weight": 1.0
     },
     {
@@ -35436,7 +35436,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L598",
+      "source_location": "L591",
       "weight": 1.0
     },
     {
@@ -35940,7 +35940,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L655",
+      "source_location": "L648",
       "weight": 1.0
     },
     {
@@ -35953,7 +35953,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L547",
+      "source_location": "L540",
       "weight": 1.0
     },
     {
@@ -49588,7 +49588,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L545",
+      "source_location": "L533",
       "weight": 1.0
     },
     {
@@ -49599,7 +49599,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L566",
+      "source_location": "L554",
       "weight": 1.0
     },
     {
@@ -49610,7 +49610,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/seed-db.mjs",
-      "source_location": "L592",
+      "source_location": "L580",
       "weight": 1.0
     },
     {
@@ -51073,7 +51073,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/contexts/AuthContext.tsx",
-      "source_location": "L233",
+      "source_location": "L226",
       "weight": 1.0
     },
     {
@@ -52657,7 +52657,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L420",
+      "source_location": "L413",
       "weight": 1.0
     },
     {
@@ -52668,7 +52668,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L449",
+      "source_location": "L442",
       "weight": 1.0
     },
     {
@@ -52679,7 +52679,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L454",
+      "source_location": "L447",
+      "weight": 1.0
+    },
+    {
+      "source": "src_services_firebaseservice",
+      "target": "src_services_firebaseservice_flagclaimforexpeditedreview",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/services/firebaseService.ts",
+      "source_location": "L465",
       "weight": 1.0
     },
     {
@@ -52695,24 +52706,13 @@
     },
     {
       "source": "src_services_firebaseservice",
-      "target": "src_services_firebaseservice_flagclaimforexpeditedreview",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/services/firebaseService.ts",
-      "source_location": "L472",
-      "weight": 1.0
-    },
-    {
-      "source": "src_services_firebaseservice",
       "target": "src_services_firebaseservice_deleteclaimfromfirestore",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L487",
+      "source_location": "L480",
       "weight": 1.0
     },
     {
@@ -52723,7 +52723,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L494",
+      "source_location": "L487",
       "weight": 1.0
     },
     {
@@ -52734,7 +52734,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L501",
+      "source_location": "L494",
       "weight": 1.0
     },
     {
@@ -52745,7 +52745,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L508",
+      "source_location": "L501",
       "weight": 1.0
     },
     {
@@ -52756,7 +52756,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L519",
+      "source_location": "L512",
       "weight": 1.0
     },
     {
@@ -52767,7 +52767,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L538",
+      "source_location": "L531",
       "weight": 1.0
     },
     {
@@ -52778,7 +52778,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L579",
+      "source_location": "L572",
       "weight": 1.0
     },
     {
@@ -52800,7 +52800,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L592",
+      "source_location": "L585",
       "weight": 1.0
     },
     {
@@ -52811,7 +52811,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L610",
+      "source_location": "L603",
       "weight": 1.0
     },
     {
@@ -52822,7 +52822,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L633",
+      "source_location": "L626",
       "weight": 1.0
     },
     {
@@ -52833,7 +52833,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/services/firebaseService.ts",
-      "source_location": "L646",
+      "source_location": "L639",
       "weight": 1.0
     },
     {
