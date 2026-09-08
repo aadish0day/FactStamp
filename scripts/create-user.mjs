@@ -203,7 +203,7 @@ async function run() {
 
   await api(url, {
     method: 'PATCH',
-    headers: { Authorization: `Bearer ${userToken}` },
+    headers: { Authorization: `Bearer ${seedAdminToken || userToken}` },
     body: JSON.stringify({ fields: toFields(profileData) }),
   })
   console.log(`  ✔ Firestore document users/${uid} provisioned (isAdmin: ${isAdmin}).`)

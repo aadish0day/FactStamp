@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ShieldAlert, Lock, ArrowLeft, AlertCircle, User as UserIcon, Key } from 'lucide-react'
+import { ShieldAlert, Lock, ArrowLeft, AlertCircle, User as UserIcon, Key, KeyRound } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/Button'
@@ -31,6 +31,12 @@ export function AdminRoute({ children }: AdminRouteProps) {
   const [isSessionUnlocked, setIsSessionUnlocked] = useState<boolean>(() => {
     return sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true'
   })
+
+  const fillDemoAdmin = (email: string) => {
+    setUsernameInput(email)
+    setPasswordInput('FactStamp@2026')
+    setError(null)
+  }
 
   // Loading state from auth
   if (isLoading) {
@@ -187,6 +193,32 @@ export function AdminRoute({ children }: AdminRouteProps) {
             {isSubmitting ? 'Connecting to Firebase DB…' : 'Sign in to /admin'}
           </Button>
         </form>
+
+        {/* Demo Admin Quick-Fill Helper */}
+        <div className="mt-5 pt-4 border-t border-[var(--color-border-soft)]">
+          <p className="text-[11px] font-semibold text-[var(--color-fg-muted)] mb-2 flex items-center gap-1.5">
+            <KeyRound className="w-3.5 h-3.5 text-[var(--color-brand)]" />
+            Authorized Demo Admins (Password: <code className="text-[10px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded font-mono text-[var(--color-fg)]">FactStamp@2026</code>)
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => fillDemoAdmin('priya@factstamp.app')}
+              className="p-2 text-left rounded-lg bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] border border-[var(--color-border)] transition-colors text-xs cursor-pointer group"
+            >
+              <span className="font-semibold text-[var(--color-fg)] block text-[11px] group-hover:text-[var(--color-brand)]">Priya Sharma</span>
+              <span className="text-[10px] text-[var(--color-fg-muted)] block truncate">priya@factstamp.app</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemoAdmin('admin@factstamp.app')}
+              className="p-2 text-left rounded-lg bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] border border-[var(--color-border)] transition-colors text-xs cursor-pointer group"
+            >
+              <span className="font-semibold text-[var(--color-fg)] block text-[11px] group-hover:text-[var(--color-brand)]">FactStamp Admin</span>
+              <span className="text-[10px] text-[var(--color-fg-muted)] block truncate">admin@factstamp.app</span>
+            </button>
+          </div>
+        </div>
 
         {/* Back Link */}
         <div className="mt-6 pt-4 border-t border-[var(--color-border-soft)] flex items-center justify-between text-xs text-[var(--color-fg-muted)]">

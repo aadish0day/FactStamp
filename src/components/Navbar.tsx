@@ -129,12 +129,12 @@ export function Navbar() {
               <Link
                 to="/profile"
                 className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] hover:bg-[var(--color-brand-subtle)] hover:border-[var(--color-brand-subtle)] transition-all cursor-pointer"
-                title={`${user.displayName} — ${user.reputation}% reputation (View Profile)`}
+                title={`${user.displayName || user.email || 'User'} — ${user.reputation}% reputation (View Profile)`}
               >
-                <Avatar initials={user.displayName.charAt(0)} size="sm" />
+                <Avatar initials={(user.displayName?.trim() || user.email || 'U').charAt(0).toUpperCase()} size="sm" />
                 <div className="flex flex-col leading-tight">
                   <span className="text-xs font-semibold text-[var(--color-fg)] truncate max-w-[100px]">
-                    {user.displayName}
+                    {user.displayName?.trim() || user.email?.split('@')[0] || 'User'}
                   </span>
                   <span className="inline-flex items-center gap-0.5 text-[10px] text-[var(--color-fg-muted)]">
                     <Star className="w-2.5 h-2.5 text-[var(--color-brand)]" aria-hidden="true" />
@@ -251,10 +251,10 @@ export function Navbar() {
               className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
               title="View Profile"
             >
-              <Avatar initials={user.displayName.charAt(0)} size="md" online />
+              <Avatar initials={(user.displayName?.trim() || user.email || 'U').charAt(0).toUpperCase()} size="md" online />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-[var(--color-fg)] truncate">
-                  {user.displayName}
+                  {user.displayName?.trim() || user.email?.split('@')[0] || 'User'}
                 </p>
                 <p className="text-xs text-[var(--color-fg-2)]">
                   <Star className="w-3 h-3 inline-block text-[var(--color-brand)] -mt-0.5 me-0.5" aria-hidden="true" />

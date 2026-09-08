@@ -173,9 +173,9 @@ export function Admin() {
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
       const matchSearch =
-        u.displayName.toLowerCase().includes(userSearch.toLowerCase()) ||
-        u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
-        u.uid.toLowerCase().includes(userSearch.toLowerCase())
+        (u.displayName || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+        (u.email || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+        (u.uid || '').toLowerCase().includes(userSearch.toLowerCase())
       const matchRole =
         userRoleFilter === 'all'
           ? true
@@ -961,10 +961,10 @@ export function Admin() {
                       <tr key={u.uid} className="hover:bg-[var(--color-surface-2)] transition-colors">
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-3">
-                            <Avatar initials={u.displayName?.charAt(0) || 'V'} size="sm" />
+                            <Avatar initials={(u.displayName?.trim() || u.email || 'V').charAt(0).toUpperCase()} size="sm" />
                             <div className="min-w-0">
                               <p className="font-semibold text-[var(--color-fg)] truncate max-w-[160px] sm:max-w-[200px]">
-                                {u.displayName}
+                                {u.displayName?.trim() || u.email?.split('@')[0] || 'Verifier'}
                               </p>
                               <p className="text-[11px] text-[var(--color-fg-muted)] truncate max-w-[160px] sm:max-w-[200px]">
                                 {u.email}

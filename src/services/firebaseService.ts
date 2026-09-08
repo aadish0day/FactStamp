@@ -395,7 +395,14 @@ export function subscribeUsersRealtime(
       snapshot.forEach((docSnap) => {
         // Drop any stored `uid` field — the real document id always wins.
         const { uid: _storedUid, ...data } = docSnap.data() as Record<string, unknown>
-        users.push({ uid: docSnap.id, ...(data as Omit<User, 'uid'>) })
+        const rawName = typeof data.displayName === 'string' ? data.displayName.trim() : ''
+        const rawEmail = typeof data.email === 'string' ? data.email.trim() : ''
+        const displayName = rawName || (rawEmail ? rawEmail.split('@')[0] : 'Verifier')
+        users.push({
+          uid: docSnap.id,
+          ...(data as Omit<User, 'uid'>),
+          displayName,
+        })
       })
       callback(users)
     },

@@ -74,7 +74,7 @@ export function Dashboard() {
     () =>
       users.slice(0, 5).map((u) => ({
         uid: u.uid,
-        name: u.displayName,
+        name: u.displayName?.trim() || u.email?.split('@')[0] || 'Verifier',
         reputation: u.reputation,
         verifications: u.totalVerifications,
       })),

@@ -314,7 +314,7 @@ export function Profile() {
               <div className="flex flex-col items-center text-center">
                 {/* Avatar with top-right status and bottom-right badge */}
                 <div className="relative">
-                  <Avatar initials={user.displayName.charAt(0)} size="xl" className="ring-4 ring-[var(--color-surface)] shadow-[var(--shadow-md)] font-bold text-lg" />
+                  <Avatar initials={(user.displayName?.trim() || user.email || 'U').charAt(0).toUpperCase()} size="xl" className="ring-4 ring-[var(--color-surface)] shadow-[var(--shadow-md)] font-bold text-lg" />
                   
                   {/* Custom Online dot moved to the TOP-RIGHT of the avatar circle */}
                   <span 
@@ -333,7 +333,7 @@ export function Profile() {
                 <div className="mt-4 space-y-1">
                   <div className="flex items-center gap-1.5 justify-center">
                     <h1 className="text-2xl font-black text-[var(--color-fg)] tracking-tight leading-none">
-                      {user.displayName}
+                      {user.displayName?.trim() || user.email?.split('@')[0] || 'Verifier'}
                     </h1>
                     <button
                       type="button"

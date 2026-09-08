@@ -508,13 +508,14 @@ function updateMask(paths) {
 /* ── 5. Auth: create or sign in each account ── */
 
 async function ensureAccount(user) {
+  let account
   // 1) Try to create
   try {
     const created = await api(`${AUTH_BASE}/accounts:signUp?key=${API_KEY}`, {
       method: 'POST',
       body: JSON.stringify({ email: user.email, password: PASSWORD, returnSecureToken: true }),
     })
-    return { ...user, uid: created.localId, idToken: created.idToken, created: true }
+    account = { ...user, uid: created.localId, idToken: created.idToken, created: true }
   } catch (err) {
     if (err.status === 400 && err.details?.message?.includes('EMAIL_EXISTS')) {
       // 2) Account exists → sign in to get a fresh token
@@ -522,10 +523,21 @@ async function ensureAccount(user) {
         method: 'POST',
         body: JSON.stringify({ email: user.email, password: PASSWORD, returnSecureToken: true }),
       })
-      return { ...user, uid: signedIn.localId, idToken: signedIn.idToken, created: false }
+      account = { ...user, uid: signedIn.localId, idToken: signedIn.idToken, created: false }
+    } else {
+      throw err
     }
-    throw err
   }
+
+  // Sync displayName into Firebase Auth profile
+  try {
+    await api(`${AUTH_BASE}/accounts:update?key=${API_KEY}`, {
+      method: 'POST',
+      body: JSON.stringify({ idToken: account.idToken, displayName: user.name, returnSecureToken: true }),
+    })
+  } catch {}
+
+  return account
 }
 
 /* ── 6. Write a Firestore doc (insert-or-update) ── */

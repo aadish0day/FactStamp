@@ -53,7 +53,7 @@ export function Footer() {
               {user ? (
                 <>
                   <span className="text-sm text-[var(--color-fg-2)]">
-                    Signed in as <span className="text-[var(--color-fg)] font-medium">{user.displayName}</span>
+                    Signed in as <span className="text-[var(--color-fg)] font-medium">{user.displayName?.trim() || user.email?.split('@')[0] || 'User'}</span>
                   </span>
                 </>
               ) : (

@@ -80,11 +80,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userDocRef,
           (snap) => {
             if (snap.exists()) {
-              setUser(snap.data() as User)
+              const data = snap.data() as User
+              const rawName = typeof data.displayName === 'string' ? data.displayName.trim() : ''
+              const authName = typeof firebaseUser.displayName === 'string' ? firebaseUser.displayName.trim() : ''
+              const emailPrefix = firebaseUser.email ? firebaseUser.email.split('@')[0] : ''
+              const displayName = rawName || authName || emailPrefix || 'Verifier'
+              setUser({ ...data, displayName })
             } else {
+              const authName = typeof firebaseUser.displayName === 'string' ? firebaseUser.displayName.trim() : ''
+              const emailPrefix = firebaseUser.email ? firebaseUser.email.split('@')[0] : ''
               const newProfile: User = {
                 uid: firebaseUser.uid,
-                displayName: firebaseUser.displayName || 'Verifier',
+                displayName: authName || emailPrefix || 'Verifier',
                 email: firebaseUser.email || '',
                 reputation: 50,
                 totalVerifications: 0,
