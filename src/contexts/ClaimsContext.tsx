@@ -457,7 +457,7 @@ const SEED_CLAIMS: Claim[] = [
 ]
 
 export function ClaimsProvider({ children }: { children: ReactNode }) {
-  const { user, updateUser } = useAuth()
+  const { user } = useAuth()
   // The claims collection is initialized with rich seed data and updated via Firestore
   const [claims, setClaims] = useState<Claim[]>(SEED_CLAIMS)
   const [isLoading, setIsLoading] = useState(false)
@@ -672,25 +672,14 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
         )
       }
 
-      if (user && data.verifierId === user.uid) {
-        let repChange = 0
-        if (target.status === 'verified' && target.verdict) {
-          repChange = data.verdict === target.verdict ? 2 : -1
-        } else if (target.status === 'pending') {
-          if (target.verifications.length + 1 >= 3) {
-            repChange = data.verdict === updatedClaim.verdict ? 2 : -1
-          }
-        }
-
-        updateUser({
-          totalVerifications: user.totalVerifications + 1,
-          reputation: Math.max(0, Math.min(100, user.reputation + repChange)),
-        }).catch((err) => {
-          console.warn('Failed to update verifier profile after verification:', err)
-        })
-      }
+      // Reputation and totalVerifications are deliberately NOT written here.
+      // firestore.rules denies every client write to those fields, so this call
+      // was rejected on every single verification by a normal user — the local
+      // state showed a reputation gain that never persisted and vanished on
+      // reload. The awardVerificationReputation Cloud Function (functions/index.js)
+      // is now the only writer; its update arrives through the profile snapshot.
     },
-    [claims, user, updateUser]
+    [claims, user]
   )
 
   /**

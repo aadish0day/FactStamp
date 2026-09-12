@@ -13,7 +13,9 @@
     "emulators:export": "firebase emulators:export ./emulator-data",
     "seed:db": "node scripts/seed-db.mjs",
     "create:admin": "node scripts/create-admin.mjs",
-    "create:user": "node scripts/create-user.mjs"
+    "create:user": "node scripts/create-user.mjs",
+    "audit:admins": "node scripts/audit-admins.mjs",
+    "test:rules": "firebase emulators:exec --only firestore,auth --project factstamp-app --config firebase.emulator-test.json 'node scripts/test-rules.mjs'"
   },
   "dependencies": {
     "clsx": "^2.1.0",
