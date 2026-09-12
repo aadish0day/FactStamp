@@ -336,6 +336,17 @@ export function clearSecuritySession(): void {
 }
 
 // ─── 08. Authentication: Rate Limiting for Login Attempts ────────────────────
+//
+// SCOPE: this is a client-side UX cooldown, NOT an enforcement boundary. The
+// counters live in localStorage/sessionStorage, so they reset on "clear site
+// data", in a private window, or on another device — and an attacker hitting the
+// Firebase Identity Toolkit REST API directly never runs this code at all.
+//
+// The actual brute-force protection is Firebase Auth's own backend throttling,
+// surfaced as `auth/too-many-requests` in getAuthErrorMessage(). Do not describe
+// this module to users as if it were the thing stopping an attacker; real
+// enforcement would need a Cloud Function or App Check that can lock the account
+// server-side. Keep the UI copy honest about which of the two is doing the work.
 
 const LOGIN_ATTEMPT_KEY_PREFIX = 'fs_login_attempts'
 const LOGIN_LOCKOUT_KEY_PREFIX = 'fs_login_lockout'

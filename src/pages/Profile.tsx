@@ -258,7 +258,17 @@ export function Profile() {
       toast.error('Name must be at least 2 characters')
       return
     }
-    await updateUser({ displayName: editName.trim() })
+    try {
+      await updateUser({ displayName: editName.trim() })
+    } catch (err) {
+      // updateUser now propagates a rejected Firestore write instead of
+      // swallowing it, so don't claim success we didn't get.
+      console.warn('Profile update failed:', err)
+      toast.error('Could not update profile', {
+        description: 'The change was rejected and has not been saved. Please try again.',
+      })
+      return
+    }
     toast.success('Profile updated successfully', {
       description: `Display name changed to "${editName.trim()}".`,
     })

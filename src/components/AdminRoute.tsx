@@ -21,8 +21,16 @@ interface AdminRouteProps {
 
 const ADMIN_SESSION_KEY = 'fs_admin_session_unlocked'
 
+// Demo quick-fill is a local development affordance only. `import.meta.env.DEV`
+// is statically replaced at build time, so the whole block is dead-code
+// eliminated from production bundles, and the password is read from .env rather
+// than written in source — previously the gate printed working admin
+// credentials to every signed-in visitor who opened /admin.
+const DEMO_ADMIN_PASSWORD: string = import.meta.env.VITE_DEMO_ADMIN_PASSWORD ?? ''
+const SHOW_DEMO_ADMINS = import.meta.env.DEV && DEMO_ADMIN_PASSWORD !== ''
+
 export function AdminRoute({ children }: AdminRouteProps) {
-  const { user, isLoading, updateUser } = useAuth()
+  const { user, isLoading } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [usernameInput, setUsernameInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
@@ -31,15 +39,23 @@ export function AdminRoute({ children }: AdminRouteProps) {
   const [isSessionUnlocked, setIsSessionUnlocked] = useState<boolean>(() => {
     return sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true'
   })
+  // uid of an admin that just authenticated here, held until the realtime
+  // Firestore profile snapshot catches up to that account.
+  const [pendingAdminUid, setPendingAdminUid] = useState<string | null>(null)
 
   const fillDemoAdmin = (email: string) => {
     setUsernameInput(email)
-    setPasswordInput('FactStamp@2026')
+    setPasswordInput(DEMO_ADMIN_PASSWORD)
     setError(null)
   }
 
+  // authenticateAdmin() swaps the Firebase Auth session, so onAuthStateChanged
+  // and the profile snapshot land a moment later. Hold on a spinner until the
+  // snapshot is for that admin, instead of bouncing back to the gate.
+  const isAwaitingAdminProfile = pendingAdminUid !== null && user?.uid !== pendingAdminUid
+
   // Loading state from auth
-  if (isLoading) {
+  if (isLoading || isAwaitingAdminProfile) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -91,11 +107,11 @@ export function AdminRoute({ children }: AdminRouteProps) {
       // Authenticates with Firebase Auth and syncs with Firestore Database
       const adminProfile = await authenticateAdmin(u, p)
       resetLoginAttempts()
-      // Promote the admin role into the app-level auth state immediately.
-      // The Firestore profile snapshot that drives useAuth() can arrive stale
-      // (before authenticateAdmin's updateDoc commits), which would otherwise
-      // bounce the admin back to this gate as a "normal user".
-      await updateUser({ isAdmin: true })
+      // NEVER write isAdmin from here. authenticateAdmin() already verified the
+      // clearance against Firestore, and the profile snapshot is the single
+      // source of truth. Writing it back promoted whichever profile happened to
+      // still be in auth state — i.e. the normal user who opened this gate.
+      setPendingAdminUid(adminProfile.uid)
       sessionStorage.setItem(ADMIN_SESSION_KEY, 'true')
       setIsSessionUnlocked(true)
       toast.success('Admin authenticated with Firebase DB', {
@@ -194,11 +210,12 @@ export function AdminRoute({ children }: AdminRouteProps) {
           </Button>
         </form>
 
-        {/* Demo Admin Quick-Fill Helper */}
+        {/* Demo Admin Quick-Fill Helper — development builds only */}
+        {SHOW_DEMO_ADMINS && (
         <div className="mt-5 pt-4 border-t border-[var(--color-border-soft)]">
           <p className="text-[11px] font-semibold text-[var(--color-fg-muted)] mb-2 flex items-center gap-1.5">
             <KeyRound className="w-3.5 h-3.5 text-[var(--color-brand)]" />
-            Authorized Demo Admins (Password: <code className="text-[10px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded font-mono text-[var(--color-fg)]">FactStamp@2026</code>)
+            Dev quick-fill (password from <code className="text-[10px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded font-mono text-[var(--color-fg)]">.env</code>)
           </p>
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -219,6 +236,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
             </button>
           </div>
         </div>
+        )}
 
         {/* Back Link */}
         <div className="mt-6 pt-4 border-t border-[var(--color-border-soft)] flex items-center justify-between text-xs text-[var(--color-fg-muted)]">

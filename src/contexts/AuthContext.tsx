@@ -211,16 +211,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const updateUser = useCallback(async (updates: Partial<User>) => {
-    setUser((prev) => {
-      if (!prev) return prev
-      const next = { ...prev, ...updates }
-      if (isFirebaseConfigured) {
-        updateUserProfile(prev.uid, updates).catch((err) => {
-          console.warn('Firestore profile update notice:', err)
-        })
-      }
-      return next
-    })
+    if (!isFirebaseConfigured) {
+      setUser((prev) => (prev ? { ...prev, ...updates } : prev))
+      return
+    }
+    // Read the uid from Firebase Auth rather than React state: during an account
+    // switch the state still holds the previous profile, which is exactly how the
+    // /admin gate ended up writing isAdmin onto the wrong user.
+    const uid = auth.currentUser?.uid
+    if (!uid) return
+    // Write first and let the onSnapshot subscription deliver the committed
+    // values. The previous version merged optimistically and only console.warn'd
+    // on rejection, so a write Firestore refused still left the UI showing values
+    // the database never accepted — and the caller was told nothing. Rejections
+    // now propagate; callers are responsible for surfacing them.
+    await updateUserProfile(uid, updates)
   }, [])
 
   return (

@@ -32,6 +32,14 @@ import {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+// Demo quick-fill is a local development affordance only. `import.meta.env.DEV`
+// is statically replaced at build time, so this block is dead-code eliminated
+// from production bundles, and the password comes from .env rather than source.
+// Two of these accounts are admins — shipping their working password on the
+// public sign-in page handed anyone the admin console.
+const DEMO_ACCOUNT_PASSWORD: string = import.meta.env.VITE_DEMO_ADMIN_PASSWORD ?? ''
+const SHOW_DEMO_ACCOUNTS = import.meta.env.DEV && DEMO_ACCOUNT_PASSWORD !== ''
+
 const DEMO_ACCOUNTS = [
   { name: 'FactStamp Admin', email: 'admin@factstamp.app', role: 'Super Admin', rep: '100%' },
   { name: 'Priya Sharma', email: 'priya@factstamp.app', role: 'Platform Admin', rep: '95%' },
@@ -126,7 +134,7 @@ export function SignIn() {
 
   const handleFillDemoAccount = (accEmail: string) => {
     setEmail(accEmail)
-    setPassword('FactStamp@2026')
+    setPassword(DEMO_ACCOUNT_PASSWORD)
     setTouched({ email: true, password: true })
     setErrors({})
     syncRateLimit(accEmail)
@@ -268,12 +276,15 @@ export function SignIn() {
         </div>
       )}
 
-      {/* ── Security Status Pill: Active Rate Limiting Guard ── */}
+      {/* ── Sign-in cooldown counter ──
+          Deliberately does NOT claim "brute-force protection": these counters
+          are client-side only (see src/lib/security.ts). Real throttling comes
+          from Firebase Auth's backend. ── */}
       {!rateLimit.isLockedOut && (
         <div className="flex items-center justify-between px-3 py-1.5 mb-4 rounded-lg bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] text-[11px] text-[var(--color-fg-muted)]">
           <span className="flex items-center gap-1.5 font-medium">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
-            Brute-force protection enabled
+            Sign-in cooldown after {MAX_LOGIN_ATTEMPTS} failed attempts
           </span>
           <span className="font-mono text-[10px] font-bold">
             {rateLimit.remainingAttempts}/{MAX_LOGIN_ATTEMPTS} attempts left
@@ -461,7 +472,8 @@ export function SignIn() {
         Continue with Google
       </Button>
 
-      {/* ── Demo Verifier Accounts Quick-Fill Helper ── */}
+      {/* ── Demo Verifier Accounts Quick-Fill Helper — development builds only ── */}
+      {SHOW_DEMO_ACCOUNTS && (
       <div className="mt-6 pt-5 border-t border-[var(--color-border-soft)]">
         <button
           type="button"
@@ -509,11 +521,12 @@ export function SignIn() {
               ))}
             </div>
             <p className="text-[10px] text-[var(--color-fg-muted)] text-center mt-2 font-mono">
-              Password for all seeded accounts: FactStamp@2026
+              Password auto-filled from VITE_DEMO_ADMIN_PASSWORD in .env
             </p>
           </div>
         )}
       </div>
+      )}
     </AuthLayout>
   )
 }
