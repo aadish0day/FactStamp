@@ -661,6 +661,10 @@ async function main() {
         status: claim.status,
         createdAt: claim.createdAt,
         consensusDeadline: claim.consensusDeadline,
+        // Numeric mirror of consensusDeadline. Firestore rules cannot parse the
+        // ISO string, so the expiry rule (Case B) checks this field instead —
+        // without it a seeded claim can only ever be expired by an admin.
+        consensusDeadlineMs: Date.parse(claim.consensusDeadline),
         submittedBy: uidByName.get(claim.submittedByName) || 'seed-unknown',
         submittedByName: claim.submittedByName,
         ...(isVerified

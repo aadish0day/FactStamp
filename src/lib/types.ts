@@ -41,6 +41,13 @@ export interface Claim {
   createdAt: string
   verifiedAt?: string
   consensusDeadline: string
+  /**
+   * Same instant as `consensusDeadline`, in epoch millis. Firestore rules cannot
+   * parse an ISO string or compare it to request.time, so the expiry rule needs a
+   * numeric field to verify a claim is genuinely overdue. Optional only so the
+   * in-memory demo fixtures and pre-existing documents still typecheck.
+   */
+  consensusDeadlineMs?: number
   submittedBy: string
   submittedByName: string
   imageUrl?: string

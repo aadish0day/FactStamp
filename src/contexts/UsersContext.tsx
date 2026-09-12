@@ -43,7 +43,9 @@ export function UsersProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    if (!user) {
+    // /users is readable only by the owner or an admin (see firestore.rules), so
+    // only subscribe for admins. Non-admins would just get permission-denied.
+    if (!user?.isAdmin) {
       setUsers([])
       setIsLoading(false)
       return
@@ -65,7 +67,7 @@ export function UsersProvider({ children }: { children: ReactNode }) {
     )
 
     return () => unsub()
-  }, [user])
+  }, [user?.uid, user?.isAdmin])
 
   const adminUpdateUser = useCallback(
     async (uid: string, updates: Partial<User>) => {

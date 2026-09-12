@@ -9,11 +9,47 @@ service cloud.firestore {
     }
 
     // ── Seed / Developer User Helper ──
-    // Checks if the authenticated user is a verified developer account ending with @factstamp.app
+    // The fixtures written by `npm run seed:db` need to bypass the self-update
+    // guards: inflated reputation, non-zero verification counts, the demo admin
+    // flag, and the collection wipe. This is an EXPLICIT allowlist of the seven
+    // seeded demo accounts.
+    //
+    // It must never go back to matching '.*@factstamp\.app': signup is open, so
+    // anyone could register their own @factstamp.app address and immediately
+    // hold admin-equivalent rights over every collection. The old
+    // `email_verified` clause did not stop that either — it defaulted to true
+    // when the claim was absent.
+    function seedAccounts() {
+      return [
+        'priya@factstamp.app',
+        'raj@factstamp.app',
+        'vikram@factstamp.app',
+        'ananya@factstamp.app',
+        'aarav@factstamp.app',
+        'neha@factstamp.app',
+        'kavya@factstamp.app'
+      ];
+    }
+
     function isSeedUser() {
       return request.auth != null
-        && request.auth.token.email.matches('.*@factstamp\\.app')
-        && request.auth.token.get('email_verified', true) == true;
+        && request.auth.token.email in seedAccounts();
+    }
+
+    // The caller's own stored profile.
+    function callerProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Public display names are written by the client, but `submittedBy`/`verifierId`
+    // are bound to request.auth.uid — so without this a user could bypass the UI and
+    // post a claim as "WHO Official" or a verdict under a real verifier's name, on a
+    // product where perceived source credibility is the entire point.
+    // Profiles with a blank stored displayName are exempt: the UI falls back to the
+    // email prefix for those, and requiring equality would block them from posting.
+    function nameMatchesCaller(name) {
+      return callerProfile().get('displayName', '') == ''
+        || name == callerProfile().displayName;
     }
 
     // Helper to verify a field's value did not change during update
@@ -29,12 +65,18 @@ service cloud.firestore {
         && isUnchanged('submittedByName')
         && isUnchanged('createdAt')
         && isUnchanged('consensusDeadline')
+        && isUnchanged('consensusDeadlineMs')
         && isUnchanged('imageUrl');
     }
 
     // ── Verifier Profiles ──
     match /users/{uid} {
-      allow read: if request.auth != null;
+      // Previously any signed-in user could read every profile document. Rules have
+      // no field-level projection, so that exposed every user's email address and
+      // isAdmin status to anyone with an account — the leaderboard's bulk read made
+      // the whole collection trivially harvestable from devtools.
+      allow read: if request.auth != null
+        && (request.auth.uid == uid || isAdmin() || isSeedUser());
 
       allow create: if request.auth != null && (
         (
@@ -96,7 +138,19 @@ service cloud.firestore {
         && request.resource.data.submittedByName.size() <= 100
         && request.resource.data.get('imageUrl', 'https://placeholder.com').matches('^(data:image/(jpeg|png|webp);base64,|https?://).*')
         && request.resource.data.get('imageUrl', '').size() <= 800000
-        && (request.resource.data.submittedBy == request.auth.uid || isAdmin() || isSeedUser());
+        && (request.resource.data.submittedBy == request.auth.uid || isAdmin() || isSeedUser())
+        && (isAdmin() || isSeedUser() || nameMatchesCaller(request.resource.data.submittedByName))
+        // `consensusDeadline` is an ISO string, which rules cannot parse or compare
+        // to request.time — so claims also carry the same instant as epoch millis,
+        // which Case B below can actually check. Without this a claim could be
+        // created pre-expired and contested instantly.
+        && (
+          isAdmin() || isSeedUser() || (
+            request.resource.data.consensusDeadlineMs is int
+            && request.resource.data.consensusDeadlineMs >= request.time.toMillis()
+            && request.resource.data.consensusDeadlineMs <= request.time.toMillis() + 2592000000
+          )
+        );
 
       allow update: if request.auth != null
         && (
@@ -113,6 +167,14 @@ service cloud.firestore {
             && isUnchanged('verificationCount')
             && isUnchanged('adminFlagged')
             && isUnchanged('adminFlaggedAt')
+            // The branch previously checked only that the claim was pending, so any
+            // signed-in user could instantly close a brand-new claim as CONTESTED and
+            // bury it before real verifiers saw it. Expiry now requires the claim to
+            // be genuinely overdue AND short of consensus.
+            && resource.data.verificationCount < 3
+            // Legacy claims written before consensusDeadlineMs existed default to a
+            // far-future value, so they can only be expired by an admin (Case A).
+            && resource.data.get('consensusDeadlineMs', 99999999999999) <= request.time.toMillis()
           )
           ||
           // Case C: Adding a source-backed verification
@@ -122,7 +184,12 @@ service cloud.firestore {
             && isUnchanged('adminFlaggedAt')
             // Count must increment by 1
             && request.resource.data.verificationCount == resource.data.verificationCount + 1
-            // Existing verifications array must be preserved
+            // Exactly one element may be appended. hasAll() alone is a subset check,
+            // so without the size bound a caller could append extra fabricated
+            // verifications (any verifierId/verifierName, entirely unvalidated)
+            // alongside the single element checked below, and decouple
+            // verificationCount from the real array length.
+            && request.resource.data.verifications.size() == resource.data.verifications.size() + 1
             && request.resource.data.verifications.hasAll(resource.data.verifications)
             // The newly appended verification element must be validated
             && request.resource.data.verifications[resource.data.verifications.size()].verifierId == request.auth.uid
@@ -136,6 +203,24 @@ service cloud.firestore {
             && request.resource.data.verifications[resource.data.verifications.size()].explanation.size() <= 3000
             && request.resource.data.verifications[resource.data.verifications.size()].verifierName is string
             && request.resource.data.verifications[resource.data.verifications.size()].verifierName.size() <= 100
+            && nameMatchesCaller(request.resource.data.verifications[resource.data.verifications.size()].verifierName)
+            // status/verdict/confidenceScore used to be entirely unconstrained here, so
+            // one appended verification could carry `status: 'verified'` with an
+            // attacker-chosen verdict and a 99% score — forging full consensus and
+            // bypassing the 3-verifier model outright. A claim may only become
+            // 'verified' on the write that actually reaches 3 verifications.
+            //
+            // The running verdict/score are still client-computed (the client updates
+            // them on every verification, not just the third); bounding them is all
+            // rules can do without a trusted Cloud Function to recompute consensus.
+            && (
+              (request.resource.data.verificationCount < 3 && request.resource.data.status == 'pending')
+              || (request.resource.data.verificationCount >= 3 && request.resource.data.status == 'verified')
+            )
+            && request.resource.data.verdict in ['TRUE', 'FALSE', 'MISLEADING', 'UNVERIFIABLE']
+            && request.resource.data.confidenceScore is number
+            && request.resource.data.confidenceScore >= 0
+            && request.resource.data.confidenceScore <= 100
           )
         );
 

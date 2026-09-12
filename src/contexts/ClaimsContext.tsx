@@ -610,11 +610,15 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
 
   const addClaim = useCallback(async (data: AddClaimInput): Promise<Claim> => {
     claimCounter++
+    const deadlineMs = Date.now() + CONSENSUS_DEADLINE_DAYS * 24 * 60 * 60 * 1000
     const newClaim: Claim = {
       ...data,
       id: `c${claimCounter}`,
       createdAt: new Date().toISOString(),
-      consensusDeadline: new Date(Date.now() + CONSENSUS_DEADLINE_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+      consensusDeadline: new Date(deadlineMs).toISOString(),
+      // Firestore rules check this numeric copy, not the ISO string — see the
+      // claims create/Case B rules in firestore.rules.
+      consensusDeadlineMs: deadlineMs,
       status: 'pending',
       verifications: [],
       verificationCount: 0,

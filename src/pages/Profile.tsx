@@ -34,7 +34,6 @@ import { AnimatedCounter } from '@/components/AnimatedCounter'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useAuth } from '@/contexts/AuthContext'
 import { useClaims } from '@/contexts/ClaimsContext'
-import { useUsers } from '@/contexts/UsersContext'
 import { formatDistanceToNow } from '@/lib/utils'
 import type { Verification, Verdict } from '@/lib/types'
 
@@ -154,7 +153,6 @@ export function Profile() {
   const navigate = useNavigate()
   const { user, updateUser } = useAuth()
   const { claims } = useClaims()
-  const { users } = useUsers()
 
   const [historySearch, setHistorySearch] = useState('')
 
@@ -236,13 +234,10 @@ export function Profile() {
     return history
   }, [user, userVerifications])
 
-  // Data-driven verifier rank compared to all community verifiers
-  const verifierRank = useMemo(() => {
-    if (!user || !users || users.length === 0) return '—'
-    const higherCount = users.filter((u) => u.reputation > user.reputation).length
-    const rank = higherCount + 1
-    return `#${rank} of ${users.length}`
-  }, [user, users])
+  // Community rank is unavailable: computing it meant reading every user's
+  // profile, which leaked emails and admin status (see firestore.rules).
+  // A public_profiles collection would be needed to bring it back.
+  const verifierRank = '—'
 
   const level = user ? repLevel(user.reputation) : null
   const LevelIcon = level?.icon || Shield

@@ -31,7 +31,6 @@ import { SpotlightCard } from '@/components/ui/SpotlightCard'
 import { DashboardChart } from '@/components/DashboardChart'
 import { computeWeeklyReport } from '@/lib/weeklyReport'
 import { useClaims } from '@/contexts/ClaimsContext'
-import { useUsers } from '@/contexts/UsersContext'
 import { useAuth } from '@/contexts/AuthContext'
 
 const CATEGORY_COLOR_MAP: Record<string, string> = {
@@ -44,7 +43,6 @@ const CATEGORY_COLOR_MAP: Record<string, string> = {
 
 export function Dashboard() {
   const { claims, flagClaim } = useClaims()
-  const { users, isLoading: usersLoading } = useUsers()
   const { user } = useAuth()
 
   const verifiedClaims = claims.filter((c) => c.status === 'verified')
@@ -68,18 +66,6 @@ export function Dashboard() {
         verifiedClaims.reduce((sum, c) => sum + (c.confidenceScore ?? 0), 0) / verifiedClaims.length
       )
     : 0
-
-  // Top verifiers — sourced directly from the Firestore `users` collection
-  const leaderboard = useMemo(
-    () =>
-      users.slice(0, 5).map((u) => ({
-        uid: u.uid,
-        name: u.displayName?.trim() || u.email?.split('@')[0] || 'Verifier',
-        reputation: u.reputation,
-        verifications: u.totalVerifications,
-      })),
-    [users]
-  )
 
   // Status & Sort toggles
   type SortMode = 'count' | 'recent'
@@ -675,73 +661,11 @@ export function Dashboard() {
         {/* Right Column (4/12 Width): Community social leaderboard & live timeline */}
         <div className="lg:col-span-4 space-y-8">
           
-          {/* Top Verifiers Leaderboard Card */}
-          <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)]">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-bold tracking-tight text-[var(--color-fg)]">Top Verifiers</h2>
-                <p className="text-sm text-[var(--color-fg-2)] mt-0.5 font-medium">Highest consensus scores this week</p>
-              </div>
-              <div className="flex items-center gap-1 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2.5 py-0.5 rounded-sm border border-[var(--color-brand-subtle)]">
-                <Award className="w-3 h-3" />
-                <span>Top 5</span>
-              </div>
-            </div>
-
-            {leaderboard.length === 0 ? (
-              usersLoading ? (
-                <p className="text-xs text-[var(--color-fg-muted)] text-center py-8 animate-pulse">
-                  Loading verifiers…
-                </p>
-              ) : user ? (
-                <p className="text-xs text-[var(--color-fg-muted)] text-center py-8">
-                  No verifiers yet
-                </p>
-              ) : (
-                <div className="py-8 text-center">
-                  <p className="text-sm text-[var(--color-fg-muted)] mb-3 font-semibold">
-                    Sign in to see verifier rankings
-                  </p>
-                  <Link to="/signin">
-                    <Button intent="outline" size="sm" className="font-bold">
-                      Sign in
-                    </Button>
-                  </Link>
-                </div>
-              )
-            ) : (
-              <div className="space-y-3">
-                {leaderboard.map((verifier, index) => {
-                  const isTop3 = index < 3
-                  const title = getVerifierTitle(verifier.reputation, verifier.verifications)
-                  return (
-                    <div
-                      key={`${verifier.uid}-${index}`}
-                      className="flex items-center gap-3 p-3 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)]/40 border border-[var(--color-border-soft)] hover:border-[var(--color-brand-subtle)] transition-all"
-                    >
-                      <span className={`text-xs font-bold font-mono w-6 text-center flex items-center justify-center ${isTop3 ? 'text-[var(--color-brand)]' : 'text-[var(--color-fg-muted)]'}`}>
-                        {index === 0 ? <Trophy className="w-4 h-4 text-[var(--color-brand)]" aria-hidden="true" /> : `#${index + 1}`}
-                      </span>
-                      <Avatar initials={verifier.name[0]} size="md" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-[var(--color-fg)] truncate leading-tight">
-                          {verifier.name}
-                        </p>
-                        <p className="text-xs text-[var(--color-fg-muted)] font-mono font-semibold mt-0.5">
-                          {title} · {verifier.verifications} checks
-                        </p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <span className="text-xs font-mono font-bold tabular-nums text-[var(--color-v-true)] bg-[var(--color-v-true-bg)] px-2 py-0.5 rounded-full border border-[var(--color-v-true-border)]">
-                          {verifier.reputation}% Rep
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
+          {/* The Top Verifiers leaderboard was removed: it bulk-read the whole
+              `users` collection, which exposed every user's email and isAdmin
+              status to any signed-in visitor. /users is now owner-or-admin read
+              only (see firestore.rules). Restoring a leaderboard needs a separate
+              public_profiles collection holding only non-sensitive fields. */}
 
           {/* Recent Activity Timeline Card */}
           <div className="p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)]">

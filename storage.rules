@@ -4,9 +4,16 @@ service firebase.storage {
     // Claim screenshots: public read so shared cards and public claim pages
     // load images; uploads require auth and must be image files ≤ 10 MB.
     // Restricting to safe raster/vector formats (jpeg, png, gif, webp) to avoid SVG script-execution XSS.
-    match /claim_screenshots/{fileName} {
+    // Path is owner-scoped: the uid segment is required, so a user can only write
+    // under their own prefix. The previous flat /claim_screenshots/{fileName} let
+    // any signed-in user write — or silently overwrite — any other user's file.
+    // No client code uses Storage yet (images are base64 data URIs on the claim
+    // doc), so any future upload MUST build the path as
+    // `claim_screenshots/${auth.currentUser.uid}/${fileName}`.
+    match /claim_screenshots/{uid}/{fileName} {
       allow read: if true;
       allow write: if request.auth != null
+        && request.auth.uid == uid
         && request.resource.contentType in ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
         && request.resource.size < 10 * 1024 * 1024;
     }
