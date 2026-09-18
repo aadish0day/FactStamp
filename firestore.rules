@@ -8,33 +8,12 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isAdmin', false) == true;
     }
 
-    // ── Seed / Developer User Helper ──
-    // The fixtures written by `npm run seed:db` need to bypass the self-update
-    // guards: inflated reputation, non-zero verification counts, the demo admin
-    // flag, and the collection wipe. This is an EXPLICIT allowlist of the seven
-    // seeded demo accounts.
-    //
-    // It must never go back to matching '.*@factstamp\.app': signup is open, so
-    // anyone could register their own @factstamp.app address and immediately
-    // hold admin-equivalent rights over every collection. The old
-    // `email_verified` clause did not stop that either — it defaulted to true
-    // when the claim was absent.
-    function seedAccounts() {
-      return [
-        'priya@factstamp.app',
-        'raj@factstamp.app',
-        'vikram@factstamp.app',
-        'ananya@factstamp.app',
-        'aarav@factstamp.app',
-        'neha@factstamp.app',
-        'kavya@factstamp.app'
-      ];
-    }
-
-    function isSeedUser() {
-      return request.auth != null
-        && request.auth.token.email in seedAccounts();
-    }
+    // The seed-account allowlist that used to live here is gone. It granted
+    // seven demo logins — whose shared password ships in this repo — the power
+    // to forge consensus, impersonate any verifier, read every profile and wipe
+    // collections. Seeding now authenticates as a real admin instead
+    // (FACTSTAMP_ADMIN_EMAIL / FACTSTAMP_ADMIN_PASSWORD), so isAdmin() is the
+    // only elevated path.
 
     // The caller's own stored profile.
     function callerProfile() {
@@ -66,7 +45,9 @@ service cloud.firestore {
         && isUnchanged('createdAt')
         && isUnchanged('consensusDeadline')
         && isUnchanged('consensusDeadlineMs')
-        && isUnchanged('imageUrl');
+        && isUnchanged('imageUrl')
+        && isUnchanged('thumbnailUrl')
+        && isUnchanged('hasScreenshot');
     }
 
     // ── Verifier Profiles ──
@@ -76,12 +57,12 @@ service cloud.firestore {
       // isAdmin status to anyone with an account — the leaderboard's bulk read made
       // the whole collection trivially harvestable from devtools.
       allow read: if request.auth != null
-        && (request.auth.uid == uid || isAdmin() || isSeedUser());
+        && (request.auth.uid == uid || isAdmin());
 
       allow create: if request.auth != null && (
         (
           request.auth.uid == uid && (
-            isSeedUser() || (
+            (
               request.resource.data.get('reputation', 50) == 50
               && request.resource.data.get('totalVerifications', 0) == 0
               && request.resource.data.get('isAdmin', false) == false
@@ -90,13 +71,13 @@ service cloud.firestore {
               && request.resource.data.email == request.auth.token.email
             )
           )
-        ) || isAdmin() || isSeedUser()
+        ) || isAdmin()
       );
 
       allow update: if request.auth != null && (
         // Admin update: can manage reputation, verification count, and admin role
         (
-          (isAdmin() || isSeedUser())
+          isAdmin()
           && request.resource.data.uid == resource.data.uid
           && request.resource.data.get('reputation', 50) is int
           && request.resource.data.get('reputation', 50) >= 0
@@ -119,7 +100,7 @@ service cloud.firestore {
         )
       );
 
-      allow delete: if request.auth != null && (isAdmin() || isSeedUser());
+      allow delete: if request.auth != null && isAdmin();
     }
 
     // ── Claims ──
@@ -138,14 +119,18 @@ service cloud.firestore {
         && request.resource.data.submittedByName.size() <= 100
         && request.resource.data.get('imageUrl', 'https://placeholder.com').matches('^(data:image/(jpeg|png|webp);base64,|https?://).*')
         && request.resource.data.get('imageUrl', '').size() <= 800000
-        && (request.resource.data.submittedBy == request.auth.uid || isAdmin() || isSeedUser())
-        && (isAdmin() || isSeedUser() || nameMatchesCaller(request.resource.data.submittedByName))
+        // Thumbnails ride along on the claim and are read by every list view,
+        // so they are capped far tighter than the full screenshot.
+        && request.resource.data.get('thumbnailUrl', 'https://placeholder.com').matches('^(data:image/(jpeg|png|webp);base64,|https?://).*')
+        && request.resource.data.get('thumbnailUrl', '').size() <= 60000
+        && (request.resource.data.submittedBy == request.auth.uid || isAdmin())
+        && (isAdmin() || nameMatchesCaller(request.resource.data.submittedByName))
         // `consensusDeadline` is an ISO string, which rules cannot parse or compare
         // to request.time — so claims also carry the same instant as epoch millis,
         // which Case B below can actually check. Without this a claim could be
         // created pre-expired and contested instantly.
         && (
-          isAdmin() || isSeedUser() || (
+          isAdmin() || (
             request.resource.data.consensusDeadlineMs is int
             && request.resource.data.consensusDeadlineMs >= request.time.toMillis()
             && request.resource.data.consensusDeadlineMs <= request.time.toMillis() + 2592000000
@@ -155,7 +140,7 @@ service cloud.firestore {
       allow update: if request.auth != null
         && (
           // Case A: Admin update (moderator consensus corrections, text edit, verdict override, seeding, flagging)
-          (isAdmin() || isSeedUser())
+          isAdmin()
           ||
           // Case B: Consensus expiry updates (claims overdue for verification marked CONTESTED)
           (
@@ -182,6 +167,19 @@ service cloud.firestore {
             identityUnchanged()
             && isUnchanged('adminFlagged')
             && isUnchanged('adminFlaggedAt')
+            // A claim's author cannot sit on its jury.
+            && resource.data.submittedBy != request.auth.uid
+            // One verifier, one verdict. Without this a single account could
+            // append three verifications and manufacture a full consensus on
+            // its own. Consensus closes at 3, so checking slots 0-2 (guarded by
+            // the current size) covers every verification a claim can hold.
+            && request.resource.data.verificationCount <= 3
+            && (resource.data.verifications.size() < 1
+                || resource.data.verifications[0].verifierId != request.auth.uid)
+            && (resource.data.verifications.size() < 2
+                || resource.data.verifications[1].verifierId != request.auth.uid)
+            && (resource.data.verifications.size() < 3
+                || resource.data.verifications[2].verifierId != request.auth.uid)
             // Count must increment by 1
             && request.resource.data.verificationCount == resource.data.verificationCount + 1
             // Exactly one element may be appended. hasAll() alone is a subset check,
@@ -224,7 +222,7 @@ service cloud.firestore {
           )
         );
 
-      allow delete: if request.auth != null && (isAdmin() || isSeedUser());
+      allow delete: if request.auth != null && isAdmin();
 
       // ── Verdicts subcollection ──
       match /verdicts/{verdictId} {
@@ -244,11 +242,31 @@ service cloud.firestore {
       }
     }
 
+    // ── Claim screenshots ──
+    // Cloud Storage requires the paid Blaze plan, so full screenshots are kept
+    // here as base64 instead of on the claim document — list views would
+    // otherwise download every image. Public read (claim pages are public);
+    // only the claim's own author may attach one.
+    match /claim_media/{claimId} {
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && request.resource.data.claimId == claimId
+        && request.resource.data.imageUrl is string
+        && request.resource.data.imageUrl.matches('^data:image/(jpeg|png|webp);base64,.*')
+        && request.resource.data.imageUrl.size() <= 900000
+        && get(/databases/$(database)/documents/claims/$(claimId)).data.submittedBy == request.auth.uid;
+
+      // A screenshot is evidence: it is attached once and never rewritten.
+      allow update: if false;
+      allow delete: if request.auth != null && isAdmin();
+    }
+
     // ── Notifications ──
     match /notifications/{notificationId} {
-      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin() || isSeedUser());
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if request.auth != null
-        && (request.resource.data.userId == request.auth.uid || isAdmin() || isSeedUser())
+        && (request.resource.data.userId == request.auth.uid || isAdmin())
         && request.resource.data.title is string
         && request.resource.data.title.size() <= 200
         && request.resource.data.message is string
@@ -262,12 +280,12 @@ service cloud.firestore {
         && isUnchanged('message')
         && isUnchanged('createdAt')
         && isUnchanged('claimId');
-      allow delete: if request.auth != null && (isAdmin() || isSeedUser() || resource.data.userId == request.auth.uid);
+      allow delete: if request.auth != null && (isAdmin() || resource.data.userId == request.auth.uid);
     }
 
     // ── Moderation Incident Reports ──
     match /reports/{reportId} {
-      allow read: if request.auth != null && (isAdmin() || isSeedUser());
+      allow read: if request.auth != null && isAdmin();
       allow create: if request.auth != null
         && request.resource.data.reportedBy == request.auth.uid
         && request.resource.data.status == 'pending'
@@ -278,15 +296,15 @@ service cloud.firestore {
         && request.resource.data.targetTitle.size() <= 300
         && request.resource.data.details is string
         && request.resource.data.details.size() <= 3000;
-      allow update: if request.auth != null && (isAdmin() || isSeedUser());
-      allow delete: if request.auth != null && (isAdmin() || isSeedUser());
+      allow update: if request.auth != null && isAdmin();
+      allow delete: if request.auth != null && isAdmin();
     }
 
     // ── Administrative Audit Logs (Immutable) ──
     match /audit_logs/{logId} {
-      allow read: if request.auth != null && (isAdmin() || isSeedUser());
+      allow read: if request.auth != null && isAdmin();
       allow create: if request.auth != null
-        && (isAdmin() || isSeedUser())
+        && isAdmin()
         && request.resource.data.action is string
         && request.resource.data.action.size() <= 200
         && request.resource.data.details is string

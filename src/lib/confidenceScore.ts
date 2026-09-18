@@ -93,12 +93,23 @@ const MQ_DOMAINS = new Set([
   "snopes.com",
 ]);
 
+/**
+ * Matches a hostname against a trusted domain on label boundaries only.
+ * A substring test rated `who.int.example.com` and `notwho.int` as WHO, which
+ * let anyone inflate a claim's confidence score by up to 30 points with a
+ * lookalike domain.
+ */
+function hostMatches(host: string, domain: string): boolean {
+  return host === domain || host.endsWith("." + domain);
+}
+
 export function determineSourceQuality(url: string): "high" | "medium" | "low" {
   try {
-    const domain = new URL(url).hostname.toLowerCase();
-    if (Array.from(HQ_DOMAINS).some((hq) => domain.includes(hq))) return "high";
-    if (Array.from(MQ_DOMAINS).some((mq) => domain.includes(mq)))
-      return "medium";
+    const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "low";
+    const host = parsed.hostname.toLowerCase().replace(/\.$/, "");
+    if (Array.from(HQ_DOMAINS).some((hq) => hostMatches(host, hq))) return "high";
+    if (Array.from(MQ_DOMAINS).some((mq) => hostMatches(host, mq))) return "medium";
     return "low";
   } catch {
     return "low";

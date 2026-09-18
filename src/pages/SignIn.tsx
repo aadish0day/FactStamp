@@ -191,8 +191,8 @@ export function SignIn() {
         navigate('/admin')
         return
       }
-      const from = (location.state as { from?: { pathname: string } })?.from?.pathname
-      navigate(from || '/')
+      const from = (location.state as { from?: { pathname: string; search?: string } })?.from
+      navigate(from ? from.pathname + (from.search ?? '') : '/')
     } catch (err) {
       // 03. Failed authentication: increment failed attempts counter
       const updatedLimit = recordFailedLogin(cleanEmail)

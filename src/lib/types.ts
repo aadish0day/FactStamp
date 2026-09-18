@@ -50,7 +50,16 @@ export interface Claim {
   consensusDeadlineMs?: number
   submittedBy: string
   submittedByName: string
+  /**
+   * Legacy inline screenshot. New claims store the full image in
+   * `claim_media/{claimId}` and keep only `thumbnailUrl` here, so list views
+   * stop downloading hundreds of KB per claim.
+   */
   imageUrl?: string
+  /** Small (~8 KB) preview shown in lists and queues. */
+  thumbnailUrl?: string
+  /** True when a full screenshot exists in `claim_media/{claimId}`. */
+  hasScreenshot?: boolean
   verdict?: Verdict
   confidenceScore?: number
   verifications: Verification[]
@@ -182,3 +191,44 @@ export interface AdminAuditLog {
   details: string
 }
 
+
+/* ── Consensus helpers ── */
+
+/** A claim needs this many independent verifications before a verdict stands. */
+export const REQUIRED_VERIFICATIONS = 3
+
+/**
+ * True when a claim is closed but never reached the 3-verifier quorum — it ran
+ * past its consensus deadline instead. These carry a CONTESTED verdict and a
+ * low confidence score, so counting them as fact-checks overstates how much
+ * has actually been verified.
+ */
+export function isClosedWithoutQuorum(claim: Claim): boolean {
+  return (
+    claim.status === 'verified' &&
+    claim.verdict === 'CONTESTED' &&
+    claim.verificationCount < REQUIRED_VERIFICATIONS
+  )
+}
+
+/**
+ * True when a pending claim has run past its consensus deadline. It stays in
+ * the queue and can still be verified — this only flags it for display.
+ */
+export function isOverdue(claim: Claim): boolean {
+  return claim.status === 'pending' && Date.parse(claim.consensusDeadline) <= Date.now()
+}
+
+/**
+ * Mirrors the Case C conditions in firestore.rules: a claim's author cannot
+ * verify it, nobody verifies the same claim twice, and consensus closes at
+ * REQUIRED_VERIFICATIONS. Keeping it here means the queue hides work the
+ * database would reject anyway.
+ */
+export function canVerify(claim: Claim, uid: string | undefined): boolean {
+  if (!uid) return false
+  if (claim.status !== 'pending') return false
+  if (claim.submittedBy === uid) return false
+  if (claim.verificationCount >= REQUIRED_VERIFICATIONS) return false
+  return !claim.verifications.some((v) => v.verifierId === uid)
+}

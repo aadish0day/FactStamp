@@ -11,10 +11,11 @@ export function NotFound() {
       <Seo title="Page Not Found" description="The page you're looking for has been debunked — or it never existed." />
       <ShieldAlert className="w-20 h-20 text-[var(--color-fg-muted)] mx-auto mb-6" aria-hidden="true" />
       <h1 className="text-4xl font-bold text-[var(--color-fg)] mb-4">
-        This claim doesn't exist
+        Page not found
       </h1>
       <p className="text-[var(--color-fg-2)] max-w-md mx-auto mb-8">
-        The page you're looking for has been debunked — or it never existed in the first place.
+        This address doesn&apos;t match anything on FactStamp. If you followed a link to a
+        fact-check, the claim may have been removed.
       </p>
       <div className="flex gap-4 justify-center">
         <Button intent="primary" size="lg" onClick={() => navigate('/')}>

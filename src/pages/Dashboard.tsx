@@ -24,6 +24,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { VerdictPill } from '@/components/ui/VerdictPill'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { Button } from '@/components/ui/Button'
+import { ErrorState } from '@/components/ui/ErrorState'
 import { ShimmerText } from '@/components/ui/ShimmerText'
 import { InteractiveHoverButton } from '@/components/ui/InteractiveHoverButton'
 import { FlowButton } from '@/components/ui/FlowButton'
@@ -32,6 +33,7 @@ import { DashboardChart } from '@/components/DashboardChart'
 import { computeWeeklyReport } from '@/lib/weeklyReport'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { VERDICT_META, isClosedWithoutQuorum, isOverdue } from '@/lib/types'
 
 const CATEGORY_COLOR_MAP: Record<string, string> = {
   health: 'var(--color-cat-health)',
@@ -42,10 +44,14 @@ const CATEGORY_COLOR_MAP: Record<string, string> = {
 }
 
 export function Dashboard() {
-  const { claims, flagClaim } = useClaims()
+  const { claims, flagClaim, isLoading, error } = useClaims()
   const { user } = useAuth()
 
-  const verifiedClaims = claims.filter((c) => c.status === 'verified')
+  // Claims that ran out their consensus deadline without reaching 3 verifiers
+  // are closed, but they are not fact-checks — keep them out of the verified
+  // counts and report them separately.
+  const timedOutClaims = claims.filter(isClosedWithoutQuorum)
+  const verifiedClaims = claims.filter((c) => c.status === 'verified' && !isClosedWithoutQuorum(c))
   const falseClaims = verifiedClaims.filter((c) => c.verdict === 'FALSE')
 
   // Module 7 — weekly trending report computed live from the claims feed
@@ -59,6 +65,8 @@ export function Dashboard() {
     name: cat.charAt(0).toUpperCase() + cat.slice(1),
     count: verifiedClaims.filter((c) => c.category === cat).length,
   }))
+
+  const activeCategoryCount = categoryData.filter((c) => c.count > 0).length
 
   // Average confidence across verified claims (real data)
   const avgConfidence = verifiedClaims.length
@@ -86,7 +94,7 @@ export function Dashboard() {
   // User submitted claims
   const userSubmittedClaims = useMemo(() => {
     if (!user) return []
-    return claims.filter((c) => c.submittedBy === user.uid || c.submittedBy === 'u1')
+    return claims.filter((c) => c.submittedBy === user.uid)
   }, [claims, user])
 
   // Filtered & sorted claims directory
@@ -124,6 +132,7 @@ export function Dashboard() {
       verdict: c.verdict,
       count: c.verificationCount,
       createdAt: c.createdAt,
+      overdue: isOverdue(c),
     }))
   }, [claims, statusFilter, sortMode, searchQuery])
 
@@ -140,14 +149,22 @@ export function Dashboard() {
   // Admin expedite toggle for pending claims
   const pendingClaims = claims.filter((c) => c.status === 'pending')
   const toggleFlag = (claimId: string, currentlyFlagged: boolean) => {
-    flagClaim(claimId, !currentlyFlagged).then(() => {
-      toast(currentlyFlagged ? 'Flag removed' : 'Claim flagged for expedited review', {
-        description: currentlyFlagged
-          ? 'The claim returned to the normal verification queue.'
-          : 'The claim will surface first in the verification queue.',
-        icon: <Flag className="w-5 h-5 text-[var(--color-brand)]" />,
+    flagClaim(claimId, !currentlyFlagged)
+      .then(() => {
+        toast(currentlyFlagged ? 'Flag removed' : 'Claim flagged for expedited review', {
+          description: currentlyFlagged
+            ? 'The claim returned to the normal verification queue.'
+            : 'The claim will surface first in the verification queue.',
+          icon: <Flag className="w-5 h-5 text-[var(--color-brand)]" />,
+        })
       })
-    })
+      .catch((err) => {
+        // flagClaim now rejects when Firestore refuses the write.
+        console.error('Flag write failed:', err)
+        toast.error('That flag was not saved.', {
+          description: 'The database rejected the change. Reload and try again.',
+        })
+      })
   }
 
   // Title calculator
@@ -164,7 +181,7 @@ export function Dashboard() {
 
   const kpis = [
     {
-      label: 'Total Claims Verified',
+      label: 'Claims With a Verdict',
       value: verifiedClaims.length,
       icon: ShieldCheck,
       color: 'var(--color-v-true)',
@@ -191,7 +208,39 @@ export function Dashboard() {
       borderColor: 'var(--color-brand-subtle)',
       trend: confidenceLabel,
     },
+    {
+      label: 'Closed Without Quorum',
+      value: timedOutClaims.length,
+      icon: AlertCircle,
+      color: 'var(--color-v-unverif)',
+      bgColor: 'var(--color-v-unverif-bg)',
+      borderColor: 'var(--color-v-unverif-border)',
+      trend: 'Deadline passed',
+    },
   ]
+
+  // Until Firestore answers, show a loading state rather than charts and
+  // counters built from an empty list.
+  if (isLoading || error) {
+    return (
+      <div className="w-full max-w-[1400px] mx-auto px-[clamp(1rem,4vw,3rem)] py-8">
+        <Seo title="Misinformation Dashboard" description="Weekly trends and community insights on WhatsApp misinformation in India." />
+        <Breadcrumbs />
+        {error ? (
+          <ErrorState
+            title="Couldn't load the claims"
+            message="The dashboard needs a live connection to the claims database. Check your connection and try again."
+            onRetry={() => window.location.reload()}
+          />
+        ) : (
+          <div role="status" className="flex flex-col items-center justify-center py-24 gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-brand)] animate-spin" />
+            <span className="text-sm text-[var(--color-fg-muted)]">Loading claims…</span>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="w-full max-w-[1400px] mx-auto px-[clamp(1rem,4vw,3rem)] py-8">
@@ -226,7 +275,7 @@ export function Dashboard() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         {kpis.map((kpi) => {
           const Icon = kpi.icon
           return (
@@ -271,11 +320,15 @@ export function Dashboard() {
               <div>
                 <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-sm text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] border border-[var(--color-brand)]/20 mb-2">
                   <CalendarDays className="w-3.5 h-3.5" />
-                  <span className="font-mono">Weekly Trending Report</span>
+                  <span className="font-mono">{weekly.scope === 'week' ? 'Weekly Trending Report' : 'Trending Report'}</span>
                 </div>
-                <h2 className="text-xl font-bold tracking-tight text-[var(--color-fg)]">Misinformation Trends — {weekly.weekLabel}</h2>
+                <h2 className="text-xl font-bold tracking-tight text-[var(--color-fg)]">
+                  Misinformation Trends — {weekly.scope === 'week' ? weekly.weekLabel : 'all time'}
+                </h2>
                 <p className="text-sm text-[var(--color-fg-2)] mt-0.5 font-medium">
-                  {weekly.weeklyClaimCount} claim{weekly.weeklyClaimCount !== 1 ? 's' : ''} submitted this week · computed live
+                  {weekly.scope === 'week'
+                    ? `${weekly.weeklyClaimCount} claim${weekly.weeklyClaimCount !== 1 ? 's' : ''} submitted this week · computed live`
+                    : `No claims submitted this week — showing all ${claims.length} claim${claims.length !== 1 ? 's' : ''} instead`}
                 </p>
               </div>
               <div className="flex items-center gap-2 text-xs text-[var(--color-fg-2)] bg-[var(--color-surface-2)]/70 border border-[var(--color-border-soft)] px-2.5 py-1 rounded-sm font-mono font-bold self-start sm:self-auto">
@@ -314,7 +367,7 @@ export function Dashboard() {
                 <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[var(--color-brand)] border-b border-[var(--color-border-soft)] pb-2">Most Debunked</h3>
                 {weekly.debunkedClaims.length === 0 ? (
                   <p className="text-xs text-[var(--color-fg-muted)] py-6 text-center">
-                    No claims debunked this week yet
+                    {weekly.scope === 'week' ? 'No claims debunked this week yet' : 'No claims debunked yet'}
                   </p>
                 ) : (
                   <div className="space-y-2.5">
@@ -367,7 +420,7 @@ export function Dashboard() {
                           </p>
                         </div>
                         <span className="text-xs font-mono font-bold text-[var(--color-v-true)] bg-[var(--color-v-true-bg)] px-2 py-0.5 rounded-full border border-[var(--color-v-true-border)]">
-                          {v.accuracy}% acc
+                          {v.accuracy}% agreed
                         </span>
                       </div>
                     ))}
@@ -385,7 +438,7 @@ export function Dashboard() {
                 <p className="text-sm text-[var(--color-fg-2)] mt-0.5 font-medium">Distribution of verified WhatsApp forwards</p>
               </div>
               <span className="text-xs font-mono font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2.5 py-0.5 rounded-sm border border-[var(--color-brand-subtle)]">
-                5 Active Categories
+                {activeCategoryCount} Active {activeCategoryCount === 1 ? 'Category' : 'Categories'}
               </span>
             </div>
             <DashboardChart categoryData={categoryData} />
@@ -630,8 +683,14 @@ export function Dashboard() {
                         {item.status === 'verified' && item.verdict ? (
                           <VerdictPill verdict={item.verdict} size="sm" />
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--color-v-unverif-bg)] text-[var(--color-v-unverif)] border border-[var(--color-v-unverif-border)]">
-                            Pending Review
+                          <span
+                            className={`inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                              item.overdue
+                                ? 'bg-[var(--color-v-contested-bg)] text-[var(--color-v-contested)] border border-[var(--color-v-contested-border)]'
+                                : 'bg-[var(--color-v-unverif-bg)] text-[var(--color-v-unverif)] border border-[var(--color-v-unverif-border)]'
+                            }`}
+                          >
+                            {item.overdue ? 'Overdue' : 'Pending Review'}
                           </span>
                         )}
                       </div>
@@ -689,8 +748,8 @@ export function Dashboard() {
                       <span
                         className="w-2.5 h-2.5 rounded-full ring-4 ring-[var(--color-surface)] z-10"
                         style={{
-                          backgroundColor: claim.verdict === 'TRUE' ? 'var(--color-v-true)' : claim.verdict === 'FALSE' ? 'var(--color-v-false)' : 'var(--color-v-mislead)',
-                          boxShadow: `0 0 8px ${claim.verdict === 'TRUE' ? 'var(--color-v-true-border)' : claim.verdict === 'FALSE' ? 'var(--color-v-false-border)' : 'var(--color-v-mislead-border)'}`,
+                          backgroundColor: `var(${VERDICT_META[claim.verdict!].colorVar})`,
+                          boxShadow: `0 0 8px var(${VERDICT_META[claim.verdict!].borderVar})`,
                         }}
                         aria-hidden="true"
                       />

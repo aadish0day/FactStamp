@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Download, ShieldCheck, Plus, RefreshCw, ChevronDown } from 'lucide-react'
 import { formatDistanceToNow } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Seo } from '@/components/Seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { getClaimScreenshot } from '@/services/firebaseService'
 import { Button } from '@/components/ui/Button'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { VerdictPill } from '@/components/ui/VerdictPill'
@@ -21,6 +22,36 @@ import { VERDICT_META } from '@/lib/types'
 import { toPng } from 'html-to-image'
 
 /** Detail view for individual claim with verification timeline and share cards. */
+/**
+ * Full screenshots live in `claim_media/{claimId}`, not on the claim, so they
+ * are fetched only when a claim page is actually opened. Legacy claims that
+ * still carry an inline `imageUrl` are used as-is.
+ */
+function useClaimScreenshot(claim: { id: string; imageUrl?: string; hasScreenshot?: boolean } | null | undefined) {
+  const [screenshot, setScreenshot] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!claim) return
+    if (claim.imageUrl) {
+      setScreenshot(claim.imageUrl)
+      return
+    }
+    if (!claim.hasScreenshot) {
+      setScreenshot(null)
+      return
+    }
+    let cancelled = false
+    getClaimScreenshot(claim.id).then((url) => {
+      if (!cancelled) setScreenshot(url)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [claim?.id, claim?.imageUrl, claim?.hasScreenshot])
+
+  return screenshot
+}
+
 export function ClaimDetail() {
   const { claimId } = useParams<{ claimId: string }>()
   const navigate = useNavigate()
@@ -30,6 +61,7 @@ export function ClaimDetail() {
   const [isDownloading, setIsDownloading] = useState(false)
 
   const claim = claimId ? getClaimById(claimId) : undefined
+  const screenshot = useClaimScreenshot(claim)
 
   if (error) {
     return (
@@ -99,6 +131,10 @@ export function ClaimDetail() {
     <div className="container mx-auto px-[clamp(1rem,4vw,3rem)] py-8">
       <Seo title={claim.text.slice(0, 60)} description={`Fact-check verdict for: ${claim.text.slice(0, 120)}`} />
       <Breadcrumbs currentLabel={claim.text.slice(0, 40) + '…'} />
+      {/* The claim itself is the page's subject; screen readers and search
+          engines need it as a heading even though the design shows it as body
+          text inside the claim card below. */}
+      <h1 className="sr-only">Fact-check: {claim.text}</h1>
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 items-start mt-4">
       {/* Main Content */}
       <div className="space-y-6">
@@ -116,15 +152,15 @@ export function ClaimDetail() {
           </p>
 
           {/* Attached screenshot (uploaded via Firebase Storage) */}
-          {claim.imageUrl && (
+          {screenshot && (
             <a
-              href={claim.imageUrl}
+              href={screenshot}
               target="_blank"
               rel="noopener noreferrer"
               className="block mb-6 rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border-soft)] hover:border-[var(--color-brand)] transition-colors"
             >
               <img
-                src={claim.imageUrl}
+                src={screenshot}
                 alt="Screenshot attached with this claim"
                 className="w-full max-h-80 object-contain bg-[var(--color-surface-2)]"
                 loading="lazy"

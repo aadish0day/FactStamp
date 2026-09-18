@@ -67,7 +67,9 @@ const FIRESTORE_BASE = USE_EMULATORS
 
 /* ── 3. Seed data ── */
 
-const PASSWORD = 'FactStamp@2026'
+// Overridable so the demo password can be rotated without editing this file:
+//   SEED_PASSWORD='…' npm run seed:db
+const PASSWORD = process.env.SEED_PASSWORD || env.SEED_PASSWORD || 'FactStamp@2026'
 
 // Order matters: index 0 → 'u1', index 1 → 'u2', ... (uid references are
 // remapped to the real Firebase uids created below).
@@ -106,7 +108,7 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Priya Sharma',
     verdict: 'FALSE',
     confidenceScore: 97,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 95,
     verifications: [
       v('v1', 'c1', 'FALSE', 'https://who.int/dengue-treatment-guidelines', 'high',
@@ -117,7 +119,7 @@ const VERIFIED_SEEDS = [
         'Vikram Singh', '2025-06-10T11:30:00Z'),
       v('v3', 'c1', 'FALSE', 'https://timesofindia.indiatimes.com/dengue-myths', 'medium',
         'The Times of India fact-check cites multiple health officials debunking this claim. No government health agency recommends neem leaves or antibiotics for dengue treatment.',
-        'Priya Sharma', '2025-06-10T14:00:00Z'),
+        'Kavya Nair', '2025-06-10T14:00:00Z'),
     ],
   },
   {
@@ -130,7 +132,7 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Ananya Gupta',
     verdict: 'TRUE',
     confidenceScore: 98,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 100,
     verifications: [
       v('v4', 'c2', 'TRUE', 'https://eci.gov.in/voter-id-requirements', 'high',
@@ -139,6 +141,9 @@ const VERIFIED_SEEDS = [
       v('v5', 'c2', 'TRUE', 'https://ceodelhi.gov.in/voter-registration', 'high',
         'The Delhi CEO website confirms Aadhaar is an accepted document for voter registration. This claim is accurate.',
         'Raj Patel', '2025-06-09T10:20:00Z'),
+      v('v21', 'c2', 'TRUE', 'https://eci.gov.in/form-6-documents', 'high',
+        "The Election Commission's Form 6 instruction sheet lists Aadhaar among the accepted proof-of-identity documents, so the claim holds up as stated.",
+        'Neha Joshi', '2025-06-09T13:10:00Z'),
     ],
   },
   {
@@ -151,12 +156,18 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Neha Joshi',
     verdict: 'FALSE',
     confidenceScore: 94,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 85,
     verifications: [
       v('v6', 'c3', 'FALSE', 'https://indianexpress.com/election-eligibility-facts', 'medium',
         'The Indian Express fact-check clarifies that no Indian law requires voters to have a separate mobile phone for their ID. This is a viral WhatsApp rumor without basis in the Representation of the People Act, 1951.',
         'Priya Sharma', '2025-06-08T16:00:00Z'),
+      v('v22', 'c3', 'FALSE', 'https://pib.gov.in/factcheck/voter-mobile-rumour', 'high',
+        "PIB Fact Check labelled this exact forward fake. No Election Commission order ties voter eligibility to owning a personal mobile number.",
+        'Raj Patel', '2025-06-08T17:20:00Z'),
+      v('v23', 'c3', 'FALSE', 'https://eci.gov.in/faqs/voter-registration', 'high',
+        "The Commission's own registration FAQ lists the eligibility conditions, and a personal phone is not among them. A mobile number is optional, used only for status SMS.",
+        'Kavya Nair', '2025-06-08T18:05:00Z'),
     ],
   },
   {
@@ -169,12 +180,18 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Vikram Singh',
     verdict: 'MISLEADING',
     confidenceScore: 89,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 90,
     verifications: [
       v('v7', 'c4', 'MISLEADING', 'https://pib.gov.in/eci-clarification', 'high',
         "The PIB fact-check found the claim MISLEADING. While the viral message correctly states that NOTA exists, it's misleading to claim NOTA votes directly cancel the winning candidate's victory — NOTA only triggers a re-poll if NOTA gets the highest votes.",
         'Raj Patel', '2025-06-07T12:00:00Z'),
+      v('v24', 'c4', 'MISLEADING', 'https://eci.gov.in/faqs/nota', 'high',
+        "The Commission's NOTA FAQ states the candidate with the most valid votes still wins even when NOTA polls higher. The forward inverts that rule.",
+        'Kavya Nair', '2025-06-07T13:40:00Z'),
+      v('v25', 'c4', 'MISLEADING', 'https://www.thehindu.com/elections/nota-explained', 'medium',
+        "The explainer traces the 2013 Supreme Court judgment that introduced NOTA and confirms it carries no power to void a result.",
+        'Neha Joshi', '2025-06-07T15:00:00Z'),
     ],
   },
   {
@@ -187,7 +204,7 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Neha Joshi',
     verdict: 'MISLEADING',
     confidenceScore: 86,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 85,
     verifications: [
       v('v8', 'c5', 'MISLEADING', 'https://ayush.gov.in/ayurveda-covid', 'high',
@@ -196,6 +213,9 @@ const VERIFIED_SEEDS = [
       v('v9', 'c5', 'MISLEADING', 'https://icmr.gov.in/covid-guidelines', 'high',
         'ICMR guidelines emphasize vaccination and masks as primary prevention. The AYUSH remedies mentioned may support general immunity but are not proven to prevent COVID infection.',
         'Vikram Singh', '2025-06-10T09:45:00Z'),
+      v('v26', 'c5', 'MISLEADING', 'https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public', 'high',
+        "WHO public advice lists vaccination, ventilation and masks. It records no herbal decoction as a preventive measure, so the forward overstates what AYUSH actually advised.",
+        'Priya Sharma', '2025-06-10T11:20:00Z'),
     ],
   },
   {
@@ -208,12 +228,18 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Ananya Gupta',
     verdict: 'FALSE',
     confidenceScore: 92,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 80,
     verifications: [
       v('v10', 'c6', 'FALSE', 'https://iitm.org/scholarship-factcheck', 'medium',
         'The IIT Madras fact-check clarifies this scholarship scheme does not exist. No official announcement has been made about a ₹50,000 scholarship for IIT aspirants from government schools.',
         'Neha Joshi', '2025-06-06T15:30:00Z'),
+      v('v27', 'c6', 'FALSE', 'https://www.iitm.ac.in/scholarships', 'high',
+        "The institute's own scholarships page lists no such \u20b950,000 government-school award, and the link in the forward points to a non-institutional domain.",
+        'Aarav Mehta', '2025-06-06T16:40:00Z'),
+      v('v28', 'c6', 'FALSE', 'https://pib.gov.in/factcheck/iit-scholarship-fake', 'high',
+        "PIB Fact Check flagged the same message as a phishing lure that harvests Aadhaar and bank details through a lookalike form.",
+        'Priya Sharma', '2025-06-06T17:25:00Z'),
     ],
   },
   {
@@ -226,12 +252,18 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Priya Sharma',
     verdict: 'TRUE',
     confidenceScore: 95,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 100,
     verifications: [
       v('v11', 'c7', 'TRUE', 'https://mohfw.gov.in/helpline', 'high',
         'The Ministry of Health confirmed this helpline number through their official channels. The number matches the government portal listing.',
-        'Priya Sharma', '2025-06-05T11:00:00Z'),
+        'Neha Joshi', '2025-06-05T11:00:00Z'),
+      v('v29', 'c7', 'TRUE', 'https://pib.gov.in/PressReleasePage.aspx?PRID=health-helpline', 'high',
+        "The launch was announced in an official press release, which matches the number quoted in the message.",
+        'Raj Patel', '2025-06-05T12:15:00Z'),
+      v('v30', 'c7', 'TRUE', 'https://www.mohfw.gov.in/helplines', 'high',
+        "The ministry's published helpline directory lists the same number, so the forward is accurate.",
+        'Ananya Gupta', '2025-06-05T13:30:00Z'),
     ],
   },
   {
@@ -244,12 +276,18 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Raj Patel',
     verdict: 'CONTESTED',
     confidenceScore: 71,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 65,
     verifications: [
       v('v12', 'c8', 'CONTESTED', 'https://factcheck.org/common-cold-medicine', 'medium',
         'Medical professionals disagree on this. Some studies suggest zinc lozenges may reduce cold duration by 1-2 days, while others show no significant effect. More research needed.',
         'Ananya Gupta', '2025-06-04T14:20:00Z'),
+      v('v31', 'c8', 'CONTESTED', 'https://www.cochranelibrary.com/zinc-for-the-common-cold', 'high',
+        "The Cochrane review finds the evidence too inconsistent to support a firm conclusion: some trials show a shorter cold, others none, and the trials differ in dose and formulation.",
+        'Vikram Singh', '2025-06-04T15:30:00Z'),
+      v('v32', 'c8', 'CONTESTED', 'https://www.nccih.nih.gov/health/zinc', 'high',
+        "NIH summarises the same split. Zinc may shorten a cold slightly if started early, but nothing supports a 24-hour cure, so the claim as worded cannot be settled either way.",
+        'Kavya Nair', '2025-06-04T16:45:00Z'),
     ],
   },
   {
@@ -262,7 +300,7 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Kavya Nair',
     verdict: 'FALSE',
     confidenceScore: 99,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 90,
     verifications: [
       v('v13', 'c13', 'FALSE', 'https://www.healthline.com/health/onion-in-socks', 'high',
@@ -271,6 +309,9 @@ const VERIFIED_SEEDS = [
       v('v14', 'c13', 'FALSE', 'https://www.snopes.com/fact-check/onions-in-socks/', 'medium',
         'The practice originates from a 16th-century plague myth. Modern biology confirms there is no mechanism for onions to filter blood or draw heavy metals through the skin.',
         'Vikram Singh', '2025-06-03T11:00:00Z'),
+      v('v33', 'c13', 'FALSE', 'https://www.cdc.gov/flu/treatment/index.html', 'high',
+        "CDC treatment guidance lists antivirals and supportive care. Skin contact with onion has no route to clear a viral infection.",
+        'Neha Joshi', '2025-06-03T12:20:00Z'),
     ],
   },
   {
@@ -283,7 +324,7 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Aarav Mehta',
     verdict: 'TRUE',
     confidenceScore: 98,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 95,
     verifications: [
       v('v15', 'c14', 'TRUE', 'https://www.isro.gov.in/PrivateSpaceStartupLaunch', 'high',
@@ -292,6 +333,9 @@ const VERIFIED_SEEDS = [
       v('v16', 'c14', 'TRUE', 'https://www.thehindu.com/sci-tech/science/private-rocket-launch', 'high',
         'Media reports and press releases from IN-SPACe corroborate the successful launch and re-entry testing of the private hybrid rocket.',
         'Priya Sharma', '2025-06-02T15:00:00Z'),
+      v('v34', 'c14', 'TRUE', 'https://www.inspace.gov.in/authorised-launches', 'high',
+        "The IN-SPACe authorisation record lists the launch, which confirms the test happened as reported.",
+        'Vikram Singh', '2025-06-02T16:10:00Z'),
     ],
   },
   {
@@ -304,15 +348,18 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Vikram Singh',
     verdict: 'TRUE',
     confidenceScore: 98,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 95,
     verifications: [
       v('v17', 'c17', 'TRUE', 'https://pib.gov.in/PressReleasePage.aspx?PRID=unified-pension', 'high',
         'Official press release from the Press Information Bureau (PIB) confirms the Union Cabinet approved the Unified Pension Scheme (UPS) guaranteeing 50% basic pay as pension.',
-        'Vikram Singh', '2025-06-01T10:00:00Z'),
+        'Priya Sharma', '2025-06-01T10:00:00Z'),
       v('v18', 'c17', 'TRUE', 'https://www.livemint.com/news/india/cabinet-approves-unified-pension-scheme', 'high',
         'Ministry of Finance brief details the 25-year service threshold to receive the full guaranteed 50% basic salary as pension under the new scheme.',
         'Aarav Mehta', '2025-06-01T11:30:00Z'),
+      v('v35', 'c17', 'TRUE', 'https://www.pib.gov.in/PressReleasePage.aspx?PRID=ups-cabinet', 'high',
+        "The Cabinet decision document sets out the assured payout and the qualifying service period exactly as the message describes.",
+        'Raj Patel', '2025-06-01T12:45:00Z'),
     ],
   },
   {
@@ -325,7 +372,7 @@ const VERIFIED_SEEDS = [
     submittedByName: 'Neha Joshi',
     verdict: 'FALSE',
     confidenceScore: 99,
-    agreementRatio: 1.0,
+    agreementRatio: 100,
     sourceQualityScore: 90,
     verifications: [
       v('v19', 'c18', 'FALSE', 'https://www.fda.gov/consumers/consumer-updates/colloidal-silver-products-warning', 'high',
@@ -334,6 +381,9 @@ const VERIFIED_SEEDS = [
       v('v20', 'c18', 'FALSE', 'https://www.mayoclinic.org/healthy-lifestyle/consumer-health/expert-answers/colloidal-silver', 'high',
         'Mayo Clinic health publications confirm that colloidal silver is not considered safe or effective, and can cause serious side effects including kidney damage and neurological issues.',
         'Kavya Nair', '2025-05-31T10:30:00Z'),
+      v('v36', 'c18', 'FALSE', 'https://www.nccih.nih.gov/health/colloidal-silver', 'high',
+        "NIH states plainly that colloidal silver has no proven benefit and carries real risks, including permanent skin discolouration.",
+        'Vikram Singh', '2025-05-31T11:45:00Z'),
     ],
   },
 ];
@@ -602,13 +652,46 @@ async function main() {
     console.log(`  ${acc.created ? 'created' : 'exists '} → ${acc.email} (uid ${acc.uid.slice(0, 6)}…)`)
   }
 
-  const seedToken = accounts[0].idToken
+  // Elevated writes (collection wipes, verified claims, inflated reputations)
+  // now require a genuine admin. The seed-account allowlist in firestore.rules
+  // is gone: it gave seven demo logins with a published password admin-level
+  // reach over the whole database.
+  const ADMIN_EMAIL = process.env.FACTSTAMP_ADMIN_EMAIL || env.FACTSTAMP_ADMIN_EMAIL || 'admin@factstamp.app'
+  const ADMIN_PASSWORD = process.env.FACTSTAMP_ADMIN_PASSWORD || env.FACTSTAMP_ADMIN_PASSWORD || env.VITE_DEMO_ADMIN_PASSWORD
+  if (!ADMIN_PASSWORD) {
+    console.error('\n✖ No admin password. Set FACTSTAMP_ADMIN_PASSWORD (or VITE_DEMO_ADMIN_PASSWORD in .env).')
+    console.error('  Seeding writes verified claims and reputations, which only an admin may do.')
+    process.exit(1)
+  }
+  console.log(`\nAuthenticating admin ${ADMIN_EMAIL}…`)
+  let seedToken
+  try {
+    const adminAuth = await api(`${AUTH_BASE}/accounts:signInWithPassword?key=${API_KEY}`, {
+      method: 'POST',
+      body: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, returnSecureToken: true }),
+    })
+    seedToken = adminAuth.idToken
+    console.log('  ✔ Admin authenticated.')
+  } catch (err) {
+    console.error(`\n✖ Could not sign in as ${ADMIN_EMAIL}: ${err.message}`)
+    console.error('  Create one with `npm run create:admin`, or set isAdmin: true on a')
+    console.error('  users/{uid} document in the Firebase console to bootstrap the first admin.')
+    process.exit(1)
+  }
 
   // ── Clean up existing collections (Wipe) ──
   console.log('\nWiping existing collections…')
   await deleteCollection('claims', seedToken)
+  // Screenshots live in their own collection; wiping claims without this would
+  // leave orphaned images behind.
+  await deleteCollection('claim_media', seedToken)
   await deleteCollection('notifications', seedToken)
-  await deleteCollection('users', seedToken)
+  // `users` is deliberately NOT wiped: it holds real accounts (including admin
+  // profiles) that this script cannot recreate. The 7 seed profiles below are
+  // rewritten in place anyway. Pass --wipe-users to clear it as well.
+  if (process.argv.includes('--wipe-users')) {
+    await deleteCollection('users', seedToken)
+  }
 
   // ── User profiles (owner-only writes, so each uses its own token) ──
   console.log('\nWriting verifier profiles…')
@@ -621,9 +704,13 @@ async function main() {
       totalVerifications: acc.totalVerifications,
       joinedAt: acc.joinedAt,
       // Priya Sharma is the demo admin — unlocks the Expedited Review panel
-      isAdmin: acc.name === 'Priya Sharma',
+      // Demo accounts are NOT admins. Their password ships in this repo, so an
+      // admin flag here hands anyone who reads it the admin console on the live
+      // project. Grant admin with scripts/create-admin.mjs instead.
+      isAdmin: false,
     }
-    await writeDoc(`users/${acc.uid}`, profile, acc.idToken)
+    // Reputation and totalVerifications are admin-only fields.
+    await writeDoc(`users/${acc.uid}`, profile, seedToken)
   }
   console.log(`  ${accounts.length} profiles written to users/{uid}`)
 
@@ -683,11 +770,13 @@ async function main() {
     )
     const mask = isVerified ? Object.keys(finalData) : [...Object.keys(finalData), ...optionalKeys]
 
-    // Create-phase payload must satisfy the create rule (verificationCount == 0)
+    // Create-phase payload must satisfy the create rule, which requires
+    // status 'pending' with no verifications for EVERY new claim. Verified
+    // seeds are promoted to their real status by the PATCH below.
     const createData = {
       text: claim.text,
       category: claim.category,
-      status: claim.status,
+      status: 'pending',
       createdAt: claim.createdAt,
       consensusDeadline: claim.consensusDeadline,
       submittedBy: finalData.submittedBy,
@@ -734,7 +823,7 @@ async function main() {
       try {
         await api(`${FIRESTORE_BASE}/notifications?documentId=${docId}`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${acc.idToken}` },
+          headers: { Authorization: `Bearer ${seedToken}` },
           body: JSON.stringify({ fields: toFields(data) }),
         })
         notifCreated++

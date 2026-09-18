@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   AlertTriangle,
@@ -39,8 +39,9 @@ import { Textarea } from '@/components/ui/Input'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { findDuplicate } from '@/lib/duplicateDetection'
+import { saveClaimScreenshot } from '@/services/firebaseService'
 import { cn } from '@/lib/utils'
-import { compressImageToDataUrl } from '@/lib/imageCompression'
+import { compressImageToDataUrl, createThumbnailDataUrl } from '@/lib/imageCompression'
 import { validateImageUpload, sanitizeTextInput } from '@/lib/security'
 import {
   extractTextFromImage,
@@ -125,9 +126,11 @@ export function Submit() {
   const navigate = useNavigate()
   const { addClaim, claims } = useClaims()
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<Tab>('text')
-  const [claimText, setClaimText] = useState('')
+  // Prefilled when arriving from the home page's paste-to-check box
+  const [claimText, setClaimText] = useState(() => searchParams.get('text') ?? '')
   const [category, setCategory] = useState<ClaimCategory>('health')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [duplicateFound, setDuplicateFound] = useState<{ id: string; text: string; similarity: number } | null>(null)
@@ -201,16 +204,40 @@ export function Submit() {
     try {
       await new Promise((r) => setTimeout(r, 900))
 
+      // The claim carries only a small thumbnail; the full screenshot goes to
+      // claim_media/{claimId} so list views don't download it.
+      const thumbnailUrl = screenshotUrl ? (await createThumbnailDataUrl(screenshotUrl)) ?? undefined : undefined
+
       const newClaim = await addClaim({
         text: sanitizeTextInput(claimText.trim()),
         category,
         submittedBy: user?.uid || '',
         submittedByName: sanitizeTextInput(user?.displayName || 'Anonymous'),
-        imageUrl: screenshotUrl || undefined,
+        thumbnailUrl,
+        hasScreenshot: Boolean(screenshotUrl),
       })
+
+      if (screenshotUrl) {
+        try {
+          await saveClaimScreenshot(newClaim.id, screenshotUrl)
+        } catch (err) {
+          // The claim itself was saved, so say precisely what was lost.
+          console.error('Screenshot write failed:', err)
+          toast.error('Your claim was submitted, but the screenshot was not saved.', {
+            description: 'Verifiers will see the text only.',
+          })
+        }
+      }
 
       setSubmittedClaimId(newClaim.id)
       setShowSuccessModal(true)
+    } catch (err) {
+      // addClaim now throws when Firestore refuses the write, so the success
+      // modal can no longer point at a claim that was never stored.
+      console.error('Claim submission failed:', err)
+      toast.error('Your claim was not submitted.', {
+        description: 'We could not save it to the database. Check your connection and try again.',
+      })
     } finally {
       setLoading(false)
     }

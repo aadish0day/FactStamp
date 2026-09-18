@@ -124,16 +124,27 @@ function updateMask(paths) {
 /* ── 4. Main Provisioning Flow ── */
 
 async function run() {
-  // Step A: If creating an admin, get admin token from existing seed admin to promote
+  // Step A: promoting someone to admin requires an existing admin. The demo
+  // seed accounts lost that power when the allowlist was removed from
+  // firestore.rules, so the granting admin comes from the environment.
   let seedAdminToken = null
   if (isAdmin) {
+    const granterEmail = process.env.FACTSTAMP_ADMIN_EMAIL || env.FACTSTAMP_ADMIN_EMAIL || 'admin@factstamp.app'
+    const granterPassword = process.env.FACTSTAMP_ADMIN_PASSWORD || env.FACTSTAMP_ADMIN_PASSWORD || env.VITE_DEMO_ADMIN_PASSWORD
+    if (!granterPassword) {
+      console.error('✖ --admin needs a granting admin: set FACTSTAMP_ADMIN_EMAIL / FACTSTAMP_ADMIN_PASSWORD.')
+      process.exit(1)
+    }
     try {
-      const priyaAuth = await api(`${AUTH_BASE}/accounts:signInWithPassword?key=${API_KEY}`, {
+      const granter = await api(`${AUTH_BASE}/accounts:signInWithPassword?key=${API_KEY}`, {
         method: 'POST',
-        body: JSON.stringify({ email: 'priya@factstamp.app', password: 'FactStamp@2026', returnSecureToken: true }),
+        body: JSON.stringify({ email: granterEmail, password: granterPassword, returnSecureToken: true }),
       })
-      seedAdminToken = priyaAuth.idToken
-    } catch {}
+      seedAdminToken = granter.idToken
+    } catch (err) {
+      console.error(`✖ Could not authenticate granting admin ${granterEmail}: ${err.message}`)
+      process.exit(1)
+    }
   }
 
   // Step B: Create or sign in user in Firebase Auth

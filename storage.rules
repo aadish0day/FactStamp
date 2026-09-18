@@ -7,8 +7,10 @@ service firebase.storage {
     // Path is owner-scoped: the uid segment is required, so a user can only write
     // under their own prefix. The previous flat /claim_screenshots/{fileName} let
     // any signed-in user write — or silently overwrite — any other user's file.
-    // No client code uses Storage yet (images are base64 data URIs on the claim
-    // doc), so any future upload MUST build the path as
+    // NOT IN USE. Cloud Storage requires the paid Blaze plan, so screenshots are
+    // stored as base64 in Firestore under `claim_media/{claimId}` instead (see
+    // firestore.rules). This file is kept for the day the project moves to
+    // Blaze; any future upload MUST build the path as
     // `claim_screenshots/${auth.currentUser.uid}/${fileName}`.
     match /claim_screenshots/{uid}/{fileName} {
       allow read: if true;

@@ -22,6 +22,8 @@ interface AddClaimInput {
   submittedBy: string
   submittedByName: string
   imageUrl?: string
+  thumbnailUrl?: string
+  hasScreenshot?: boolean
 }
 
 interface AddVerificationInput {
@@ -36,16 +38,18 @@ interface AddVerificationInput {
 interface ClaimsContextValue {
   claims: Claim[]
   addClaim: (claim: AddClaimInput) => Promise<Claim>
-  addVerification: (claimId: string, data: AddVerificationInput) => void
+  addVerification: (claimId: string, data: AddVerificationInput) => Promise<void>
   getClaimById: (id: string) => Claim | undefined
   getPendingClaims: () => Claim[]
   getVerifiedClaims: () => Claim[]
-  expireOverdueClaims: () => void
+  expireOverdueClaims: () => Promise<void> | void
   flagClaim: (claimId: string, flagged: boolean) => Promise<void>
   deleteClaim: (claimId: string) => Promise<void>
   adminUpdateClaim: (claimId: string, updates: Partial<Claim>) => Promise<void>
   deleteVerification: (claimId: string, verificationId: string) => Promise<void>
   isLoading: boolean
+  /** Set when the Firestore subscription failed; claims are empty, not stale. */
+  error: Error | null
 }
 
 const defaultClaimsContext: ClaimsContextValue = {
@@ -59,7 +63,7 @@ const defaultClaimsContext: ClaimsContextValue = {
     verifications: [],
     verificationCount: 0,
   }),
-  addVerification: () => {},
+  addVerification: async () => {},
   getClaimById: () => undefined,
   getPendingClaims: () => [],
   getVerifiedClaims: () => [],
@@ -69,6 +73,7 @@ const defaultClaimsContext: ClaimsContextValue = {
   adminUpdateClaim: async () => {},
   deleteVerification: async () => {},
   isLoading: false,
+  error: null,
 }
 
 const ClaimsContext = createContext<ClaimsContextValue>(defaultClaimsContext)
@@ -123,6 +128,10 @@ function computeUpdatedClaim(claim: Claim, data: AddVerificationInput): Claim {
     verifications: updatedVerifications,
     verificationCount: updatedVerifications.length,
     status: isVerified ? 'verified' : 'pending',
+    // Stamp the moment consensus closed. Without this, claims verified through
+    // the app had no verifiedAt at all and every "recently verified" list fell
+    // back to createdAt.
+    ...(isVerified ? { verifiedAt: claim.verifiedAt ?? new Date().toISOString() } : {}),
     verdict: majorityVerdict,
     confidenceScore: confidence.score,
     agreementRatio: confidence.agreementRatio,
@@ -458,60 +467,18 @@ const SEED_CLAIMS: Claim[] = [
 
 export function ClaimsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
-  // The claims collection is initialized with rich seed data and updated via Firestore
-  const [claims, setClaims] = useState<Claim[]>(SEED_CLAIMS)
-  const [isLoading, setIsLoading] = useState(false)
-  const expiryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  // With Firebase configured the claims come from Firestore and nowhere else;
+  // the seed fixtures are only a fallback for running without a backend.
+  const [claims, setClaims] = useState<Claim[]>(isFirebaseConfigured ? [] : SEED_CLAIMS)
+  const [isLoading, setIsLoading] = useState(isFirebaseConfigured)
+  const [error, setError] = useState<Error | null>(null)
   const attemptedExpiryIdsRef = useRef<Set<string>>(new Set())
 
-  // Helper to map overdue pending claims to verified/CONTESTED in-memory
-  const applyLocalExpiry = useCallback((claimsList: Claim[]): Claim[] => {
-    const now = new Date()
-    const processed = claimsList.map((claim) => {
-      if (
-        claim.status === 'pending' &&
-        claim.verificationCount < 3 &&
-        new Date(claim.consensusDeadline) <= now
-      ) {
-        let confidenceScore = 30
-        let agreementRatio = 0
-        if (claim.verifications && claim.verifications.length > 0) {
-          const verifData = claim.verifications.map((v) => ({
-            verdict: v.verdict,
-            verifierReputation: v.verifierReputation,
-            sourceQuality: sourceQualityToScore(v.sourceQuality),
-          }))
-          const result = calculateConfidenceScore(verifData)
-          confidenceScore = result.score
-          agreementRatio = result.agreementRatio
-        }
-        return {
-          ...claim,
-          status: 'verified' as const,
-          verdict: 'CONTESTED' as const,
-          confidenceScore,
-          agreementRatio,
-          verifiedAt: claim.verifiedAt || new Date().toISOString(),
-        }
-      }
-      return claim
-    })
-
-    // If all pending claims in the database expired, replenish with active pending seed claims
-    // so the community Verification Queue always has active work for verifiers.
-    const pendingCount = processed.filter((c) => c.status === 'pending').length
-    if (pendingCount === 0) {
-      const activeSeeds = SEED_CLAIMS.filter((c) => c.status === 'pending').map((seed, i) => ({
-        ...seed,
-        consensusDeadline: new Date(Date.now() + (3 + i) * 24 * 60 * 60 * 1000).toISOString(),
-      }))
-      const existingIds = new Set(processed.map((c) => c.id))
-      const uniqueSeeds = activeSeeds.filter((s) => !existingIds.has(s.id))
-      return [...uniqueSeeds, ...processed]
-    }
-
-    return processed
-  }, [])
+  // NOTE: overdue pending claims are deliberately NOT rewritten here. Doing
+  // that client-side invented a CONTESTED verdict the database never had, and
+  // emptied the verification queue. The queue renders its own "Consensus
+  // closed" state for them, and an admin can settle them via
+  // `expireOverdueClaims`, which writes the change to Firestore.
 
   const localClaimsRef = useRef<Claim[]>([])
 
@@ -524,20 +491,23 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
 
     const unsub = subscribeClaimsRealtime(
       (firestoreClaims) => {
-        const sourceData = firestoreClaims && firestoreClaims.length > 0 ? firestoreClaims : SEED_CLAIMS
-        const merged = applyLocalExpiry(sourceData)
-        setClaims(merged)
+        // Firestore is the only source of truth here. An empty collection is a
+        // real answer — substituting demo claims for it hid outages and made
+        // every count on the dashboard wrong.
+        setClaims(firestoreClaims ?? [])
+        setError(null)
         setIsLoading(false)
       },
       (err) => {
-        console.warn('Realtime claims subscription notice, using seed data:', err)
-        setClaims(applyLocalExpiry(SEED_CLAIMS))
+        console.error('Realtime claims subscription failed:', err)
+        setClaims([])
+        setError(err instanceof Error ? err : new Error('Could not load claims'))
         setIsLoading(false)
       }
     )
 
     return () => unsub()
-  }, [applyLocalExpiry])
+  }, [])
 
   /**
    * Mark pending claims as CONTESTED if their consensus deadline has passed
@@ -592,21 +562,20 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
     )
 
     if (isFirebaseConfigured && auth.currentUser && newExpiredToSync.length > 0) {
-      newExpiredToSync.forEach((c) => {
-        updateClaimInFirestore(c).catch(() => {})
-      })
+      // Report the outcome so the admin console can say how many claims were
+      // actually settled instead of always claiming success.
+      return Promise.allSettled(newExpiredToSync.map((c) => updateClaimInFirestore(c))).then(
+        (results) => {
+          const failed = results.filter((r) => r.status === 'rejected').length
+          if (failed > 0) {
+            // Re-arm the ids so a retry is possible.
+            newExpiredToSync.forEach((c) => attemptedExpiryIdsRef.current.delete(c.id))
+            throw new Error(`${failed} of ${newExpiredToSync.length} claims could not be settled.`)
+          }
+        }
+      )
     }
   }, [claims])
-
-  // Periodic expiry check every 60 seconds
-  useEffect(() => {
-    expiryIntervalRef.current = setInterval(() => {
-      expireOverdueClaims()
-    }, 60_000)
-    return () => {
-      if (expiryIntervalRef.current) clearInterval(expiryIntervalRef.current)
-    }
-  }, [expireOverdueClaims])
 
   const addClaim = useCallback(async (data: AddClaimInput): Promise<Claim> => {
     claimCounter++
@@ -640,9 +609,11 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
         setClaims((prev) => [persisted, ...prev.filter((c) => c.id !== persisted.id && c.id !== newClaim.id)])
         return persisted
       } catch (err) {
-        console.warn('Firestore add notice (using local state):', err)
-        setClaims((prev) => [newClaim, ...prev.filter((c) => c.id !== newClaim.id)])
-        return newClaim
+        // Previously this swallowed the error and returned the local claim with
+        // a made-up id, so Submit showed a success modal linking to a claim that
+        // did not exist. Let the caller surface the failure instead.
+        localClaimsRef.current = localClaimsRef.current.filter((c) => c.id !== newClaim.id)
+        throw err
       }
     }
 
@@ -651,9 +622,9 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const addVerification = useCallback(
-    (claimId: string, data: AddVerificationInput) => {
+    async (claimId: string, data: AddVerificationInput): Promise<void> => {
       const target = claims.find((c) => c.id === claimId)
-      if (!target) return
+      if (!target) throw new Error('That claim no longer exists.')
 
       const updatedClaim = computeUpdatedClaim(target, data)
 
@@ -667,9 +638,20 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
       )
 
       if (isFirebaseConfigured) {
-        updateClaimInFirestore(updatedClaim).catch((err) =>
-          console.warn('Firestore verdict sync notice:', err)
-        )
+        try {
+          // This used to be fire-and-forget with a console.warn. A verdict the
+          // rules rejected still showed "recorded successfully" and vanished on
+          // the next reload, so the write result now decides what the UI says.
+          await updateClaimInFirestore(updatedClaim)
+        } catch (err) {
+          // Roll the optimistic update back so the UI matches the database.
+          localClaimsRef.current = [
+            target,
+            ...localClaimsRef.current.filter((c) => c.id !== claimId),
+          ]
+          setClaims((prev) => prev.map((c) => (c.id === claimId ? target : c)))
+          throw err
+        }
       }
 
       // Reputation and totalVerifications are deliberately NOT written here.
@@ -696,11 +678,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
         )
       )
       if (isFirebaseConfigured) {
-        try {
-          await flagClaimForExpeditedReview(claimId, flagged)
-        } catch (err) {
-          console.warn('Firestore flag sync notice:', err)
-        }
+        await flagClaimForExpeditedReview(claimId, flagged)
       }
     },
     []
@@ -714,11 +692,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
       localClaimsRef.current = localClaimsRef.current.filter((c) => c.id !== claimId)
       setClaims((prev) => prev.filter((c) => c.id !== claimId))
       if (isFirebaseConfigured) {
-        try {
-          await deleteClaimFromFirestore(claimId)
-        } catch (err) {
-          console.warn('Firestore claim delete notice:', err)
-        }
+        await deleteClaimFromFirestore(claimId)
       }
     },
     []
@@ -736,11 +710,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
         c.id === claimId ? { ...c, ...updates } : c
       )
       if (isFirebaseConfigured) {
-        try {
-          await adminOverrideClaim(claimId, updates)
-        } catch (err) {
-          console.warn('Firestore admin claim override notice:', err)
-        }
+        await adminOverrideClaim(claimId, updates)
       }
     },
     []
@@ -765,11 +735,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
         })
       )
       if (isFirebaseConfigured) {
-        try {
-          await adminDeleteVerification(claimId, verificationId)
-        } catch (err) {
-          console.warn('Firestore verification delete notice:', err)
-        }
+        await adminDeleteVerification(claimId, verificationId)
       }
     },
     []
@@ -821,6 +787,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
         adminUpdateClaim,
         deleteVerification,
         isLoading,
+        error,
       }}
     >
       {children}

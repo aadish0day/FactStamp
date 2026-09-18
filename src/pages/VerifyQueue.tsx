@@ -19,6 +19,7 @@ import { CategoryBadge } from "@/components/ui/CategoryBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useClaims } from "@/contexts/ClaimsContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { canVerify } from "@/lib/types";
 import { cn, formatDistanceToNow } from "@/lib/utils";
 import type { Claim } from "@/lib/types";
 
@@ -114,6 +115,11 @@ export function VerifyQueue() {
 
   const filteredClaims = useMemo(() => {
     let list = pendingClaims.filter((claim) => {
+      // Hide claims this verifier may not act on: their own submissions, and
+      // any they have already verified. firestore.rules rejects both.
+      if (!canVerify(claim, user?.uid)) {
+        return false;
+      }
       if (
         activeFilter !== "all" &&
         (claim.category || "").toLowerCase() !== activeFilter.toLowerCase()
@@ -351,7 +357,7 @@ function ClaimDossierCard({
             </span>
           )}
 
-          {claim.imageUrl && (
+          {(claim.thumbnailUrl || claim.imageUrl) && (
             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-fg-muted)] bg-[var(--color-surface-2)] px-2 py-0.5 rounded border border-[var(--color-border-soft)]">
               <ImageIcon className="w-3 h-3 text-[var(--color-brand)]" />
               Screenshot Attached
@@ -388,10 +394,10 @@ function ClaimDossierCard({
       </h2>
 
       {/* Optional WhatsApp Screenshot Thumbnail */}
-      {claim.imageUrl && (
+      {(claim.thumbnailUrl || claim.imageUrl) && (
         <div className="flex items-center gap-3 p-2 mb-3.5 rounded-[var(--radius-md)] bg-[var(--color-surface-2)]/60 border border-[var(--color-border-soft)] w-fit max-w-full">
           <img
-            src={claim.imageUrl}
+            src={claim.thumbnailUrl || claim.imageUrl}
             alt="Attached viral forward screenshot"
             className="w-12 h-12 object-cover rounded border border-[var(--color-border-soft)] flex-shrink-0"
           />

@@ -77,8 +77,10 @@ for (let i = 0; i < args.length; i++) {
 }
 
 // Credentials used to authenticate the audit itself. Must be an admin, because
-// only isAdmin()/isSeedUser() may write another user's isAdmin field.
-const ADMIN_EMAIL = process.env.FACTSTAMP_ADMIN_EMAIL || 'priya@factstamp.app'
+// only isAdmin() may write another user's isAdmin field.
+// Reading every profile is admin-only; the demo accounts lost that power
+// when the seed allowlist was removed from firestore.rules.
+const ADMIN_EMAIL = process.env.FACTSTAMP_ADMIN_EMAIL || 'admin@factstamp.app'
 const ADMIN_PASSWORD = process.env.FACTSTAMP_ADMIN_PASSWORD || env.VITE_DEMO_ADMIN_PASSWORD || ''
 
 /* ── 3. REST helpers ── */

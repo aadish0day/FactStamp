@@ -111,18 +111,27 @@ function updateMask(paths) {
 /* ── 4. Main Provisioning Flow ── */
 
 async function run() {
-  // Step A: First authenticate the existing seed admin (Priya Sharma) to get admin auth token
-  console.log('1. Authenticating existing seed admin…')
+  // Step A: authenticate an existing admin. The seed-account allowlist that
+  // used to be used here is gone from firestore.rules, so granting admin now
+  // requires an admin. Bootstrap the very first one by setting isAdmin: true on
+  // a users/{uid} document in the Firebase console.
+  console.log('1. Authenticating an existing admin…')
   let seedAdminToken = null
-  try {
-    const priyaAuth = await api(`${AUTH_BASE}/accounts:signInWithPassword?key=${API_KEY}`, {
-      method: 'POST',
-      body: JSON.stringify({ email: 'priya@factstamp.app', password: 'FactStamp@2026', returnSecureToken: true }),
-    })
-    seedAdminToken = priyaAuth.idToken
-    console.log('  ✔ Seed admin authenticated.')
-  } catch (err) {
-    console.log('  ℹ Notice: Could not sign in with seed admin account, will use direct token if available.')
+  const GRANTER_EMAIL = process.env.FACTSTAMP_ADMIN_EMAIL || env.FACTSTAMP_ADMIN_EMAIL || 'admin@factstamp.app'
+  const GRANTER_PASSWORD = process.env.FACTSTAMP_ADMIN_PASSWORD || env.FACTSTAMP_ADMIN_PASSWORD || env.VITE_DEMO_ADMIN_PASSWORD
+  if (GRANTER_PASSWORD && GRANTER_EMAIL !== EMAIL) {
+    try {
+      const granter = await api(`${AUTH_BASE}/accounts:signInWithPassword?key=${API_KEY}`, {
+        method: 'POST',
+        body: JSON.stringify({ email: GRANTER_EMAIL, password: GRANTER_PASSWORD, returnSecureToken: true }),
+      })
+      seedAdminToken = granter.idToken
+      console.log(`  ✔ Authenticated as ${GRANTER_EMAIL}.`)
+    } catch {
+      console.log(`  ℹ Could not sign in as ${GRANTER_EMAIL}; the target account's own token will be tried.`)
+    }
+  } else {
+    console.log('  ℹ No granting admin configured (set FACTSTAMP_ADMIN_EMAIL / FACTSTAMP_ADMIN_PASSWORD).')
   }
 
   // Step B: Create or sign in the target admin account

@@ -26,7 +26,9 @@ import {
   query,
   where,
   orderBy,
+  limit,
   serverTimestamp,
+  writeBatch,
   connectFirestoreEmulator,
 } from 'firebase/firestore'
 
@@ -76,6 +78,7 @@ googleProvider.setCustomParameters({ prompt: 'select_account' })
 export const COLLECTIONS = {
   USERS: 'users',
   CLAIMS: 'claims',
+  CLAIM_MEDIA: 'claim_media',
   VERDICTS: 'verdicts',
   NOTIFICATIONS: 'notifications',
   REPORTS: 'reports',
@@ -103,6 +106,8 @@ export {
   query,
   where,
   orderBy,
+  limit,
   serverTimestamp,
+  writeBatch,
 }
 

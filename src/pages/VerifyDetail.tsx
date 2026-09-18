@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -22,6 +22,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/Button'
 import { Input, Textarea } from '@/components/ui/Input'
 import { validateVerdictExplanation, sanitizeTextInput } from '@/lib/security'
+import { getClaimScreenshot } from '@/services/firebaseService'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { SourceQualityDot } from '@/components/ui/SourceQualityDot'
 import { VerdictStamp } from '@/components/VerdictStamp'
@@ -30,7 +31,7 @@ import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { determineSourceQuality } from '@/lib/confidenceScore'
 import { cn, formatDistanceToNow } from '@/lib/utils'
-import { VERDICT_META, type Verdict, type SourceQuality } from '@/lib/types'
+import { VERDICT_META, type Verdict, type SourceQuality, canVerify } from '@/lib/types'
 
 const VERDICT_ICONS: Record<Verdict, LucideIcon> = {
   TRUE: CheckCircle2,
@@ -83,6 +84,36 @@ function timeRemaining(deadline: string): {
   return { label: `${minutes}m remaining`, urgent: true, expired: false }
 }
 
+/**
+ * Full screenshots live in `claim_media/{claimId}`, not on the claim, so they
+ * are fetched only when a claim page is actually opened. Legacy claims that
+ * still carry an inline `imageUrl` are used as-is.
+ */
+function useClaimScreenshot(claim: { id: string; imageUrl?: string; hasScreenshot?: boolean } | null | undefined) {
+  const [screenshot, setScreenshot] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!claim) return
+    if (claim.imageUrl) {
+      setScreenshot(claim.imageUrl)
+      return
+    }
+    if (!claim.hasScreenshot) {
+      setScreenshot(null)
+      return
+    }
+    let cancelled = false
+    getClaimScreenshot(claim.id).then((url) => {
+      if (!cancelled) setScreenshot(url)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [claim?.id, claim?.imageUrl, claim?.hasScreenshot])
+
+  return screenshot
+}
+
 export function VerifyDetail() {
   const { claimId } = useParams<{ claimId: string }>()
   const navigate = useNavigate()
@@ -90,6 +121,7 @@ export function VerifyDetail() {
   const { user } = useAuth()
 
   const claim = claimId ? getClaimById(claimId) : undefined
+  const screenshot = useClaimScreenshot(claim)
 
   const [verdict, setVerdict] = useState<Verdict | null>(null)
   const [sourceUrl, setSourceUrl] = useState('')
@@ -182,6 +214,37 @@ export function VerifyDetail() {
     )
   }
 
+  // Direct-link guard. firestore.rules rejects these writes, so tell the
+  // verifier why instead of letting them fill in a form that cannot be saved.
+  if (!canVerify(claim, user?.uid)) {
+    const reason =
+      claim.status !== 'pending'
+        ? 'This claim has already reached consensus.'
+        : claim.submittedBy === user?.uid
+          ? 'You submitted this claim, so you cannot also verify it.'
+          : 'You have already submitted a verdict on this claim.'
+
+    return (
+      <div className="container mx-auto px-4 py-12 max-w-lg text-center">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-sm space-y-6">
+          <div className="w-12 h-12 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-fg-2)] flex items-center justify-center mx-auto">
+            <ShieldCheck className="w-6 h-6" aria-hidden="true" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-[var(--color-fg)]">Not open to you</h1>
+            <p className="text-sm text-[var(--color-fg-2)] leading-relaxed">{reason}</p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button onClick={() => navigate('/verify')}>Back to the queue</Button>
+            <Button intent="outline" onClick={() => navigate(`/claim/${claim.id}`)}>
+              View the claim
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -214,20 +277,27 @@ export function VerifyDetail() {
     }
 
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 800))
 
-    addVerification(claim.id, {
-      verdict: verdict!,
-      sourceUrl: sourceUrl.trim(),
-      explanation: cleanExplanation,
-      verifierId: user?.uid || '',
-      verifierName: user?.displayName || 'Independent Verifier',
-      verifierReputation: user?.reputation || 50,
-    })
-
-    setLoading(false)
-    toast.success('Verdict recorded successfully.')
-    setSubmitted(true)
+    try {
+      await addVerification(claim.id, {
+        verdict: verdict!,
+        sourceUrl: sourceUrl.trim(),
+        explanation: cleanExplanation,
+        verifierId: user?.uid || '',
+        verifierName: user?.displayName || 'Independent Verifier',
+        verifierReputation: user?.reputation ?? 50,
+      })
+      toast.success('Verdict recorded successfully.')
+      setSubmitted(true)
+    } catch (err) {
+      // Success is only claimed once the database has accepted the verdict.
+      console.error('Verdict write failed:', err)
+      toast.error('Your verdict was not saved.', {
+        description: 'The database rejected the write. Check your connection and try again.',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const deadline = timeRemaining(claim.consensusDeadline)
@@ -243,6 +313,7 @@ export function VerifyDetail() {
         description={`Fact-checking claim: ${claim.text.slice(0, 80)}`}
       />
       <Breadcrumbs currentLabel="Submit Verdict" />
+      <h1 className="sr-only">Verify claim: {claim.text}</h1>
 
       {/* ── Case Dossier Brief (The Claim Under Review) ── */}
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-7 mb-8 shadow-sm">
@@ -274,7 +345,7 @@ export function VerifyDetail() {
         </div>
 
         {/* Attached Screenshot Evidence */}
-        {claim.imageUrl && (
+        {screenshot && (
           <div className="mt-2 pt-4 border-t border-[var(--color-border-soft)]">
             <div className="flex items-center justify-between mb-2.5">
               <span className="text-xs font-semibold text-[var(--color-fg-2)] flex items-center gap-1.5">
@@ -282,7 +353,7 @@ export function VerifyDetail() {
                 Attached WhatsApp Forward Screenshot
               </span>
               <a
-                href={claim.imageUrl}
+                href={screenshot}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs font-medium text-[var(--color-brand)] hover:underline inline-flex items-center gap-1"
@@ -292,7 +363,7 @@ export function VerifyDetail() {
             </div>
             <div className="rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/60 max-h-80 p-2 flex justify-center">
               <img
-                src={claim.imageUrl}
+                src={screenshot}
                 alt="Viral WhatsApp forward screenshot"
                 className="max-h-72 w-auto object-contain rounded"
               />

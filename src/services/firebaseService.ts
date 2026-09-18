@@ -20,11 +20,16 @@ import {
   onSnapshot,
   query,
   orderBy,
+  limit,
   where,
   serverTimestamp,
+  writeBatch,
   COLLECTIONS,
 } from '@/lib/firebase'
 import type { User, Claim, AppNotification, ClaimCategory, Verdict, SourceQuality } from '@/lib/types'
+
+/** How many recent claims the app keeps live in the realtime subscription. */
+export const CLAIMS_PAGE_SIZE = 200
 
 /* ── 1. FIREBASE AUTHENTICATION SERVICE ── */
 
@@ -183,6 +188,34 @@ function withoutUndefined<T extends Record<string, unknown>>(obj: T): { [x: stri
  * the embedded verifications array) so the realtime subscription can rebuild
  * full Claim objects without extra subcollection reads.
  */
+/**
+ * Full claim screenshots live in their own `claim_media/{claimId}` document.
+ *
+ * Cloud Storage needs the paid Blaze plan, so images stay in Firestore as
+ * base64 — but keeping a ~700 KB payload on the claim itself meant every list
+ * view downloaded it. The claim now carries only a small thumbnail, and the
+ * full image is fetched on demand when someone opens the claim.
+ */
+export async function saveClaimScreenshot(claimId: string, dataUrl: string): Promise<void> {
+  await setDoc(doc(db, COLLECTIONS.CLAIM_MEDIA, claimId), {
+    claimId,
+    imageUrl: dataUrl,
+    createdAt: new Date().toISOString(),
+  })
+}
+
+/** Fetch a claim's full screenshot, or null when it has none. */
+export async function getClaimScreenshot(claimId: string): Promise<string | null> {
+  try {
+    const snap = await getDoc(doc(db, COLLECTIONS.CLAIM_MEDIA, claimId))
+    const url = snap.exists() ? (snap.data() as { imageUrl?: string }).imageUrl : undefined
+    return typeof url === 'string' ? url : null
+  } catch (err) {
+    console.warn('Could not load claim screenshot:', err)
+    return null
+  }
+}
+
 export async function addClaimToFirestore(claimData: Omit<Claim, 'id'>): Promise<string> {
   const docRef = await addDoc(collection(db, COLLECTIONS.CLAIMS), {
     ...withoutUndefined(claimData as unknown as Record<string, unknown>),
@@ -204,20 +237,18 @@ let permissionDeniedWarned = false
  */
 export async function updateClaimInFirestore(claim: Claim): Promise<void> {
   const { id: _id, ...data } = claim
-  try {
-    const docRef = doc(db, COLLECTIONS.CLAIMS, claim.id)
-    const snap = await getDoc(docRef)
-    const sanitizedData = {
-      ...withoutUndefined(data as unknown as Record<string, unknown>),
-      serverTime: serverTimestamp(),
-    }
-    if (snap.exists()) {
-      await updateDoc(docRef, sanitizedData)
-    } else {
-      await setDoc(docRef, sanitizedData)
-    }
-  } catch (err) {
-    console.warn('Firestore claim update notice:', err)
+  // Rejections propagate. This used to console.warn and resolve, so a verdict
+  // the rules refused still looked like it had been saved to every caller.
+  const docRef = doc(db, COLLECTIONS.CLAIMS, claim.id)
+  const snap = await getDoc(docRef)
+  const sanitizedData = {
+    ...withoutUndefined(data as unknown as Record<string, unknown>),
+    serverTime: serverTimestamp(),
+  }
+  if (snap.exists()) {
+    await updateDoc(docRef, sanitizedData)
+  } else {
+    await setDoc(docRef, sanitizedData)
   }
 }
 
@@ -304,6 +335,11 @@ function mapFirestoreDocToClaim(docId: string, data: Record<string, unknown>): C
     submittedBy: typeof data.submittedBy === 'string' ? data.submittedBy : 'u1',
     submittedByName: typeof data.submittedByName === 'string' ? data.submittedByName : 'Community User',
     imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl : undefined,
+    // Screenshot fields: the thumbnail rides on the claim, the full image lives
+    // in claim_media/{claimId}. This mapper builds the object field by field,
+    // so anything omitted here is invisible to the app.
+    thumbnailUrl: typeof data.thumbnailUrl === 'string' ? data.thumbnailUrl : undefined,
+    hasScreenshot: typeof data.hasScreenshot === 'boolean' ? data.hasScreenshot : undefined,
     verdict: typeof data.verdict === 'string' ? (data.verdict.toUpperCase() as Verdict) : undefined,
     confidenceScore: typeof data.confidenceScore === 'number' ? data.confidenceScore : undefined,
     agreementRatio: typeof data.agreementRatio === 'number' ? data.agreementRatio : undefined,
@@ -339,7 +375,9 @@ export function subscribeClaimsRealtime(
   onError?: (err: unknown) => void
 ): () => void {
   const claimsRef = collection(db, COLLECTIONS.CLAIMS)
-  const q = query(claimsRef, orderBy('createdAt', 'desc'))
+  // Bounded so the whole collection is not streamed to every visitor. Duplicate
+  // detection on /submit searches these same claims, so keep the window wide.
+  const q = query(claimsRef, orderBy('createdAt', 'desc'), limit(CLAIMS_PAGE_SIZE))
   let innerUnsub: (() => void) | null = null
 
   const outerUnsub = onSnapshot(
@@ -354,7 +392,7 @@ export function subscribeClaimsRealtime(
     (err) => {
       console.warn('Realtime ordered query notice, falling back to simple listener:', err)
       innerUnsub = onSnapshot(
-        claimsRef,
+        query(claimsRef, limit(CLAIMS_PAGE_SIZE)),
         (snapshot) => {
           const claims: Claim[] = []
           snapshot.forEach((docSnap) => {
@@ -461,6 +499,36 @@ export async function markAllNotificationsRead(userId: string): Promise<void> {
   await Promise.all(
     snap.docs.map((d) => updateDoc(d.ref, { isRead: true }))
   )
+}
+
+/** Firestore caps a single batched write at 500 operations. */
+const MAX_BATCH_WRITES = 500
+
+/**
+ * Admin action — deliver one notification to every user. Notifications are
+ * per-user documents (the bell only reads docs whose userId matches the signed-in
+ * user), so a broadcast fans out one doc per account. firestore.rules lets an
+ * admin create a notification for any userId.
+ */
+export async function broadcastNotification(
+  input: Pick<AppNotification, 'type' | 'title' | 'message'>
+): Promise<number> {
+  const usersSnap = await getDocs(collection(db, COLLECTIONS.USERS))
+  const createdAt = new Date().toISOString()
+
+  for (let i = 0; i < usersSnap.docs.length; i += MAX_BATCH_WRITES) {
+    const batch = writeBatch(db)
+    for (const userDoc of usersSnap.docs.slice(i, i + MAX_BATCH_WRITES)) {
+      batch.set(doc(collection(db, COLLECTIONS.NOTIFICATIONS)), {
+        ...input,
+        userId: userDoc.id,
+        isRead: false,
+        createdAt,
+      })
+    }
+    await batch.commit()
+  }
+  return usersSnap.size
 }
 
 /**

@@ -62,6 +62,7 @@ import {
   updateReportInFirestore,
   subscribeAuditLogsRealtime,
   addAuditLogToFirestore,
+  broadcastNotification,
 } from '@/services/firebaseService'
 import { isFirebaseConfigured } from '@/lib/firebase'
 import { formatDistanceToNow, cn } from '@/lib/utils'
@@ -472,27 +473,42 @@ export function Admin() {
   const [broadcastTitle, setBroadcastTitle] = useState('')
   const [broadcastMessage, setBroadcastMessage] = useState('')
 
-  const handleBroadcastNotification = () => {
+  const handleBroadcastNotification = async () => {
     if (!broadcastTitle || !broadcastMessage) return
-    addNotification({
-      userId: user?.uid || 'all',
-      type: 'weekly_report',
-      title: broadcastTitle,
-      message: broadcastMessage,
-    })
+    const notification = { type: 'weekly_report' as const, title: broadcastTitle, message: broadcastMessage }
+    if (isFirebaseConfigured) {
+      try {
+        const recipients = await broadcastNotification(notification)
+        toast.success(`Broadcast delivered to ${recipients} users`)
+      } catch (err) {
+        console.error('Broadcast failed:', err)
+        toast.error('Broadcast failed', { description: err instanceof Error ? err.message : undefined })
+        return
+      }
+    } else {
+      addNotification({ ...notification, userId: user?.uid || 'demo' })
+      toast.success('Broadcast notification dispatched to users')
+    }
     addAuditLog('Sent System Broadcast', 'system', 'all_users', `Title: "${broadcastTitle}"`)
-    toast.success('Broadcast notification dispatched to users')
     setIsBroadcastModalOpen(false)
     setBroadcastTitle('')
     setBroadcastMessage('')
   }
 
-  const handleForceExpiry = () => {
-    expireOverdueClaims()
-    addAuditLog('Triggered Manual Consensus Expiry', 'system', 'claims', 'Executed force settlement on overdue submissions')
-    toast.success('Consensus expiry check executed', {
-      description: 'Overdue claims without 3 verifications settled as CONTESTED.',
-    })
+  const handleForceExpiry = async () => {
+    try {
+      await expireOverdueClaims()
+      addAuditLog('Triggered Manual Consensus Expiry', 'system', 'claims', 'Executed force settlement on overdue submissions')
+      toast.success('Consensus expiry check executed', {
+        description: 'Overdue claims without 3 verifications settled as CONTESTED.',
+      })
+    } catch (err) {
+      // expireOverdueClaims now reports rejected writes instead of dropping them.
+      console.error('Force expiry failed:', err)
+      toast.error('Consensus expiry did not complete', {
+        description: err instanceof Error ? err.message : 'Some claims could not be settled.',
+      })
+    }
   }
 
   const handleExportData = () => {

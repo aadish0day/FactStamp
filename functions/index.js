@@ -24,6 +24,11 @@ const AGREE_REWARD = 2
 const DISAGREE_PENALTY = -1
 const clamp = (n) => Math.max(0, Math.min(100, n))
 
+const snippet = (text) => {
+  const s = typeof text === 'string' ? text.trim() : ''
+  return s.length > 80 ? `${s.slice(0, 77)}…` : s
+}
+
 export const awardVerificationReputation = onDocumentUpdated('claims/{claimId}', async (event) => {
   const before = event.data?.before.data()
   const after = event.data?.after.data()
@@ -61,6 +66,40 @@ export const awardVerificationReputation = onDocumentUpdated('claims/{claimId}',
     }
   }
 
+  // Notifications are per-user docs the client bell subscribes to. Rules only let
+  // a client notify itself, so everything addressed to *other* users is written
+  // here. Ids derive from the event, so an at-least-once redelivery overwrites
+  // instead of duplicating.
+  const claimId = event.params.claimId
+  const claimText = snippet(after.text)
+  const createdAt = new Date().toISOString()
+  const notifications = []
+  const notify = (uid, type, title, message) =>
+    notifications.push({
+      ref: db.doc(`notifications/${event.id}_${type}_${uid}`),
+      data: { userId: uid, type, title, message, claimId, isRead: false, createdAt },
+    })
+
+  notify(appendedBy, 'verdict_submitted', 'Verdict Submitted',
+    `Your ${appended.verdict} verdict on "${claimText}" was recorded into the consensus queue.`)
+
+  if (justSettled && finalVerdict) {
+    const confidence = typeof after.confidenceScore === 'number' ? ` (${Math.round(after.confidenceScore)}% confidence)` : ''
+    const recipients = new Set([after.submittedBy, ...newList.map((v) => v?.verifierId)])
+    for (const uid of recipients) {
+      if (typeof uid !== 'string' || !uid) continue
+      notify(uid, 'claim_verified', `Consensus Reached: ${finalVerdict}`,
+        `Claim "${claimText}" was settled as ${finalVerdict}${confidence}.`)
+    }
+  }
+
+  for (const [uid, delta] of deltas) {
+    notify(uid, 'reputation_update', delta > 0 ? 'Reputation Increased' : 'Reputation Decreased',
+      delta > 0
+        ? `+${delta} reputation for matching the consensus verdict on "${claimText}".`
+        : `${delta} reputation: your verdict on "${claimText}" did not match the consensus.`)
+  }
+
   const involved = new Set([appendedBy, ...deltas.keys()])
   const refs = [...involved].map((uid) => ({ uid, ref: db.doc(`users/${uid}`) }))
 
@@ -83,5 +122,7 @@ export const awardVerificationReputation = onDocumentUpdated('claims/{claimId}',
 
       if (Object.keys(updates).length > 0) tx.update(snap.ref, updates)
     })
+
+    for (const { ref, data } of notifications) tx.set(ref, data)
   })
 })

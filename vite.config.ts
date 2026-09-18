@@ -40,7 +40,10 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+          // firebase/storage is intentionally absent: it is imported dynamically
+          // by uploadClaimScreenshot(), and naming it here would pull it back
+          // into the eager vendor chunk every visitor downloads.
+          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
           'vendor-ui': ['lucide-react', 'framer-motion'],
           'vendor-charts': ['recharts'],
           'vendor-html-to-image': ['html-to-image'],

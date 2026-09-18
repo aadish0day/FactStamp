@@ -8,6 +8,12 @@ interface WeeklyCategoryCount {
 interface WeeklyVerifierStat {
   name: string
   verifications: number
+  /**
+   * Share of this verifier's verdicts that match the claim's final verdict.
+   * Since the same verdicts form that consensus, it reads high by construction —
+   * it measures agreement with the group, not correctness. Labelled "agreed" in
+   * the UI for that reason.
+   */
   accuracy: number
 }
 
@@ -16,6 +22,12 @@ export interface WeeklyReport {
   weekStart: Date
   weekEnd: Date
   weeklyClaimCount: number
+  /**
+   * 'week' when the figures below cover the last 7 days. Falls back to 'all'
+   * when nothing was submitted this week, so the UI can say which it is
+   * instead of labelling all-time totals as weekly.
+   */
+  scope: 'week' | 'all'
   categoryCounts: WeeklyCategoryCount[]
   debunkedClaims: Claim[]
   topVerifiers: WeeklyVerifierStat[]
@@ -40,7 +52,9 @@ export function computeWeeklyReport(claims: Claim[]): WeeklyReport {
     return d >= weekStart && d <= weekEnd
   })
 
-  // Use 7-day window if claims exist, otherwise fall back to all claims so seed/mock data populates
+  // Use the 7-day window when it has claims, otherwise report on all claims
+  // (and say so via `scope`) rather than showing an empty panel.
+  const scope: 'week' | 'all' = weekClaims.length > 0 ? 'week' : 'all'
   const targetClaims = weekClaims.length > 0 ? weekClaims : claims
 
   // 1. Most submitted categories
@@ -96,6 +110,7 @@ export function computeWeeklyReport(claims: Claim[]): WeeklyReport {
     weekStart,
     weekEnd,
     weeklyClaimCount: weekClaims.length,
+    scope,
     categoryCounts,
     debunkedClaims,
     topVerifiers,
