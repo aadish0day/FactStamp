@@ -28,6 +28,7 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  deleteField,
   writeBatch,
   connectFirestoreEmulator,
 } from 'firebase/firestore'
@@ -83,6 +84,7 @@ export const COLLECTIONS = {
   NOTIFICATIONS: 'notifications',
   REPORTS: 'reports',
   AUDIT_LOGS: 'audit_logs',
+  DELETED_USERS: 'deleted_users',
 } as const
 
 // Export Auth & Firestore methods for clean service access
@@ -108,6 +110,7 @@ export {
   orderBy,
   limit,
   serverTimestamp,
+  deleteField,
   writeBatch,
 }
 

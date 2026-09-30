@@ -69,6 +69,7 @@ const NotificationsContext = createContext<NotificationsContextValue>(defaultNot
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
+  const uid = user?.uid
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     if (isFirebaseConfigured) return []
     try {
@@ -80,7 +81,18 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   })
   const [isLoading, setIsLoading] = useState(isFirebaseConfigured)
 
+  // Only the offline demo persists locally. With Firebase these are a signed-in
+  // user's private notifications, and writing them here left them on disk for
+  // whoever used the browser next.
   useEffect(() => {
+    if (isFirebaseConfigured) {
+      // Also clears what earlier versions left behind.
+      try {
+        localStorage.removeItem('fs_notifications')
+      } catch {
+      }
+      return
+    }
     try {
       localStorage.setItem('fs_notifications', JSON.stringify(notifications))
     } catch {
@@ -89,7 +101,15 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   }, [notifications])
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !user) {
+    if (!isFirebaseConfigured) {
+      setIsLoading(false)
+      return
+    }
+
+    // Clear on sign-out and on account switch, so the previous user's
+    // notifications never show under the next one while the snapshot loads.
+    setNotifications([])
+    if (!uid) {
       setIsLoading(false)
       return
     }
@@ -97,7 +117,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     setIsLoading(true)
 
     const unsub = subscribeNotificationsRealtime(
-      user.uid,
+      uid,
       (firestoreNotifications) => {
         if (firestoreNotifications) {
           setNotifications(firestoreNotifications)
@@ -108,7 +128,9 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     )
 
     return () => unsub()
-  }, [user])
+    // Keyed on uid: `user` changes on every profile snapshot (e.g. a reputation
+    // award), which tore down and rebuilt this subscription each time.
+  }, [uid])
 
   const markRead = useCallback(async (id: string) => {
     setNotifications((prev) =>

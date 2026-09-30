@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthLayout } from '@/components/AuthLayout'
 import { useAuth } from '@/contexts/AuthContext'
+import { ACCOUNT_REMOVED_MESSAGE } from '@/services/firebaseService'
 import {
   checkLoginRateLimit,
   recordFailedLogin,
@@ -191,9 +192,19 @@ export function SignIn() {
         navigate('/admin')
         return
       }
-      const from = (location.state as { from?: { pathname: string; search?: string } })?.from
-      navigate(from ? from.pathname + (from.search ?? '') : '/')
+      // ProtectedRoute passes a Location; Submit/VerifyDetail pass a plain path.
+      // Treating the string as a Location navigated to "/undefined".
+      const from = (location.state as { from?: string | { pathname: string; search?: string } } | null)?.from
+      navigate(typeof from === 'string' ? from : from ? from.pathname + (from.search ?? '') : '/')
     } catch (err) {
+      // The password was right; the account was removed. Not a guess, so it
+      // must not count toward (or advertise) the lockout.
+      if (err instanceof Error && err.message === ACCOUNT_REMOVED_MESSAGE) {
+        setErrors((prev) => ({ ...prev, form: err.message }))
+        toast.error('Sign In Failed', { description: err.message })
+        return
+      }
+
       // 03. Failed authentication: increment failed attempts counter
       const updatedLimit = recordFailedLogin(cleanEmail)
       setRateLimit(updatedLimit)

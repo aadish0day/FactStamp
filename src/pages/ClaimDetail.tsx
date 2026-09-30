@@ -55,7 +55,7 @@ function useClaimScreenshot(claim: { id: string; imageUrl?: string; hasScreensho
 export function ClaimDetail() {
   const { claimId } = useParams<{ claimId: string }>()
   const navigate = useNavigate()
-  const { getClaimById } = useClaims()
+  const { getClaimById, isLoading: claimsLoading } = useClaims()
   const { user } = useAuth()
   const [error, setError] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
@@ -75,6 +75,9 @@ export function ClaimDetail() {
       />
     )
   }
+
+  // Direct links rendered "Claim not found" until the realtime claims arrived.
+  if (!claim && claimsLoading) return <ClaimDetailSkeleton />
 
   if (!claim) {
     return (

@@ -1,4 +1,4 @@
-import type { Claim } from './types'
+import { scoredVerdict, type Claim } from './types'
 
 interface WeeklyCategoryCount {
   category: string
@@ -78,7 +78,8 @@ export function computeWeeklyReport(claims: Claim[]): WeeklyReport {
   //    accuracy needs consensus history to be meaningful)
   const verifierStats = new Map<string, { name: string; total: number; correct: number }>()
   for (const c of claims) {
-    if (c.status !== 'verified' || !c.verdict) continue
+    const verdict = scoredVerdict(c)
+    if (!verdict) continue
     for (const v of c.verifications) {
       const stats = verifierStats.get(v.verifierId) ?? {
         name: v.verifierName,
@@ -86,7 +87,7 @@ export function computeWeeklyReport(claims: Claim[]): WeeklyReport {
         correct: 0,
       }
       stats.total += 1
-      if (v.verdict === c.verdict) stats.correct += 1
+      if (v.verdict === verdict) stats.correct += 1
       verifierStats.set(v.verifierId, stats)
     }
   }

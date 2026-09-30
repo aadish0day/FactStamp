@@ -29,6 +29,65 @@ const snippet = (text) => {
   return s.length > 80 ? `${s.slice(0, 77)}…` : s
 }
 
+// The verdict at least two of three verifiers agree on, or null for a split.
+// Recomputed here from the stored verifications — `after.verdict` is written by
+// the client and must not decide who gains reputation.
+const majorityVerdict = (list) => {
+  const counts = new Map()
+  for (const v of list) counts.set(v?.verdict, (counts.get(v?.verdict) ?? 0) + 1)
+  const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1])
+  if (ranked.length === 0 || (ranked.length > 1 && ranked[0][1] === ranked[1][1])) return null
+  return ranked[0][0]
+}
+
+// uid -> reputation delta for scoring `list` against `verdict`; `sign` -1 undoes it.
+const scoreAgainst = (list, verdict, sign = 1) => {
+  const deltas = new Map()
+  for (const v of list) {
+    const uid = v?.verifierId
+    if (typeof uid !== 'string' || !uid) continue
+    const delta = sign * (v.verdict === verdict ? AGREE_REWARD : DISAGREE_PENALTY)
+    deltas.set(uid, (deltas.get(uid) ?? 0) + delta)
+  }
+  return deltas
+}
+
+// A claim was scored when it settled through a full jury with a majority.
+// Claims closed as CONTESTED by expiry (fewer than 3) or a split never were.
+const wasScored = (claim, list) =>
+  claim.status === 'verified' && list.length >= 3 && majorityVerdict(list) !== null
+
+async function applyReputation(deltas, verificationCounts, notifications) {
+  const involved = new Set([...deltas.keys(), ...verificationCounts.keys()])
+  const refs = [...involved].map((uid) => ({ uid, ref: db.doc(`users/${uid}`) }))
+
+  await db.runTransaction(async (tx) => {
+    // All reads must precede all writes inside a transaction.
+    const snaps = await Promise.all(refs.map(({ ref }) => tx.get(ref)))
+
+    refs.forEach(({ uid }, i) => {
+      const snap = snaps[i]
+      if (!snap.exists) return
+
+      const updates = {}
+      const count = verificationCounts.get(uid)
+      if (count) updates.totalVerifications = FieldValue.increment(count)
+
+      const delta = deltas.get(uid)
+      if (delta) {
+        // ponytail: clamping means an undo after hitting 0 or 100 is not exact;
+        // store per-claim awards if that ever matters.
+        const current = typeof snap.data().reputation === 'number' ? snap.data().reputation : 50
+        updates.reputation = clamp(current + delta)
+      }
+
+      if (Object.keys(updates).length > 0) tx.update(snap.ref, updates)
+    })
+
+    for (const { ref, data } of notifications) tx.set(ref, data)
+  })
+}
+
 export const awardVerificationReputation = onDocumentUpdated('claims/{claimId}', async (event) => {
   const before = event.data?.before.data()
   const after = event.data?.after.data()
@@ -37,34 +96,36 @@ export const awardVerificationReputation = onDocumentUpdated('claims/{claimId}',
   const oldList = Array.isArray(before.verifications) ? before.verifications : []
   const newList = Array.isArray(after.verifications) ? after.verifications : []
 
-  // Only react to a single appended verification. Rules already enforce exactly
-  // one append per write; anything else means an admin edit or a seed run, which
-  // must not move reputation.
+  // An admin removed a verification. Undo everything the settlement awarded;
+  // if the claim reaches 3 again it is scored afresh against the new jury, so
+  // nobody is paid twice.
+  if (newList.length === oldList.length - 1) {
+    const keptIds = new Set(newList.map((v) => v?.id))
+    const removed = oldList.find((v) => !keptIds.has(v?.id))
+    const deltas = wasScored(before, oldList)
+      ? scoreAgainst(oldList, majorityVerdict(oldList), -1)
+      : new Map()
+    const counts = new Map()
+    if (typeof removed?.verifierId === 'string' && removed.verifierId) counts.set(removed.verifierId, -1)
+    await applyReputation(deltas, counts, [])
+    return
+  }
+
+  // Otherwise only react to a single appended verification. Rules already
+  // enforce exactly one append per write; anything else means an admin edit or
+  // a seed run, which must not move reputation.
   if (newList.length !== oldList.length + 1) return
 
   const appended = newList[newList.length - 1]
   const appendedBy = appended?.verifierId
   if (typeof appendedBy !== 'string' || !appendedBy) return
 
-  // Reputation is scored against a settled verdict, never the running majority
-  // the client shows mid-flight.
+  // Reputation is scored once, when the jury settles, against the majority of
+  // all three — so the award does not depend on submission order. A split
+  // (CONTESTED) moves nobody's reputation.
   const justSettled = before.status === 'pending' && after.status === 'verified'
-  const alreadySettled = before.status === 'verified'
-  const finalVerdict = after.verdict
-
-  // uid -> reputation delta. Everyone who took part is scored against the final
-  // verdict when consensus lands, so the award does not depend on submission
-  // order; a late verification on an already-settled claim scores only itself.
-  const deltas = new Map()
-  if (finalVerdict) {
-    const scored = justSettled ? newList : alreadySettled ? [appended] : []
-    for (const v of scored) {
-      const uid = v?.verifierId
-      if (typeof uid !== 'string' || !uid) continue
-      const delta = v.verdict === finalVerdict ? AGREE_REWARD : DISAGREE_PENALTY
-      deltas.set(uid, (deltas.get(uid) ?? 0) + delta)
-    }
-  }
+  const finalVerdict = justSettled ? majorityVerdict(newList) : null
+  const deltas = finalVerdict ? scoreAgainst(newList, finalVerdict) : new Map()
 
   // Notifications are per-user docs the client bell subscribes to. Rules only let
   // a client notify itself, so everything addressed to *other* users is written
@@ -83,13 +144,14 @@ export const awardVerificationReputation = onDocumentUpdated('claims/{claimId}',
   notify(appendedBy, 'verdict_submitted', 'Verdict Submitted',
     `Your ${appended.verdict} verdict on "${claimText}" was recorded into the consensus queue.`)
 
-  if (justSettled && finalVerdict) {
+  if (justSettled) {
+    const settledAs = finalVerdict ?? 'CONTESTED'
     const confidence = typeof after.confidenceScore === 'number' ? ` (${Math.round(after.confidenceScore)}% confidence)` : ''
     const recipients = new Set([after.submittedBy, ...newList.map((v) => v?.verifierId)])
     for (const uid of recipients) {
       if (typeof uid !== 'string' || !uid) continue
-      notify(uid, 'claim_verified', `Consensus Reached: ${finalVerdict}`,
-        `Claim "${claimText}" was settled as ${finalVerdict}${confidence}.`)
+      notify(uid, 'claim_verified', `Consensus Reached: ${settledAs}`,
+        `Claim "${claimText}" was settled as ${settledAs}${confidence}.`)
     }
   }
 
@@ -100,29 +162,5 @@ export const awardVerificationReputation = onDocumentUpdated('claims/{claimId}',
         : `${delta} reputation: your verdict on "${claimText}" did not match the consensus.`)
   }
 
-  const involved = new Set([appendedBy, ...deltas.keys()])
-  const refs = [...involved].map((uid) => ({ uid, ref: db.doc(`users/${uid}`) }))
-
-  await db.runTransaction(async (tx) => {
-    // All reads must precede all writes inside a transaction.
-    const snaps = await Promise.all(refs.map(({ ref }) => tx.get(ref)))
-
-    refs.forEach(({ uid }, i) => {
-      const snap = snaps[i]
-      if (!snap.exists) return
-
-      const updates = {}
-      if (uid === appendedBy) updates.totalVerifications = FieldValue.increment(1)
-
-      const delta = deltas.get(uid)
-      if (delta) {
-        const current = typeof snap.data().reputation === 'number' ? snap.data().reputation : 50
-        updates.reputation = clamp(current + delta)
-      }
-
-      if (Object.keys(updates).length > 0) tx.update(snap.ref, updates)
-    })
-
-    for (const { ref, data } of notifications) tx.set(ref, data)
-  })
+  await applyReputation(deltas, new Map([[appendedBy, 1]]), notifications)
 })

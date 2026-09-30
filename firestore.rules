@@ -31,6 +31,25 @@ service cloud.firestore {
         || name == callerProfile().displayName;
     }
 
+    // The verdict a settled claim must carry: the verdict at least two of its three
+    // verifiers chose, or CONTESTED on a three-way split. The client computes this,
+    // so without the check the third verifier could write any verdict they liked —
+    // and the reputation function pays out against it.
+    function isMajorityVerdict(list, verdict) {
+      return (
+        (list[0].verdict == list[1].verdict || list[0].verdict == list[2].verdict)
+          && verdict == list[0].verdict
+      ) || (
+        list[0].verdict != list[1].verdict && list[0].verdict != list[2].verdict
+          && list[1].verdict == list[2].verdict
+          && verdict == list[1].verdict
+      ) || (
+        list[0].verdict != list[1].verdict && list[0].verdict != list[2].verdict
+          && list[1].verdict != list[2].verdict
+          && verdict == 'CONTESTED'
+      );
+    }
+
     // Helper to verify a field's value did not change during update
     function isUnchanged(field) {
       return request.resource.data.get(field, null) == resource.data.get(field, null);
@@ -61,7 +80,13 @@ service cloud.firestore {
 
       allow create: if request.auth != null && (
         (
-          request.auth.uid == uid && (
+          request.auth.uid == uid
+          // An admin-deleted account keeps its Firebase Auth login (clients cannot
+          // delete Auth users), so without this it simply recreated a fresh profile
+          // on its next sign-in. No profile means no claims and no verdicts: both
+          // rules read the caller's profile.
+          && !exists(/databases/$(database)/documents/deleted_users/$(uid))
+          && (
             (
               request.resource.data.get('reputation', 50) == 50
               && request.resource.data.get('totalVerifications', 0) == 0
@@ -101,6 +126,12 @@ service cloud.firestore {
       );
 
       allow delete: if request.auth != null && isAdmin();
+    }
+
+    // ── Tombstones for admin-deleted accounts (see users create above) ──
+    match /deleted_users/{uid} {
+      allow read, create, delete: if request.auth != null && isAdmin();
+      allow update: if false;
     }
 
     // ── Claims ──
@@ -167,6 +198,9 @@ service cloud.firestore {
             identityUnchanged()
             && isUnchanged('adminFlagged')
             && isUnchanged('adminFlaggedAt')
+            // Only open claims take verdicts. Without this a claim closed as
+            // CONTESTED (fewer than 3 verifications) could be reopened by appending.
+            && resource.data.status == 'pending'
             // A claim's author cannot sit on its jury.
             && resource.data.submittedBy != request.auth.uid
             // One verifier, one verdict. Without this a single account could
@@ -211,11 +245,22 @@ service cloud.firestore {
             // The running verdict/score are still client-computed (the client updates
             // them on every verification, not just the third); bounding them is all
             // rules can do without a trusted Cloud Function to recompute consensus.
+            //
+            // The running verdict on a pending claim is display-only (the reputation
+            // function ignores it); the settling verdict must be the real majority.
             && (
-              (request.resource.data.verificationCount < 3 && request.resource.data.status == 'pending')
-              || (request.resource.data.verificationCount >= 3 && request.resource.data.status == 'verified')
+              (
+                request.resource.data.verificationCount < 3
+                && request.resource.data.status == 'pending'
+                && request.resource.data.verdict in ['TRUE', 'FALSE', 'MISLEADING', 'UNVERIFIABLE']
+              )
+              || (
+                request.resource.data.verificationCount == 3
+                && request.resource.data.verifications.size() == 3
+                && request.resource.data.status == 'verified'
+                && isMajorityVerdict(request.resource.data.verifications, request.resource.data.verdict)
+              )
             )
-            && request.resource.data.verdict in ['TRUE', 'FALSE', 'MISLEADING', 'UNVERIFIABLE']
             && request.resource.data.confidenceScore is number
             && request.resource.data.confidenceScore >= 0
             && request.resource.data.confidenceScore <= 100
