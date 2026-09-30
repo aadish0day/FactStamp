@@ -146,7 +146,7 @@ export function Navbar() {
               <Link
                 to="/profile"
                 className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] hover:bg-[var(--color-brand-subtle)] hover:border-[var(--color-brand-subtle)] transition-all cursor-pointer"
-                title={`${user.displayName || user.email || 'User'} — ${user.reputation}% reputation (View Profile)`}
+                title={`${user.displayName || user.email || 'User'} — ${user.reputation}/100 reputation (View Profile)`}
               >
                 <Avatar initials={(user.displayName?.trim() || user.email || 'U').charAt(0).toUpperCase()} size="sm" />
                 <div className="flex flex-col leading-tight">
@@ -155,7 +155,7 @@ export function Navbar() {
                   </span>
                   <span className="inline-flex items-center gap-0.5 text-[10px] text-[var(--color-fg-muted)]">
                     <Star className="w-2.5 h-2.5 text-[var(--color-brand)]" aria-hidden="true" />
-                    {user.reputation}%
+                    {user.reputation}
                   </span>
                 </div>
               </Link>
@@ -277,7 +277,7 @@ export function Navbar() {
                 </p>
                 <p className="text-xs text-[var(--color-fg-2)]">
                   <Star className="w-3 h-3 inline-block text-[var(--color-brand)] -mt-0.5 me-0.5" aria-hidden="true" />
-                  {user.reputation}% — {user.totalVerifications} checks
+                  {user.reputation} rep — {user.totalVerifications} checks
                 </p>
               </div>
             </Link>

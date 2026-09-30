@@ -313,7 +313,7 @@ export function Profile() {
 
   return (
     <div className="w-full max-w-[1400px] mx-auto px-[clamp(1rem,4vw,3rem)] py-8">
-      <Seo title={`${user.displayName} — Verifier Profile`} description={`${user.displayName} has ${user.reputation}% reputation with ${user.totalVerifications} verifications on FactStamp.`} />
+      <Seo title={`${user.displayName} — Verifier Profile`} description={`${user.displayName} has ${user.reputation}/100 reputation with ${user.totalVerifications} verifications on FactStamp.`} />
       <Breadcrumbs currentLabel="My Profile" />
 
       {/* Main 2-Column Dashboard Grid */}
@@ -401,18 +401,26 @@ export function Profile() {
                     <span className="text-3xl sm:text-4xl font-extrabold font-mono tabular-nums text-[var(--color-brand)] tracking-tighter leading-none">
                       <AnimatedCounter value={user.reputation} duration={600} />
                     </span>
-                    <span className="text-lg font-bold text-[var(--color-fg-2)]">%</span>
+                    <span className="text-lg font-bold text-[var(--color-fg-2)]">/ 100</span>
                   </div>
                   <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-fg-2)] mt-1.5 flex items-center gap-1">
                     <Star className="w-3.5 h-3.5 text-[var(--color-brand)]" />
                     Reputation Score
                   </p>
+                  {!hasVerdicts && (
+                    <p className="text-xs text-[var(--color-fg-muted)] mt-1">Every new account starts at 50.</p>
+                  )}
                 </div>
                 <Sparkline data={sparklineData} className="flex-shrink-0" />
               </div>
             </div>
 
-            {/* Level Progress Bar Footer (Redesigned clean horizontal milestones layout) */}
+            {/* Tiers only mean something once reputation actually changes (Cloud Function live) */}
+            {!REPUTATION_ENABLED ? (
+              <p className="mt-6 pt-4 border-t border-[var(--color-border-soft)] text-xs text-[var(--color-fg-muted)] leading-relaxed">
+                Reputation will rise or fall as your verdicts match community consensus. Tracking isn&apos;t switched on yet, so your score stays at its starting value for now.
+              </p>
+            ) : (
             <div className="mt-6 pt-4 border-t border-[var(--color-border-soft)] space-y-3.5">
               
               {/* Perk block */}
@@ -439,7 +447,7 @@ export function Profile() {
                 <div className="text-right">
                   <span className="text-[10px] uppercase font-bold tracking-widest text-[var(--color-fg-muted)] block mb-0.5">Next Tier</span>
                   <span className="font-bold text-[var(--color-fg)]">
-                    {user.reputation >= 86 ? 'Max Tier reached' : user.reputation >= 61 ? 'Guardian (86%)' : user.reputation >= 31 ? 'Expert (61%)' : 'Analyst (31%)'}
+                    {user.reputation >= 86 ? 'Max Tier reached' : user.reputation >= 61 ? 'Guardian (86 pts)' : user.reputation >= 31 ? 'Expert (61 pts)' : 'Analyst (31 pts)'}
                   </span>
                 </div>
               </div>
@@ -455,6 +463,7 @@ export function Profile() {
               </div>
 
             </div>
+            )}
           </motion.div>
 
           {/* Unified Performance Scorecard Bento Card */}
@@ -465,9 +474,9 @@ export function Profile() {
             transition={{ type: 'spring', stiffness: 300, damping: 30, delay: 0.08 }}
           >
             <div className="flex items-center justify-between border-b border-[var(--color-border-soft)] pb-3">
-              <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[var(--color-brand)]">
+              <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-[var(--color-brand)]">
                 Verifier Scorecard
-              </h3>
+              </h2>
               <span className="text-xs font-mono font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2 py-0.5 rounded-full border border-[var(--color-brand-subtle)]">
                 Live Stats
               </span>

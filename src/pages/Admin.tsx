@@ -198,7 +198,7 @@ export function Admin() {
         `Changed ${selectedUser.displayName}'s reputation from ${selectedUser.reputation} to ${newUserReputation}`
       )
       toast.success('Reputation updated', {
-        description: `${selectedUser.displayName}'s reputation set to ${newUserReputation}%.`,
+        description: `${selectedUser.displayName}'s reputation set to ${newUserReputation}/100.`,
       })
       setIsEditUserRepModalOpen(false)
     } catch {
@@ -1008,7 +1008,7 @@ export function Admin() {
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-2">
                             <span className="font-mono font-bold text-[var(--color-fg)]">
-                              {u.reputation}%
+                              {u.reputation}
                             </span>
                             <span className={cn(
                               'px-1.5 py-0.5 rounded text-[10px] font-semibold',
@@ -1583,7 +1583,7 @@ export function Admin() {
             <div>
               <div className="flex items-center justify-between text-xs font-semibold mb-1">
                 <span>Reputation Score</span>
-                <span className="font-mono text-[var(--color-brand)] text-base">{newUserReputation}%</span>
+                <span className="font-mono text-[var(--color-brand)] text-base">{newUserReputation}/100</span>
               </div>
               <input
                 type="range"
@@ -1768,7 +1768,7 @@ export function Admin() {
                     <div className="flex items-center gap-2">
                       <VerdictPill verdict={v.verdict} />
                       <span className="text-xs font-semibold text-[var(--color-fg)]">{v.verifierName}</span>
-                      <span className="text-[10px] font-mono text-[var(--color-fg-muted)]">({v.verifierReputation}%)</span>
+                      <span className="text-[10px] font-mono text-[var(--color-fg-muted)]">({v.verifierReputation} rep)</span>
                     </div>
                     <Button
                       intent="ghost"
