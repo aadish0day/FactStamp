@@ -430,13 +430,11 @@ export function Dashboard() {
                           <p className="text-xs font-bold text-[var(--color-fg)] truncate leading-tight">
                             {v.name}
                           </p>
-                          <p className="text-xs text-[var(--color-fg-muted)] font-mono font-bold mt-0.5">
-                            {v.verifications} checks
+                          <p className="text-xs text-[var(--color-fg-muted)] font-mono font-bold mt-0.5 whitespace-nowrap">
+                            {v.verifications} checks ·{' '}
+                            <span className="text-[var(--color-v-true)]">{v.accuracy}% agreed</span>
                           </p>
                         </div>
-                        <span className="shrink-0 whitespace-nowrap text-xs font-mono font-bold text-[var(--color-v-true)] bg-[var(--color-v-true-bg)] px-2 py-0.5 rounded-full border border-[var(--color-v-true-border)]">
-                          {v.accuracy}% agreed
-                        </span>
                       </div>
                     ))}
                     {weekly.topVerifiers.some((v) => sampleVerifierNames.has(v.name)) && (
