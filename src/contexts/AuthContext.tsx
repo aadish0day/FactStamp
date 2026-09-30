@@ -7,9 +7,7 @@ import {
   db,
   COLLECTIONS,
   doc,
-  setDoc,
   onSnapshot,
-  serverTimestamp
 } from '@/lib/firebase'
 import {
   signUpWithEmail,
@@ -19,6 +17,7 @@ import {
   resetPassword as resetPasswordService,
   updateUserProfile,
   getAuthErrorMessage,
+  ensureProfile,
 } from '@/services/firebaseService'
 import {
   recordActivity,
@@ -63,6 +62,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let unsubscribeProfile: (() => void) | null = null
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Drop the previous account's listener on every auth change, not just on
+      // sign-out. An A→B switch (the /admin gate does this) otherwise left A's
+      // listener live — B, as an admin, can still read A's profile — and any
+      // change to it called setUser(A), bouncing the admin out of /admin.
+      if (unsubscribeProfile) {
+        unsubscribeProfile()
+        unsubscribeProfile = null
+      }
+
       if (firebaseUser) {
         // 09. Session Hijacking: Check for idle session timeout on re-auth
         if (isSessionExpired()) {
@@ -87,20 +95,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               const displayName = rawName || authName || emailPrefix || 'Verifier'
               setUser({ ...data, displayName })
             } else {
-              const authName = typeof firebaseUser.displayName === 'string' ? firebaseUser.displayName.trim() : ''
-              const emailPrefix = firebaseUser.email ? firebaseUser.email.split('@')[0] : ''
-              const newProfile: User = {
-                uid: firebaseUser.uid,
-                displayName: authName || emailPrefix || 'Verifier',
-                email: firebaseUser.email || '',
-                reputation: 50,
-                totalVerifications: 0,
-                joinedAt: new Date().toISOString(),
-              }
-              setDoc(userDocRef, { ...newProfile, createdAt: serverTimestamp() }).catch((err) => {
-                console.warn('Failed to initialize user document in Firestore:', err)
+              // No profile yet: create it and let the next snapshot deliver it.
+              // Previously this showed a local profile the database might never
+              // accept (a deleted account's write is refused) — ensureProfile
+              // signs such an account out instead.
+              ensureProfile(firebaseUser).catch((err) => {
+                console.warn('Could not create user profile:', err)
+                setIsLoading(false)
               })
-              setUser(newProfile)
+              return
             }
             setIsLoading(false)
           },
@@ -110,10 +113,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         )
       } else {
-        if (unsubscribeProfile) {
-          unsubscribeProfile()
-          unsubscribeProfile = null
-        }
         setUser(null)
         setIsLoading(false)
       }

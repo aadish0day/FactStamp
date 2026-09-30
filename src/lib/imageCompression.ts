@@ -12,7 +12,11 @@
  */
 
 const MAX_DIMENSION = 1280
-const MAX_BYTES = 700_000 // ~0.7 MiB — leaves headroom inside the 1 MiB doc
+// firestore.rules caps claim_media.imageUrl at 900,000 characters of data URL.
+// This used to budget 700 KB of *decoded* bytes, which base64 inflates to
+// ~933k characters, so images in that band compressed fine and then were
+// rejected on write. Measure the string the rule measures, with headroom.
+const MAX_DATA_URL_CHARS = 880_000
 const START_QUALITY = 0.72
 const MIN_QUALITY = 0.4
 
@@ -48,26 +52,20 @@ export async function compressImageToDataUrl(file: File): Promise<string | null>
         // Step quality down until the data URL fits the size budget.
         let quality = START_QUALITY
         let dataUrl = canvas.toDataURL('image/jpeg', quality)
-        while (estimateBytes(dataUrl) > MAX_BYTES && quality > MIN_QUALITY) {
+        while (dataUrl.length > MAX_DATA_URL_CHARS && quality > MIN_QUALITY) {
           quality -= 0.08
           dataUrl = canvas.toDataURL('image/jpeg', quality)
         }
 
-        resolve(dataUrl)
+        // Still too big at the lowest quality: the write would be refused, so
+        // report it as unsaveable up front (callers fall back to text-only).
+        resolve(dataUrl.length > MAX_DATA_URL_CHARS ? null : dataUrl)
       }
       img.src = reader.result as string
     }
 
     reader.readAsDataURL(file)
   })
-}
-
-/** Rough byte estimate of a base64 data URL (base64 adds ~33% overhead). */
-function estimateBytes(dataUrl: string): number {
-  const comma = dataUrl.indexOf(',')
-  if (comma === -1) return dataUrl.length
-  // data:...;base64,XXXX — payload chars * 0.75 ≈ decoded bytes
-  return Math.round((dataUrl.length - comma - 1) * 0.75)
 }
 
 const THUMB_DIMENSION = 160

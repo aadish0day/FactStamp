@@ -27,6 +27,7 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { SourceQualityDot } from '@/components/ui/SourceQualityDot'
 import { VerdictStamp } from '@/components/VerdictStamp'
 import { ErrorState } from '@/components/ui/ErrorState'
+import { ClaimDetailSkeleton } from '@/components/ui/Skeletons'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { determineSourceQuality } from '@/lib/confidenceScore'
@@ -117,7 +118,7 @@ function useClaimScreenshot(claim: { id: string; imageUrl?: string; hasScreensho
 export function VerifyDetail() {
   const { claimId } = useParams<{ claimId: string }>()
   const navigate = useNavigate()
-  const { getClaimById, addVerification } = useClaims()
+  const { getClaimById, isLoading: claimsLoading, addVerification } = useClaims()
   const { user } = useAuth()
 
   const claim = claimId ? getClaimById(claimId) : undefined
@@ -129,11 +130,16 @@ export function VerifyDetail() {
   const [sourceQuality, setSourceQuality] = useState<SourceQuality>('medium')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  // Verification count right after this verdict landed. Read from `claim` it
+  // was counted twice: the context already applied the verdict optimistically.
+  const [submitted, setSubmitted] = useState<number | null>(null)
 
   const updateSourceQuality = useCallback((url: string) => {
     setSourceQuality(determineSourceQuality(url))
   }, [])
+
+  // Direct links rendered "Claim not found" until the realtime claims arrived.
+  if (!claim && claimsLoading) return <ClaimDetailSkeleton />
 
   if (!claim) {
     return (
@@ -177,8 +183,8 @@ export function VerifyDetail() {
   }
 
   // Submission success screen
-  if (submitted) {
-    const totalCount = claim.verificationCount + 1
+  if (submitted !== null) {
+    const totalCount = submitted
     const needsMore = totalCount < 3
 
     return (
@@ -277,6 +283,7 @@ export function VerifyDetail() {
     }
 
     setLoading(true)
+    const countAfter = claim.verificationCount + 1
 
     try {
       await addVerification(claim.id, {
@@ -288,7 +295,7 @@ export function VerifyDetail() {
         verifierReputation: user?.reputation ?? 50,
       })
       toast.success('Verdict recorded successfully.')
-      setSubmitted(true)
+      setSubmitted(countAfter)
     } catch (err) {
       // Success is only claimed once the database has accepted the verdict.
       console.error('Verdict write failed:', err)

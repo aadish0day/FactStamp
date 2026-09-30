@@ -86,16 +86,19 @@ export function AdminRoute({ children }: AdminRouteProps) {
     setError(null)
     setIsSubmitting(true)
 
-    // 08. Authentication: Brute-force rate limiting
-    const rateLimit = checkLoginRateLimit()
+    const u = usernameInput.trim()
+    const p = passwordInput
+
+    // 08. Authentication: Brute-force rate limiting, keyed by the account being
+    // tried. With no key this wrote the site-wide lockout, so five bad /admin
+    // attempts also locked every account out of /signin.
+    const limitKey = u.toLowerCase()
+    const rateLimit = checkLoginRateLimit(limitKey)
     if (!rateLimit.allowed) {
       setError(`Too many failed attempts. Console locked for security. Try again in ${formatLockoutRemaining(rateLimit.lockoutRemainingMs)}.`)
       setIsSubmitting(false)
       return
     }
-
-    const u = usernameInput.trim()
-    const p = passwordInput
 
     if (!u || !p) {
       setError('Please provide both username and password.')
@@ -106,7 +109,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
     try {
       // Authenticates with Firebase Auth and syncs with Firestore Database
       const adminProfile = await authenticateAdmin(u, p)
-      resetLoginAttempts()
+      resetLoginAttempts(limitKey)
       // NEVER write isAdmin from here. authenticateAdmin() already verified the
       // clearance against Firestore, and the profile snapshot is the single
       // source of truth. Writing it back promoted whichever profile happened to
@@ -118,9 +121,9 @@ export function AdminRoute({ children }: AdminRouteProps) {
         description: `Connected as ${adminProfile.displayName} (${adminProfile.email}).`,
       })
     } catch (err: unknown) {
-      recordFailedLogin()
+      recordFailedLogin(limitKey)
       console.error('Firebase admin login error:', err)
-      const remaining = checkLoginRateLimit()
+      const remaining = checkLoginRateLimit(limitKey)
       const msg = err instanceof Error ? err.message : 'Invalid administrator credentials'
       setError(remaining.remainingAttempts > 0
         ? `${msg} (${remaining.remainingAttempts} attempt${remaining.remainingAttempts !== 1 ? 's' : ''} remaining)`

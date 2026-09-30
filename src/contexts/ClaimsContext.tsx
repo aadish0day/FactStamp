@@ -116,12 +116,16 @@ function computeUpdatedClaim(claim: Claim, data: AddVerificationInput): Claim {
   updatedVerifications.forEach((v) => {
     verdictCounts[v.verdict] = (verdictCounts[v.verdict] || 0) + 1
   })
-  const majorityVerdict = Object.entries(verdictCounts).sort(
-    (a, b) => b[1] - a[1]
-  )[0][0] as Verdict
+  const ranked = Object.entries(verdictCounts).sort((a, b) => b[1] - a[1])
 
   // A claim is 'verified' when it has at least 3 verifications
   const isVerified = updatedVerifications.length >= 3
+
+  // A split jury has no majority. While pending the leading verdict is only a
+  // preview, but a settled three-way split must be CONTESTED (firestore.rules
+  // isMajorityVerdict enforces the same).
+  const isSplit = ranked.length > 1 && ranked[0][1] === ranked[1][1]
+  const majorityVerdict = (isVerified && isSplit ? 'CONTESTED' : ranked[0][0]) as Verdict
 
   return {
     ...claim,
@@ -481,6 +485,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
   // `expireOverdueClaims`, which writes the change to Firestore.
 
   const localClaimsRef = useRef<Claim[]>([])
+  const fetchedIdsRef = useRef<Set<string>>(new Set())
 
   // Realtime Firestore sync — active only when real Firebase keys are present.
   useEffect(() => {
@@ -731,6 +736,17 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
             verifications: updatedVerifs,
             verificationCount: updatedVerifs.length,
             status: isVerified ? 'verified' : 'pending',
+            // Mirrors adminDeleteVerification: a reopened claim loses its verdict.
+            ...(isVerified
+              ? {}
+              : {
+                  verdict: undefined,
+                  confidenceScore: undefined,
+                  agreementRatio: undefined,
+                  avgVerifierReputation: undefined,
+                  sourceQualityScore: undefined,
+                  verifiedAt: undefined,
+                }),
           }
         })
       )
@@ -749,7 +765,10 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
       const existing = claims.find((c) => c.id === id)
       if (existing) return existing
 
-      if (isFirebaseConfigured && id) {
+      // Claims outside the realtime window are fetched once each. This ran on
+      // every render while the claim was missing — and forever for a bad id.
+      if (isFirebaseConfigured && id && !fetchedIdsRef.current.has(id)) {
+        fetchedIdsRef.current.add(id)
         getSingleClaimFromFirestore(id).then((fetched) => {
           if (fetched) {
             localClaimsRef.current = [fetched, ...localClaimsRef.current.filter((c) => c.id !== fetched.id)]

@@ -69,32 +69,30 @@ export function UsersProvider({ children }: { children: ReactNode }) {
     return () => unsub()
   }, [user?.uid, user?.isAdmin])
 
+  // Writes go to Firestore first and the realtime subscription above delivers
+  // the committed values. These used to merge optimistically and swallow the
+  // rejection, so /admin reported "Admin role granted" (and wrote an audit log)
+  // for changes the rules refused. Rejections now reach the caller.
   const adminUpdateUser = useCallback(
     async (uid: string, updates: Partial<User>) => {
+      if (isFirebaseConfigured) {
+        await adminUpdateUserDoc(uid, updates)
+        return
+      }
       setUsers((prev) =>
         prev.map((u) => (u.uid === uid ? { ...u, ...updates } : u))
       )
-      if (isFirebaseConfigured) {
-        try {
-          await adminUpdateUserDoc(uid, updates)
-        } catch (err) {
-          console.warn('Firestore admin user update notice:', err)
-        }
-      }
     },
     []
   )
 
   const adminDeleteUser = useCallback(
     async (uid: string) => {
-      setUsers((prev) => prev.filter((u) => u.uid !== uid))
       if (isFirebaseConfigured) {
-        try {
-          await deleteUserFromFirestore(uid)
-        } catch (err) {
-          console.warn('Firestore admin user delete notice:', err)
-        }
+        await deleteUserFromFirestore(uid)
+        return
       }
+      setUsers((prev) => prev.filter((u) => u.uid !== uid))
     },
     []
   )

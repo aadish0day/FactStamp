@@ -238,6 +238,9 @@ export function Submit() {
       toast.error('Your claim was not submitted.', {
         description: 'We could not save it to the database. Check your connection and try again.',
       })
+      // LoadingButton reads the promise: resolving here showed "Claim Submitted
+      // Successfully!" right next to the failure toast.
+      throw err
     } finally {
       setLoading(false)
     }

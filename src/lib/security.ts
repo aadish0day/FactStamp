@@ -29,8 +29,6 @@
 // ─── 12. XSS: Input Sanitization ─────────────────────────────────────────────
 
 const DANGEROUS_HTML_PATTERN = /<\s*\/?\s*(script|iframe|object|embed|form|link|meta|style|svg|math|base|applet)\b[^>]*>/gi
-const DANGEROUS_ATTR_PATTERN = /\b(on\w+|srcdoc|formaction|xlink:href)\s*=/gi
-const DANGEROUS_PROTO_PATTERN = /(javascript|vbscript|data)\s*:/gi
 
 /**
  * Sanitize user-provided text to strip dangerous HTML tags, event handler
@@ -40,10 +38,12 @@ const DANGEROUS_PROTO_PATTERN = /(javascript|vbscript|data)\s*:/gi
 export function sanitizeTextInput(input: string): string {
   if (!input || typeof input !== 'string') return ''
 
-  let cleaned = input
-    .replace(DANGEROUS_HTML_PATTERN, '')
-    .replace(DANGEROUS_ATTR_PATTERN, '')
-    .replace(DANGEROUS_PROTO_PATTERN, '')
+  // Attribute (`onclick=`) and scheme (`javascript:`) stripping used to run on
+  // the whole string, which mangled ordinary prose — "the data: 40%" lost
+  // "data:", "one = two" lost "one =". Outside a tag they are inert text (this
+  // is only ever rendered as escaped JSX text), and the tag pattern already
+  // removes any tag together with its attributes.
+  let cleaned = input.replace(DANGEROUS_HTML_PATTERN, '')
 
   // Strip null bytes (used in bypass payloads)
   cleaned = cleaned.replace(/\0/g, '')
@@ -455,14 +455,14 @@ export function checkLoginRateLimit(identifier?: string): LoginRateLimitResult {
     }
 
     const attempts = parseInt(getStorageItem(attemptKey) || '0', 10)
-    const remainingAttempts = Math.max(0, MAX_LOGIN_ATTEMPTS - attempts)
-    const isLockedOut = remainingAttempts <= 0
-
+    // A lockout exists only as a timestamp (written by recordFailedLogin). Deriving
+    // it from the count alone locked the empty-email form on the shared _global
+    // counter (5–9 failures, no timestamp) forever at 00:00, inputs disabled.
     return {
-      allowed: !isLockedOut,
-      remainingAttempts,
+      allowed: true,
+      remainingAttempts: Math.max(0, MAX_LOGIN_ATTEMPTS - attempts),
       lockoutRemainingMs: 0,
-      isLockedOut,
+      isLockedOut: false,
       totalAttempts: attempts,
     }
   } catch {

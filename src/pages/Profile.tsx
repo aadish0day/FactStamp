@@ -35,7 +35,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { useAuth } from '@/contexts/AuthContext'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { formatDistanceToNow } from '@/lib/utils'
-import type { Verification, Verdict } from '@/lib/types'
+import { scoredVerdict, type Verification, type Verdict } from '@/lib/types'
 
 /* ── Reputation level helper ── */
 function repLevel(rep: number): { label: string; icon: typeof Sprout; color: string; bg: string; border: string; perk: string } {
@@ -136,16 +136,20 @@ function Sparkline({ data, className }: { data: number[]; className?: string }) 
 function computeVerifierStats(verifications: Verification[], claimVerdicts: Map<string, Verdict | undefined>) {
   const total = verifications.length
   let matched = 0
+  let scored = 0
 
   for (const v of verifications) {
     const finalVerdict = claimVerdicts.get(v.claimId)
-    if (finalVerdict && v.verdict === finalVerdict) matched++
+    if (!finalVerdict) continue
+    scored++
+    if (v.verdict === finalVerdict) matched++
   }
 
   return {
     total,
     matched,
-    pct: total > 0 ? Math.round((matched / total) * 100) : 0,
+    // Accuracy over settled claims only; pending ones have no final verdict yet.
+    pct: scored > 0 ? Math.round((matched / scored) * 100) : 0,
   }
 }
 
@@ -169,7 +173,7 @@ export function Profile() {
             claimText: claim.text,
             claimId: claim.id,
             category: claim.category,
-            finalVerdict: claim.verdict,
+            finalVerdict: scoredVerdict(claim),
           })
         }
       }
@@ -196,7 +200,7 @@ export function Profile() {
     if (!user) return { total: 0, pct: 0, matched: 0 }
     const finalVerdicts = new Map<string, Verdict | undefined>()
     for (const claim of claims) {
-      finalVerdicts.set(claim.id, claim.verdict)
+      finalVerdicts.set(claim.id, scoredVerdict(claim))
     }
     return computeVerifierStats(
       userVerifications.map((v) => v.verification),

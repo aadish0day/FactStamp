@@ -9,7 +9,9 @@
 function normalize(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\w\s]/g, '')   // remove punctuation
+    // Remove punctuation. `\w` is ASCII-only, so the old /[^\w\s]/ erased Hindi,
+    // Tamil etc. entirely; letters, combining marks and digits of any script stay.
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, '')
     .replace(/\s+/g, ' ')      // normalize whitespace
     .trim()
 }
@@ -26,7 +28,8 @@ function jaccardSimilarity(a: string, b: string): number {
   const setA = tokenize(a)
   const setB = tokenize(b)
 
-  if (setA.size === 0 && setB.size === 0) return 1
+  // Nothing comparable is not evidence of a duplicate. This returned 1 for two
+  // empty token sets, which made every non-Latin claim a "100% match".
   if (setA.size === 0 || setB.size === 0) return 0
 
   let intersection = 0

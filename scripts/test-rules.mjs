@@ -1,5 +1,5 @@
 const AUTH='http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1'
-const FS='http://127.0.0.1:8083/v1/projects/factstamp-app/databases/(default)/documents'
+const FS=process.env.FS_URL??'http://127.0.0.1:8083/v1/projects/factstamp-app/databases/(default)/documents'
 const KEY='fake-api-key'
 const call=async(u,o)=>{const r=await fetch(u,{...o,headers:{'Content-Type':'application/json',...(o?.headers||{})}});return{ok:r.ok,status:r.status,body:await r.json().catch(()=>({}))}}
 const S=v=>({stringValue:v}),I=v=>({integerValue:String(v)}),B=v=>({booleanValue:v})
@@ -85,16 +85,19 @@ expect('Create a normal claim with a valid deadline',
   (await call(`${FS}/claims`,{method:'POST',headers:author.H,body:JSON.stringify({fields:fields(author.uid,Date.now()+7*864e5,author.name)})})).ok, true)
 
 console.log('\n── Consensus integrity (must be DENIED) ──')
-const patchV=(claimId,u,values,n,status='pending')=>call(`${FS}/claims/${claimId}?${mask('verifications','verificationCount','status','verdict','confidenceScore')}`,
+const patchV=(claimId,u,values,n,status='pending',verdict='TRUE')=>call(`${FS}/claims/${claimId}?${mask('verifications','verificationCount','status','verdict','confidenceScore')}`,
   {method:'PATCH',headers:u.H,body:JSON.stringify({fields:{verifications:{arrayValue:{values}},verificationCount:I(n),
-    status:S(status),verdict:S('TRUE'),confidenceScore:I(60)}})})
+    status:S(status),verdict:S(verdict),confidenceScore:I(60)}})})
 
 // One account must not be able to fill every slot on a claim by itself.
+// Fresh verifiers from here on: the reputation function (when the functions
+// emulator runs) moves v1-v3 off 50 once c4 settles, and verif() sends 50.
+const solo=await mkUser('solo')
 const c7=await mkClaim(author)
 expect('Solo consensus: 1st verification by v1',
-  (await patchV(c7,v1,[verif(v1)],1)).ok, true)
+  (await patchV(c7,solo,[verif(solo)],1)).ok, true)
 expect('Solo consensus: v1 verifies the same claim twice',
-  (await patchV(c7,v1,[verif(v1),verif(v1)],2)).ok, false)
+  (await patchV(c7,solo,[verif(solo),verif(solo)],2)).ok, false)
 
 // The author of a claim must not sit on its own jury.
 const c8=await mkClaim(author)
@@ -111,6 +114,26 @@ for (const [i,u] of [v1,v2,v3].entries()) {
 const v4=await mkUser('v4')
 expect('4th verification after consensus closed',
   (await patchV(c9,v4,[...arr9,verif(v4)],4,'verified')).ok, false)
+
+console.log('\n── Settling verdict must be the real majority ──')
+const settleWith=async(verdicts)=>{
+  const c=await mkClaim(author)
+  const us=[await mkUser('j1'),await mkUser('j2'),await mkUser('j3')], vs=[]
+  for (let i=0;i<2;i++){ vs.push(verif(us[i],verdicts[i])); await patchV(c,us[i],[...vs],i+1,'pending',verdicts[0]) }
+  return {c,third:us[2],vs:[...vs,verif(us[2],verdicts[2])]}
+}
+let s1=await settleWith(['FALSE','FALSE','TRUE'])
+expect('3rd verifier settles FALSE,FALSE,TRUE as TRUE',
+  (await patchV(s1.c,s1.third,s1.vs,3,'verified','TRUE')).ok, false)
+expect('3rd verifier settles FALSE,FALSE,TRUE as FALSE',
+  (await patchV(s1.c,s1.third,s1.vs,3,'verified','FALSE')).ok, true)
+let s2=await settleWith(['TRUE','FALSE','MISLEADING'])
+expect('Three-way split settled as the first verdict',
+  (await patchV(s2.c,s2.third,s2.vs,3,'verified','TRUE')).ok, false)
+expect('Three-way split settled as CONTESTED',
+  (await patchV(s2.c,s2.third,s2.vs,3,'verified','CONTESTED')).ok, true)
+expect('Append to a claim already closed as CONTESTED',
+  (await patchV(c5,v1,[verif(v1)],1)).ok, false)
 
 console.log('\n── Identity spoofing (must be DENIED) ──')
 expect('Submit a claim as "WHO Official"',
@@ -166,6 +189,21 @@ expect('Read own profile',
   (await call(`${FS}/users/${att.uid}`,{method:'GET',headers:att.H})).ok, true)
 expect('List the whole users collection',
   (await call(`${FS}/users?pageSize=50`,{method:'GET',headers:att.H})).ok, false)
+
+console.log('\n── Admin-deleted accounts stay deleted ──')
+// Stage what deleteUserFromFirestore does (tombstone + profile delete) with the
+// emulator's rules-bypassing owner token.
+const gone=await mkUser('gone')
+const OWNER={Authorization:'Bearer owner'}
+await call(`${FS}/deleted_users?documentId=${gone.uid}`,{method:'POST',headers:OWNER,body:JSON.stringify({fields:{deletedAt:S(new Date().toISOString())}})})
+await call(`${FS}/users/${gone.uid}`,{method:'DELETE',headers:OWNER})
+expect('Deleted account recreates its profile',
+  (await call(`${FS}/users?documentId=${gone.uid}`,{method:'POST',headers:gone.H,body:JSON.stringify({fields:{
+    uid:S(gone.uid),displayName:S('gone'),email:S(`x@example.com`),reputation:I(50),totalVerifications:I(0),isAdmin:B(false),joinedAt:S(new Date().toISOString())}})})).ok, false)
+expect('Deleted account submits a claim',
+  (await call(`${FS}/claims`,{method:'POST',headers:gone.H,body:JSON.stringify({fields:fields(gone.uid,Date.now()+7*864e5,gone.name)})})).ok, false)
+expect('Deleted account removes its own tombstone',
+  (await call(`${FS}/deleted_users/${gone.uid}`,{method:'DELETE',headers:gone.H})).ok, false)
 
 console.log(`\n${fail===0?'ALL GREEN':'FAILURES'} — ${pass} passed, ${fail} failed`)
 process.exit(fail===0?0:1)

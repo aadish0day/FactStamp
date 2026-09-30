@@ -232,3 +232,16 @@ export function canVerify(claim: Claim, uid: string | undefined): boolean {
   if (claim.verificationCount >= REQUIRED_VERIFICATIONS) return false
   return !claim.verifications.some((v) => v.verifierId === uid)
 }
+
+/**
+ * The verdict a claim's verifiers were scored against, or undefined when it
+ * was never scored: still pending (its verdict is only a running preview), or
+ * closed CONTESTED by expiry or a split jury. Mirrors when the
+ * awardVerificationReputation function moves reputation, so accuracy stats
+ * agree with the reputation users actually hold.
+ */
+export function scoredVerdict(claim: Claim): Verdict | undefined {
+  if (claim.status !== 'verified' || claim.verifications.length < REQUIRED_VERIFICATIONS) return undefined
+  if (!claim.verdict || claim.verdict === 'CONTESTED') return undefined
+  return claim.verdict
+}

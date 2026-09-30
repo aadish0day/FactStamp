@@ -23,6 +23,7 @@ import {
   limit,
   where,
   serverTimestamp,
+  deleteField,
   writeBatch,
   COLLECTIONS,
 } from '@/lib/firebase'
@@ -73,22 +74,53 @@ export async function signUpWithEmail(name: string, email: string, pass: string)
     }
   }
 
-  const profileData: User = {
+  return ensureProfile(firebaseUser, name)
+}
+
+/** Thrown when a deleted account signs in; the session is already signed out. */
+export const ACCOUNT_REMOVED_MESSAGE = 'This account has been removed by an administrator.'
+
+/**
+ * Create the caller's profile if it does not exist — the one place profiles are
+ * created. Sign-up, sign-in and the AuthContext listener all used to setDoc it
+ * themselves and raced: whichever write landed second counted as an update
+ * with a new `joinedAt`, which the rules reject, so sign-up could fail after
+ * the account was already created (and keep the email-prefix name).
+ *
+ * The loser of that race now falls back to setting just the display name.
+ * An account an admin deleted cannot recreate its profile (see the
+ * deleted_users rule); it is signed out with ACCOUNT_REMOVED_MESSAGE.
+ */
+export async function ensureProfile(
+  firebaseUser: { uid: string; email: string | null; displayName: string | null },
+  name?: string
+): Promise<User> {
+  const ref = doc(db, COLLECTIONS.USERS, firebaseUser.uid)
+  const profile: User = {
     uid: firebaseUser.uid,
-    displayName: name || firebaseUser.displayName || 'Verifier',
-    email: firebaseUser.email || email,
-    reputation: 50, // Default reputation starting score
+    displayName: name || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Verifier',
+    email: firebaseUser.email || '',
+    reputation: 50,
     totalVerifications: 0,
     joinedAt: new Date().toISOString(),
   }
 
-  // Store Verifier Profile in Firestore
-  await setDoc(doc(db, COLLECTIONS.USERS, firebaseUser.uid), {
-    ...profileData,
-    createdAt: serverTimestamp(),
-  })
-
-  return profileData
+  try {
+    await setDoc(ref, { ...profile, createdAt: serverTimestamp() })
+    return profile
+  } catch (err) {
+    const snap = await getDoc(ref).catch(() => null)
+    if (snap?.exists()) {
+      // Another writer created it first; only our chosen name still needs saving.
+      if (name) await updateDoc(ref, { displayName: name }).catch(() => {})
+      return { ...(snap.data() as User), ...(name ? { displayName: name } : {}) }
+    }
+    // Anything but a rules denial (offline, quota…) is not a removed account.
+    if ((err as { code?: string } | null)?.code !== 'permission-denied') throw err
+    await firebaseSignOut(auth).catch(() => {})
+    console.warn('Profile creation refused:', err)
+    throw new Error(ACCOUNT_REMOVED_MESSAGE)
+  }
 }
 
 
@@ -114,18 +146,7 @@ export async function signInWithEmail(email: string, pass: string): Promise<User
     return snap.data() as User
   }
 
-  // Fallback profile if Firestore doc doesn't exist yet
-  const fallbackProfile: User = {
-    uid: firebaseUser.uid,
-    displayName: firebaseUser.displayName || 'Verifier',
-    email: firebaseUser.email || email,
-    reputation: 50,
-    totalVerifications: 0,
-    joinedAt: new Date().toISOString(),
-  }
-
-  await setDoc(userDocRef, { ...fallbackProfile, createdAt: serverTimestamp() })
-  return fallbackProfile
+  return ensureProfile(firebaseUser)
 }
 
 /**
@@ -142,17 +163,7 @@ export async function signInWithGoogleProvider(): Promise<User> {
     return snap.data() as User
   }
 
-  const profileData: User = {
-    uid: firebaseUser.uid,
-    displayName: firebaseUser.displayName || 'Google Verifier',
-    email: firebaseUser.email || '',
-    reputation: 50,
-    totalVerifications: 0,
-    joinedAt: new Date().toISOString(),
-  }
-
-  await setDoc(userDocRef, { ...profileData, createdAt: serverTimestamp() })
-  return profileData
+  return ensureProfile(firebaseUser)
 }
 
 /**
@@ -560,7 +571,15 @@ export async function deleteClaimFromFirestore(claimId: string): Promise<void> {
  * Delete a user profile document from Firestore (Admin only)
  */
 export async function deleteUserFromFirestore(uid: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTIONS.USERS, uid))
+  // The Auth login survives (only the Admin SDK can delete it), so leave a
+  // tombstone that stops the account recreating its profile on next sign-in.
+  const batch = writeBatch(db)
+  batch.set(doc(db, COLLECTIONS.DELETED_USERS, uid), {
+    deletedAt: new Date().toISOString(),
+    deletedBy: auth.currentUser?.uid ?? '',
+  })
+  batch.delete(doc(db, COLLECTIONS.USERS, uid))
+  await batch.commit()
 }
 
 /**
@@ -575,10 +594,12 @@ export async function adminUpdateUserDoc(uid: string, updates: Partial<User>): P
  */
 export async function adminOverrideClaim(claimId: string, updates: Partial<Claim>): Promise<void> {
   const { id: _id, ...cleanUpdates } = updates
-  await updateDoc(
-    doc(db, COLLECTIONS.CLAIMS, claimId),
-    withoutUndefined(cleanUpdates as Record<string, unknown>)
+  // A key passed as undefined means "clear it" (e.g. verifiedAt when an admin
+  // reopens a claim). withoutUndefined() dropped those, so the old value stayed.
+  const fields = Object.fromEntries(
+    Object.entries(cleanUpdates).map(([key, value]) => [key, value === undefined ? deleteField() : value])
   )
+  await updateDoc(doc(db, COLLECTIONS.CLAIMS, claimId), fields)
 }
 
 /**
@@ -593,10 +614,24 @@ export async function adminDeleteVerification(claimId: string, verificationId: s
   const currentVerifications = Array.isArray(data.verifications) ? data.verifications : []
   const filtered = currentVerifications.filter((v: { id?: string }) => v.id !== verificationId)
 
+  // Dropping below 3 reopens the claim, so the settled verdict goes with it —
+  // otherwise it kept showing the old consensus while pending. The reputation
+  // it awarded is undone by the awardVerificationReputation function.
+  const reopened = filtered.length < 3
   await updateDoc(claimRef, {
     verifications: filtered,
     verificationCount: filtered.length,
-    status: filtered.length >= 3 ? 'verified' : 'pending',
+    status: reopened ? 'pending' : 'verified',
+    ...(reopened
+      ? {
+          verdict: deleteField(),
+          confidenceScore: deleteField(),
+          agreementRatio: deleteField(),
+          avgVerifierReputation: deleteField(),
+          sourceQualityScore: deleteField(),
+          verifiedAt: deleteField(),
+        }
+      : {}),
   })
 }
 
@@ -678,7 +713,9 @@ export async function updateReportInFirestore(
 export async function authenticateAdmin(usernameOrEmail: string, pass: string): Promise<User> {
   const cleanInput = usernameOrEmail.trim().toLowerCase()
   const email = cleanInput.includes('@') ? cleanInput : `${cleanInput}@factstamp.app`
-  const password = pass.trim()
+  // Not trimmed: spaces are legal in a password, and trimming here made /admin
+  // reject credentials that work on /signin.
+  const password = pass
 
   // Sign in directly with Firebase Auth using provided credentials
   const profile = await signInWithEmail(email, password)
@@ -688,6 +725,9 @@ export async function authenticateAdmin(usernameOrEmail: string, pass: string): 
   const hasAdminFlag = userDocSnap.exists() && Boolean(userDocSnap.data()?.isAdmin)
 
   if (!hasAdminFlag) {
+    // The sign-in above already swapped the session to this account. Leaving it
+    // in place meant a failed admin check still logged you in as someone else.
+    await firebaseSignOut(auth).catch(() => {})
     throw new Error('Access denied: Account does not hold administrator privileges in Firestore DB.')
   }
 
