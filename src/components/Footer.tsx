@@ -42,9 +42,11 @@ export function Footer() {
               <Link to="/verify" className="text-sm text-[var(--color-fg-2)] hover:text-[var(--color-brand)] transition-colors">
                 Verify Queue
               </Link>
-              <Link to="/dashboard" className="text-sm text-[var(--color-fg-2)] hover:text-[var(--color-brand)] transition-colors">
-                Dashboard
-              </Link>
+              {user && (
+                <Link to="/dashboard" className="text-sm text-[var(--color-fg-2)] hover:text-[var(--color-brand)] transition-colors">
+                  Dashboard
+                </Link>
+              )}
             </div>
 
             <div className="flex flex-col gap-2.5">

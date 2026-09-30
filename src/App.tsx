@@ -110,7 +110,7 @@ function AppShell() {
                     <Route path="/verify" element={<ProtectedRoute><VerifyQueue /></ProtectedRoute>} />
                     <Route path="/verify/:claimId" element={<ProtectedRoute><VerifyDetail /></ProtectedRoute>} />
                     {/* Public dashboard — Module 7: all users can view without auth */}
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     {/* Unlisted staff console — direct URL access only */}
                     <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />

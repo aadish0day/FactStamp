@@ -39,7 +39,7 @@ export function Navbar() {
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Verify Claims', path: '/verify', protected: true },
-    { label: 'Dashboard', path: '/dashboard' }, // public — analytics viewable without auth
+    { label: 'Dashboard', path: '/dashboard', protected: true },
     { label: 'My Profile', path: '/profile', protected: true },
   ]
 
