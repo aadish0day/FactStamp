@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
     },
   },
   optimizeDeps: {
-    include: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+    include: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
   },
   build: {
     chunkSizeWarningLimit: 1000,
@@ -46,9 +46,6 @@ export default defineConfig(({ mode }) => {
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          // firebase/storage is intentionally absent: it is imported dynamically
-          // by uploadClaimScreenshot(), and naming it here would pull it back
-          // into the eager vendor chunk every visitor downloads.
           'vendor-firebase': ['firebase/app', 'firebase/app-check', 'firebase/auth', 'firebase/firestore'],
           'vendor-ui': ['lucide-react', 'framer-motion'],
           // recharts, html-to-image and tesseract.js are deliberately NOT named

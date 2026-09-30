@@ -13,7 +13,7 @@
 * **Universal Dual-Icon Sliding Theme Toggle**: Kinetic, accessible dark/light mode toggle (`<ThemeToggle />`) with smooth translate animations and system preference persistence across all app views.
 * **Pan-Indic High-Trust Typography Architecture**: Variable `Plus Jakarta Sans` for Latin editorial newsroom clarity, `Noto Sans Devanagari` for native vernacular Hindi/Marathi forward rendering, and native CSS `tabular-nums` for aligned counters and timers at 0 KB extra payload.
 * **Misinformation Intelligence Dashboard**: Real-time analytics, category distributions, weekly trending reports, and top verifier reputation leaderboards powered by Recharts.
-* **Enterprise Security & Firebase Rules**: Strict Firestore security rules (`firestore.rules`) and Storage security rules (`storage.rules`) enforcing data validation, user authentication, and rate limiting.
+* **Enterprise Security & Firebase Rules**: Strict Firestore security rules (`firestore.rules`) enforcing data validation, user authentication, and rate limiting.
 * **Codebase Knowledge Graph (Graphify)**: Comprehensive graph mapping (`graphify-out/`) indexing 630+ nodes, 1,350+ edges, and 29 architectural communities for instant semantic discovery.
 * **Docker & Firebase Emulator Support**: Fully containerized environment with hot-reload development target and Nginx production target.
 
@@ -30,7 +30,7 @@
 | **Icons & UI** | [Lucide React](https://lucide.dev/) + [Sonner](https://sonner.emilkowal.si/) |
 | **Data Visualization** | [Recharts](https://recharts.org/) |
 | **Card Export** | [html-to-image](https://github.com/bubkoo/html-to-image) |
-| **Backend & DB** | [Firebase v12](https://firebase.google.com/) (Auth, Firestore, Storage, Emulators) |
+| **Backend & DB** | [Firebase v12](https://firebase.google.com/) (Auth, Firestore, Emulators) |
 | **Knowledge Graph** | [Graphify](https://github.com/aadish0day/FactStamp/tree/main/graphify-out) CLI Engine |
 | **Deployment** | Docker + Docker Compose + Nginx |
 
@@ -81,7 +81,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 To run completely offline with the Firebase Local Emulator Suite:
 
 ```bash
-# Start Firebase Emulators (Firestore, Auth, Storage)
+# Start Firebase Emulators (Firestore, Auth)
 npm run emulators
 
 # Seed mock database with claims and verifiers
@@ -128,7 +128,6 @@ FactStamp/
 ├── Dockerfile               # Multi-stage Docker build
 ├── docker-compose.yml       # Docker compose setup (dev & prod)
 ├── firestore.rules          # Firestore security rules
-├── storage.rules            # Firebase storage security rules
 └── package.json             # NPM scripts & dependencies
 ```
 
