@@ -427,22 +427,24 @@ export function Dashboard() {
                         </span>
                         <Avatar initials={v.name[0]} size="sm" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-[var(--color-fg)] truncate leading-tight flex items-center gap-1.5">
-                            <span className="truncate">{v.name}</span>
-                            {sampleVerifierNames.has(v.name) && <ExampleBadge />}
+                          <p className="text-xs font-bold text-[var(--color-fg)] truncate leading-tight">
+                            {v.name}
                           </p>
                           <p className="text-xs text-[var(--color-fg-muted)] font-mono font-bold mt-0.5">
                             {v.verifications} checks
                           </p>
                         </div>
-                        <span className="text-xs font-mono font-bold text-[var(--color-v-true)] bg-[var(--color-v-true-bg)] px-2 py-0.5 rounded-full border border-[var(--color-v-true-border)]">
+                        <span className="shrink-0 whitespace-nowrap text-xs font-mono font-bold text-[var(--color-v-true)] bg-[var(--color-v-true-bg)] px-2 py-0.5 rounded-full border border-[var(--color-v-true-border)]">
                           {v.accuracy}% agreed
                         </span>
                       </div>
                     ))}
                     {weekly.topVerifiers.some((v) => sampleVerifierNames.has(v.name)) && (
-                      <p className="text-xs text-[var(--color-fg-muted)]">
-                        Includes sample verifiers from example claims.
+                      <p className="text-xs text-[var(--color-fg-muted)] flex items-start gap-1.5">
+                        <ExampleBadge />
+                        {weekly.topVerifiers.every((v) => sampleVerifierNames.has(v.name))
+                          ? 'These are sample verifiers from example claims.'
+                          : 'Includes sample verifiers from example claims.'}
                       </p>
                     )}
                   </div>
