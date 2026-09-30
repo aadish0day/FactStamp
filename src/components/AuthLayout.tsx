@@ -1,9 +1,11 @@
 import { type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ArrowLeft, ShieldAlert, CheckCircle2, Forward, ShieldCheck, Zap } from 'lucide-react'
-import { Avatar } from '@/components/ui/Avatar'
 import { VerdictPill } from '@/components/ui/VerdictPill'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { ExampleBadge } from '@/components/ui/ExampleBadge'
+import { useClaims } from '@/contexts/ClaimsContext'
+import { isDemoClaim } from '@/lib/features'
 
 const BENEFITS = [
   'Community-verified verdicts & consensus',
@@ -21,6 +23,9 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutProps) {
   const location = useLocation()
+  const { claims } = useClaims()
+  // Showcase the newest real FALSE verdict from Firestore; nothing when none exist yet.
+  const showcase = claims.find((c) => c.status === 'verified' && c.verdict === 'FALSE')
 
   return (
     <div className="min-h-dvh bg-[var(--color-bg)] flex flex-col relative overflow-hidden">
@@ -77,38 +82,39 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
 
           {/* Main Hero Content */}
           <div className="relative z-10 my-auto py-4 w-full max-w-[460px] mx-auto hidden lg:flex flex-col">
-            {/* Interactive WhatsApp Demo Card */}
+            {/* Latest real fact-check, pulled from Firestore */}
+            {showcase && (
             <div className="relative mb-8 p-5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] overflow-hidden group hover:border-[var(--color-brand-subtle)] transition-colors">
               <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-[var(--color-brand-subtle)] opacity-50 blur-xl pointer-events-none" />
 
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2.5">
-                  <Avatar initials="M" size="sm" />
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-xs font-bold text-[var(--color-fg)]">Family Group</span>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--color-fg-muted)]">
-                      <Forward className="w-2.5 h-2.5" aria-hidden="true" />
-                      Forwarded many times
-                    </span>
-                  </div>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--color-fg-muted)]">
+                    <Forward className="w-2.5 h-2.5" aria-hidden="true" />
+                    Latest fact-check
+                  </span>
+                  {isDemoClaim(showcase.id) && <ExampleBadge />}
                 </div>
                 <VerdictPill verdict="FALSE" size="sm" />
               </div>
 
-              <p className="text-xs lg:text-sm text-[var(--color-fg)] leading-relaxed bg-[var(--color-surface-2)] rounded-xl p-3.5 italic border border-[var(--color-border-soft)]">
-                &ldquo;Govt is closing all ATMs from midnight tonight! Withdraw all your cash now! 🚨&rdquo;
+              <p className="text-xs lg:text-sm text-[var(--color-fg)] leading-relaxed bg-[var(--color-surface-2)] rounded-xl p-3.5 italic border border-[var(--color-border-soft)] line-clamp-4">
+                &ldquo;{showcase.text}&rdquo;
               </p>
 
               <div className="mt-3.5 pt-3 border-t border-[var(--color-border-soft)] flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5 text-[var(--color-v-false)] font-semibold text-[11px]">
+                <Link to={`/claim/${showcase.id}`} className="flex items-center gap-1.5 text-[var(--color-v-false)] font-semibold text-[11px] hover:underline">
                   <ShieldAlert className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span>FactStamp Verified: Fake News</span>
-                </div>
-                <span className="font-mono text-[10px] font-bold text-[var(--color-fg-muted)] bg-[var(--color-surface-2)] px-2 py-0.5 rounded-full border border-[var(--color-border-soft)]">
-                  98% Confidence
-                </span>
+                  <span>FactStamp verified: False</span>
+                </Link>
+                {showcase.confidenceScore != null && (
+                  <span className="font-mono text-[10px] font-bold text-[var(--color-fg-muted)] bg-[var(--color-surface-2)] px-2 py-0.5 rounded-full border border-[var(--color-border-soft)]">
+                    {showcase.confidenceScore}% Confidence
+                  </span>
+                )}
               </div>
             </div>
+            )}
 
             {/* Headline & Subhead */}
             <p className="text-2xl lg:text-3xl font-extrabold text-[var(--color-fg)] leading-tight tracking-tight mb-3">

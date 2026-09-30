@@ -17,7 +17,8 @@ import { ExampleBadge } from '@/components/ui/ExampleBadge'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { cn } from '@/lib/utils'
 import { isDemoClaim } from '@/lib/features'
-import { VERDICT_META } from '@/lib/types'
+import { VERDICT_META, REQUIRED_VERIFICATIONS } from '@/lib/types'
+import { formatDistanceToNow } from '@/lib/utils'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -67,13 +68,31 @@ function HomeInner() {
   // Feed shows the 6 most recent verified claims
   const feedClaims = verifiedClaims.slice(0, 6)
 
+  // Hero showcases a real fact-check from Firestore: newest FALSE verdict, else any verdict
+  const heroClaim =
+    verifiedClaims.find((c) => c.verdict === 'FALSE') ?? verifiedClaims.find((c) => c.verdict)
+  const heroMeta = heroClaim?.verdict ? VERDICT_META[heroClaim.verdict] : null
+  const heroRationale = heroClaim?.verifications.find((v) => v.verdict === heroClaim.verdict)?.explanation
+  const heroSources = [
+    ...new Set(
+      (heroClaim?.verifications ?? []).flatMap((v) => {
+        try {
+          return [new URL(v.sourceUrl).hostname.replace(/^www\./, '')]
+        } catch {
+          return []
+        }
+      })
+    ),
+  ].slice(0, 2)
+
   // Interactive hero transformation state
   const [transformed, setTransformed] = useState(false)
 
   useEffect(() => {
+    if (!heroClaim) return
     const timer = setTimeout(() => setTransformed(true), 1200)
     return () => clearTimeout(timer)
-  }, [])
+  }, [heroClaim?.id])
 
   const steps = [
     {
@@ -140,6 +159,7 @@ function HomeInner() {
           </div>
 
           {/* Right Column: Hero Live Transformation (Forward -> Stamped Card) */}
+          {heroClaim && heroMeta && (
           <div className="lg:col-span-5 flex justify-center">
             <div className="relative w-full max-w-md aspect-[4/3] sm:aspect-square flex items-center justify-center">
               <AnimatePresence mode="wait">
@@ -153,13 +173,14 @@ function HomeInner() {
                     className="w-full bg-[#DCF8C6] dark:bg-[#054740] text-zinc-900 dark:text-zinc-100 p-6 rounded-2xl shadow-lg border border-emerald-300/40 relative"
                   >
                     <div className="flex items-center gap-2 mb-3 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
-                      <MessageSquare className="w-4 h-4" /> Forwarded many times
+                      <MessageSquare className="w-4 h-4" /> Suspicious forward
+                      {isDemoClaim(heroClaim.id) && <ExampleBadge />}
                     </div>
-                    <p className="text-sm sm:text-base font-sans leading-relaxed italic">
-                      &quot;Drinking hot water with lemon cures dengue fever completely in 24 hours, confirmed by AIIMS doctors. Share with family!&quot;
+                    <p className="text-sm sm:text-base font-sans leading-relaxed italic line-clamp-5">
+                      &quot;{heroClaim.text}&quot;
                     </p>
                     <div className="mt-4 flex items-center justify-between text-xs sm:text-sm opacity-75">
-                      <span>Received 10:42 AM</span>
+                      <span>Reported {formatDistanceToNow(new Date(heroClaim.createdAt), { addSuffix: true })}</span>
                       <button
                         onClick={() => setTransformed(true)}
                         className="text-xs sm:text-sm font-bold text-emerald-900 dark:text-emerald-100 underline underline-offset-2 hover:opacity-100 cursor-pointer"
@@ -174,38 +195,47 @@ function HomeInner() {
                     initial={{ opacity: 0, scale: 0.7, rotate: 6 }}
                     animate={{ opacity: 1, scale: 1, rotate: 0 }}
                     transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                    className="w-full bg-[var(--color-surface)] p-6 rounded-[var(--radius-lg)] border-2 border-[var(--color-v-false-border)] shadow-xl relative overflow-hidden"
+                    className="w-full bg-[var(--color-surface)] p-6 rounded-[var(--radius-lg)] border-2 shadow-xl relative overflow-hidden"
+                    style={{ borderColor: `var(${heroMeta.borderVar})` }}
                   >
                     <div className="flex items-center justify-between border-b border-[var(--color-border-soft)] pb-3 mb-4">
                       <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--color-brand)] flex items-center gap-1.5">
                         <FileCheck2 className="w-4 h-4" /> FactStamp Verified
+                        {isDemoClaim(heroClaim.id) && <ExampleBadge />}
                       </span>
-                      <span className="text-xs sm:text-sm font-mono text-[var(--color-fg-muted)]">94% Confidence</span>
+                      {heroClaim.confidenceScore != null && (
+                        <span className="text-xs sm:text-sm font-mono text-[var(--color-fg-muted)]">{heroClaim.confidenceScore}% Confidence</span>
+                      )}
                     </div>
 
                     <p className="text-xs sm:text-sm text-[var(--color-fg-2)] mb-3 line-clamp-2">
-                      &quot;Drinking hot water with lemon cures dengue fever...&quot;
+                      &quot;{heroClaim.text}&quot;
                     </p>
 
                     {/* Signature Rotated Seal Overlay */}
-                    <div className="my-4 py-4 rounded-lg bg-[var(--color-v-false-bg)] border border-[var(--color-v-false-border)] flex items-center justify-center gap-3 animate-stamp-press">
-                      <XCircle className="w-8 h-8 text-[var(--color-v-false)]" />
+                    <div
+                      className="my-4 py-4 rounded-lg border flex items-center justify-center gap-3 animate-stamp-press"
+                      style={{ background: `var(${heroMeta.bgVar})`, borderColor: `var(${heroMeta.borderVar})` }}
+                    >
+                      <XCircle className="w-8 h-8" style={{ color: `var(${heroMeta.colorVar})` }} />
                       <div className="text-left">
-                        <span className="text-2xl font-black uppercase text-[var(--color-v-false)] tracking-tight block leading-none">
-                          FALSE
+                        <span className="text-2xl font-black uppercase tracking-tight block leading-none" style={{ color: `var(${heroMeta.colorVar})` }}>
+                          {heroMeta.label}
                         </span>
                         <span className="text-xs font-mono text-[var(--color-fg-muted)] uppercase tracking-wider">
-                          Consensus: 3/3 verifiers
+                          Consensus: {heroClaim.verificationCount}/{REQUIRED_VERIFICATIONS} verifiers
                         </span>
                       </div>
                     </div>
 
-                    <p className="text-xs sm:text-sm text-[var(--color-fg-2)] leading-relaxed">
-                      WHO & Ministry of Health clarify dengue requires medical fluid management; hot lemon water has no antiviral effect.
-                    </p>
+                    {heroRationale && (
+                      <p className="text-xs sm:text-sm text-[var(--color-fg-2)] leading-relaxed line-clamp-3">{heroRationale}</p>
+                    )}
 
-                    <div className="mt-4 pt-3 border-t border-[var(--color-border-soft)] flex items-center justify-between text-xs">
-                      <span className="text-[var(--color-accent)] font-medium">Sources: who.int, mohfw.gov.in</span>
+                    <div className="mt-4 pt-3 border-t border-[var(--color-border-soft)] flex items-center justify-between gap-3 text-xs">
+                      <Link to={`/claim/${heroClaim.id}`} className="text-[var(--color-accent)] font-medium truncate hover:underline">
+                        {heroSources.length ? `Sources: ${heroSources.join(', ')}` : 'View fact-check'}
+                      </Link>
                       <button
                         onClick={() => setTransformed(false)}
                         className="text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] cursor-pointer"
@@ -218,6 +248,7 @@ function HomeInner() {
               </AnimatePresence>
             </div>
           </div>
+          )}
         </div>
       </section>
 

@@ -1,56 +1,12 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { AppNotification } from '@/lib/types'
 import { isFirebaseConfigured } from '@/lib/firebase'
-import { REPUTATION_ENABLED } from '@/lib/features'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   subscribeNotificationsRealtime,
   markNotificationRead,
   markAllNotificationsRead,
 } from '@/services/firebaseService'
-
-const DEFAULT_SEED_NOTIFICATIONS: AppNotification[] = ([
-  {
-    id: 'n_seed_1',
-    userId: 'demo',
-    title: 'Verdict Consensus Reached',
-    message: 'Claim "Drinking boiled ginger water cures Type 2 Diabetes" was debunked as FALSE (94% confidence).',
-    type: 'claim_verified',
-    claimId: 'c_seed_1',
-    isRead: false,
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'n_seed_2',
-    userId: 'demo',
-    title: 'Reputation Awarded',
-    message: '+2 Rep points added to your verifier handle for community consensus match.',
-    type: 'reputation_update',
-    isRead: false,
-    createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'n_seed_3',
-    userId: 'demo',
-    title: 'Weekly Misinformation Briefing',
-    message: 'FactStamp Weekly Digest ready on Dashboard: 12 viral WhatsApp claims debunked in India.',
-    type: 'weekly_report',
-    isRead: true,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'n_seed_4',
-    userId: 'demo',
-    title: 'Verdict Submitted',
-    message: 'Your verdict for "RBI 18% digital tax on UPI" was recorded into the consensus queue.',
-    type: 'verdict_submitted',
-    claimId: 'c_seed_2',
-    isRead: true,
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  // Offline-demo only (never shown when Firebase is configured). No reputation
-  // notice while reputation awards are switched off.
-] satisfies AppNotification[]).filter((n) => REPUTATION_ENABLED || n.type !== 'reputation_update')
 
 interface NotificationsContextValue {
   notifications: AppNotification[]
@@ -61,7 +17,7 @@ interface NotificationsContextValue {
 }
 
 const defaultNotificationsContext: NotificationsContextValue = {
-  notifications: DEFAULT_SEED_NOTIFICATIONS,
+  notifications: [],
   markRead: async () => {},
   markAllRead: async () => {},
   addNotification: () => {},
@@ -77,9 +33,9 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     if (isFirebaseConfigured) return []
     try {
       const saved = localStorage.getItem('fs_notifications')
-      return saved ? JSON.parse(saved) : DEFAULT_SEED_NOTIFICATIONS
+      return saved ? JSON.parse(saved) : []
     } catch {
-      return DEFAULT_SEED_NOTIFICATIONS
+      return []
     }
   })
   const [isLoading, setIsLoading] = useState(isFirebaseConfigured)
