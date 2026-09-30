@@ -35,7 +35,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { useAuth } from '@/contexts/AuthContext'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { formatDistanceToNow } from '@/lib/utils'
-import { scoredVerdict, type Verification, type Verdict } from '@/lib/types'
+import { scoredVerdict, REQUIRED_VERIFICATIONS, type Verification, type Verdict } from '@/lib/types'
 
 /* ── Reputation level helper ── */
 function repLevel(rep: number): { label: string; icon: typeof Sprout; color: string; bg: string; border: string; perk: string } {
@@ -243,7 +243,19 @@ export function Profile() {
   // A public_profiles collection would be needed to bring it back.
   const verifierRank = '—'
 
-  const level = user ? repLevel(user.reputation) : null
+  const userSubmittedClaims = useMemo(
+    () => (user ? claims.filter((c) => c.submittedBy === user.uid) : []),
+    [claims, user]
+  )
+
+  // Every account starts at 50 reputation, which is already inside the
+  // "Trusted Analyst" band. Don't award a trust label before any verdict is cast.
+  const hasVerdicts = stats.total > 0
+  const level = user
+    ? hasVerdicts
+      ? repLevel(user.reputation)
+      : { ...repLevel(0), label: 'New Verifier', color: 'var(--color-fg-2)', bg: 'var(--color-surface-2)', border: 'var(--color-border-soft)' }
+    : null
   const LevelIcon = level?.icon || Shield
   const nextLevelScore = user
     ? user.reputation <= 30 ? 31
@@ -333,10 +345,10 @@ export function Profile() {
                     aria-label="Online"
                   />
                   
-                  {/* Verified Check Badge remains on the BOTTOM-RIGHT of the avatar circle */}
-                  <span className="absolute -bottom-1 -right-1 w-6.5 h-6.5 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center text-xs shadow-sm">
+                  {/* Check badge only once the user has actually cast verdicts */}
+                  {hasVerdicts && <span className="absolute -bottom-1 -right-1 w-6.5 h-6.5 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center text-xs shadow-sm">
                     <Check className="w-4 h-4 stroke-[3]" />
-                  </span>
+                  </span>}
                 </div>
 
                 <div className="mt-4 space-y-1">
@@ -493,7 +505,6 @@ export function Profile() {
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-lg font-extrabold font-mono text-[var(--color-fg)]">{verifierRank}</span>
-                <Badge variant="brand" size="sm">Verified</Badge>
               </div>
             </div>
           </motion.div>
@@ -619,6 +630,54 @@ export function Profile() {
                     </Link>
                   )
                 })}
+              </div>
+            )}
+          </motion.div>
+
+          {/* My Submissions */}
+          <motion.div
+            className="p-6 lg:p-8 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-md)]"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30, delay: 0.24 }}
+          >
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--color-fg)] tracking-tight">
+              My Submissions ({userSubmittedClaims.length})
+            </h2>
+            <p className="text-sm text-[var(--color-fg-2)] font-medium mt-1 mb-6">Forwards you submitted for verification</p>
+
+            {userSubmittedClaims.length === 0 ? (
+              <EmptyState
+                icon={ShieldAlert}
+                title="No submissions yet"
+                description="Claims you submit will appear here with their verification status."
+                action={{ label: 'Submit a Forward', onClick: () => navigate('/submit') }}
+              />
+            ) : (
+              <div className="space-y-3">
+                {userSubmittedClaims.map((c) => (
+                  <Link
+                    key={c.id}
+                    to={`/claim/${c.id}`}
+                    className="flex items-center justify-between gap-4 p-4 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40 hover:bg-[var(--color-surface-2)] hover:border-[var(--color-brand-subtle)] transition-all no-underline text-inherit group"
+                  >
+                    <p className="flex-1 min-w-0 text-sm text-[var(--color-fg)] font-medium truncate group-hover:text-[var(--color-brand)] transition-colors">
+                      {c.text}
+                    </p>
+                    <div className="flex items-center gap-2.5 flex-shrink-0">
+                      {c.status === 'verified' && c.verdict ? (
+                        <VerdictPill verdict={c.verdict} size="sm" />
+                      ) : (
+                        <Badge variant="neutral" size="sm">
+                          Pending {c.verifications.length}/{REQUIRED_VERIFICATIONS}
+                        </Badge>
+                      )}
+                      <time className="hidden sm:block text-xs text-[var(--color-fg-muted)] font-mono font-bold tabular-nums whitespace-nowrap">
+                        {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true })}
+                      </time>
+                    </div>
+                  </Link>
+                ))}
               </div>
             )}
           </motion.div>

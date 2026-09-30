@@ -27,7 +27,7 @@
   /* ── FOREGROUND (text hierarchy) ── */
   --color-fg:       oklch(0.14 0.020 55);  /* primary text */
   --color-fg-2:     oklch(0.38 0.016 55);  /* secondary text */
-  --color-fg-muted: oklch(0.55 0.014 55);  /* tertiary/disabled */
+  --color-fg-muted: oklch(0.50 0.014 55);  /* tertiary; >=5.1:1 on bg/surface/surface-2 (WCAG AA) */
   --color-fg-soft:  oklch(0.72 0.010 55);  /* placeholder */
 
   /* ── VERDICT SEMANTIC COLORS (double-encoded with icons) ── */
@@ -39,8 +39,8 @@
   --color-v-false-bg:       oklch(0.48 0.16 25 / 0.07);
   --color-v-false-border:   oklch(0.48 0.16 25 / 0.20);
 
-  --color-v-mislead:        oklch(0.62 0.13 65);   /* amber */
-  --color-v-mislead-bg:     oklch(0.62 0.13 65 / 0.09);
+  --color-v-mislead:        oklch(0.52 0.13 65);   /* amber */
+  --color-v-mislead-bg:     oklch(0.52 0.13 65 / 0.09);
   --color-v-mislead-border: oklch(0.62 0.13 65 / 0.22);
 
   --color-v-unverif:        oklch(0.50 0.02 195);  /* slate */
@@ -68,8 +68,8 @@
   --color-cat-financial-bg:     oklch(0.46 0.08 245 / 0.08);
   --color-cat-financial-border: oklch(0.46 0.08 245 / 0.22);
 
-  --color-cat-other:            oklch(0.54 0.05 55);   /* Muted Bronze/Sand */
-  --color-cat-other-bg:         oklch(0.54 0.05 55 / 0.08);
+  --color-cat-other:            oklch(0.50 0.05 55);   /* Muted Bronze/Sand */
+  --color-cat-other-bg:         oklch(0.50 0.05 55 / 0.08);
   --color-cat-other-border:     oklch(0.54 0.05 55 / 0.22);
 
   /* ── SOURCE QUALITY INDICATORS ── */
@@ -139,7 +139,7 @@
 
   --color-fg:       oklch(0.96 0.006 55);
   --color-fg-2:     oklch(0.78 0.008 55);
-  --color-fg-muted: oklch(0.60 0.010 55);
+  --color-fg-muted: oklch(0.64 0.010 55);  /* >=5.1:1 on bg/surface/surface-2 (WCAG AA) */
   --color-fg-soft:  oklch(0.50 0.010 55);  /* dimmed to match light-mode visual prominence */
 
   /* Lightened for APCA ≥60 on dark bg */
@@ -173,8 +173,8 @@
   --color-v-unverif-bg:     oklch(0.62 0.02 195 / 0.09);
   --color-v-unverif-border: oklch(0.62 0.02 195 / 0.25);
 
-  --color-v-contested:        oklch(0.60 0.10 240);
-  --color-v-contested-bg:     oklch(0.60 0.10 240 / 0.09);
+  --color-v-contested:        oklch(0.66 0.10 240);
+  --color-v-contested-bg:     oklch(0.66 0.10 240 / 0.09);
   --color-v-contested-border: oklch(0.60 0.10 240 / 0.25);
 
   /* ── CATEGORY HUES DARK MODE OVERRIDES ── */

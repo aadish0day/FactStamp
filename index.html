@@ -31,7 +31,14 @@
       property="og:description"
       content="Verify viral WhatsApp forwards with community evidence and shareable PNG cards."
     />
-    <meta property="og:image" content="/og-cover.svg" />
+    <meta property="og:site_name" content="FactStamp" />
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-cover.png" />
+    <meta property="og:image:secure_url" content="%VITE_SITE_URL%/og-cover.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="FactStamp — Stop WhatsApp fake news before it spreads" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -43,15 +50,24 @@
       name="twitter:description"
       content="Verify viral WhatsApp forwards with community evidence and shareable PNG cards."
     />
-    <meta name="twitter:image" content="/og-cover.svg" />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-cover.png" />
 
     <!-- Google Fonts: Plus Jakarta Sans (Variable) + Noto Sans Devanagari -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Non-render-blocking: load as print, swap to all once fetched. -->
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     <script>
       (function () {

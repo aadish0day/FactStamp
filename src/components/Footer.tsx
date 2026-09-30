@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ShieldAlert } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { SITE_HOST, SITE_URL } from '@/components/Seo'
 
 export function Footer() {
   const { user } = useAuth()
@@ -82,7 +83,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-5 border-t border-[var(--color-border)] text-sm text-[var(--color-fg-muted)]">
           <span>© {new Date().getFullYear()} FactStamp — A community misinformation fact-checker</span>
-          <span className="font-mono text-xs">factstamp.app</span>
+          <a href={SITE_URL} className="font-mono text-xs hover:text-[var(--color-brand)] transition-colors">{SITE_HOST}</a>
         </div>
       </div>
     </footer>

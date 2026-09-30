@@ -1,5 +1,6 @@
 import { ShieldAlert, Download, CheckCircle2, XCircle, AlertTriangle, HelpCircle, Scale, Users, Globe } from 'lucide-react'
 import { VERDICT_META, type Claim } from '@/lib/types'
+import { SITE_HOST } from '@/components/Seo'
 
 interface FactCheckCardProps {
   claim: Claim
@@ -27,7 +28,7 @@ const P = {
   borderDark: '#d4c8b8',
   fg: '#1c1917',
   fgSec: '#57534e',
-  fgMuted: '#948e85',
+  fgMuted: '#6f6960',
   brand: '#c2410c',
   brandLight: '#ea580c',
   white: '#ffffff',
@@ -263,7 +264,7 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
             }}>
               <Globe style={{ width: '14px', height: '14px', flexShrink: 0, color: P.brand }} />
               <span style={{ fontFamily: fontMono, fontSize: '10px', fontWeight: 600, color: P.fgSec, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.4 }}>
-                {domains.length > 0 ? domains.join(' · ') : 'factstamp.vercel.app'}
+                {domains.length > 0 ? domains.join(' · ') : SITE_HOST}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', lineHeight: 1.4 }}>
@@ -275,7 +276,7 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
                 <ShieldAlert style={{ width: '11px', height: '11px', color: P.white }} />
               </div>
               <span style={{ fontFamily: fontMono, fontSize: '11px', fontWeight: 800, color: P.brand, letterSpacing: '0.02em', lineHeight: 1.4 }}>
-                factstamp.vercel.app
+                {SITE_HOST}
               </span>
             </div>
           </div>

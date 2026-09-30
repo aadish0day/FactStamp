@@ -20,7 +20,8 @@ interface AddClaimInput {
   text: string
   category: Claim['category']
   submittedBy: string
-  submittedByName: string
+  /** Local display only — never persisted (claims are public). */
+  submittedByName?: string
   imageUrl?: string
   thumbnailUrl?: string
   hasScreenshot?: boolean
@@ -56,6 +57,7 @@ const defaultClaimsContext: ClaimsContextValue = {
   claims: [],
   addClaim: async (data) => ({
     ...data,
+    submittedByName: data.submittedByName ?? '',
     id: `c_${Date.now()}`,
     createdAt: new Date().toISOString(),
     consensusDeadline: new Date(Date.now() + CONSENSUS_DEADLINE_DAYS * 24 * 60 * 60 * 1000).toISOString(),
@@ -587,6 +589,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
     const deadlineMs = Date.now() + CONSENSUS_DEADLINE_DAYS * 24 * 60 * 60 * 1000
     const newClaim: Claim = {
       ...data,
+      submittedByName: data.submittedByName ?? '',
       id: `c${claimCounter}`,
       createdAt: new Date().toISOString(),
       consensusDeadline: new Date(deadlineMs).toISOString(),

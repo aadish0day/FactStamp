@@ -49,6 +49,9 @@ export function SignUp() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [agree, setAgree] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  // Error summary only refreshes on submit: if it updated on blur, the form
+  // would reflow under the pointer and swallow the next click.
+  const [summaryErrors, setSummaryErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -97,6 +100,7 @@ export function SignUp() {
       if (msg) newErrors[k] = msg
     })
     setErrors(newErrors)
+    setSummaryErrors(newErrors)
 
     if (Object.keys(newErrors).length > 0) {
       const firstKey = ['name', 'email', 'password', 'confirm', 'agree'].find((k) => newErrors[k])
@@ -133,7 +137,7 @@ export function SignUp() {
   const pwPct = (metCount / PW_REQS.length) * 100
   const pwColor = STR_META[metCount].color
 
-  const summaryItems = Object.entries(errors)
+  const summaryItems = Object.entries(summaryErrors)
     .filter(([, msg]) => msg)
     .map(([key, msg]) => ({
       key,
@@ -163,7 +167,7 @@ export function SignUp() {
         <span>Start with 50 Verifier Reputation Points</span>
       </div>
 
-      <form className="flex flex-col gap-3.5" onSubmit={handleSubmit} noValidate>
+      <form className="flex flex-col gap-2" onSubmit={handleSubmit} noValidate>
         {/* Error summary */}
         {submitted && summaryItems.length > 0 && (
           <div
@@ -214,13 +218,15 @@ export function SignUp() {
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? 'reg-name-error' : undefined}
           />
-          {touched.name && !errors.name && form.name && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold flex items-center gap-1">
-              <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
-              Looks good
-            </p>
-          )}
-          {errors.name && <p id="reg-name-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.name}</p>}
+          <div className="mt-1 min-h-4 text-[11px] leading-4">
+            {touched.name && !errors.name && form.name && (
+              <p className="text-[var(--color-v-true)] font-semibold flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
+                Looks good
+              </p>
+            )}
+            {errors.name && <p id="reg-name-error" className="text-[var(--color-v-false)] font-medium">{errors.name}</p>}
+          </div>
         </div>
 
         {/* Email */}
@@ -245,13 +251,15 @@ export function SignUp() {
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'reg-email-error' : undefined}
           />
-          {touched.email && !errors.email && form.email && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold flex items-center gap-1">
-              <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
-              Valid email format
-            </p>
-          )}
-          {errors.email && <p id="reg-email-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.email}</p>}
+          <div className="mt-1 min-h-4 text-[11px] leading-4">
+            {touched.email && !errors.email && form.email && (
+              <p className="text-[var(--color-v-true)] font-semibold flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
+                Valid email format
+              </p>
+            )}
+            {errors.email && <p id="reg-email-error" className="text-[var(--color-v-false)] font-medium">{errors.email}</p>}
+          </div>
         </div>
 
         {/* Password */}
@@ -287,7 +295,9 @@ export function SignUp() {
               {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
             </button>
           </div>
-          {errors.password && <p id="reg-pass-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.password}</p>}
+          <div className="mt-1 min-h-4 text-[11px] leading-4">
+            {errors.password && <p id="reg-pass-error" className="text-[var(--color-v-false)] font-medium">{errors.password}</p>}
+          </div>
 
           {/* Password Strength Indicator with spring cell transitions and crossfade labels */}
           <AnimatePresence>
@@ -297,7 +307,7 @@ export function SignUp() {
                 animate={{ opacity: 1, height: 'auto', y: 0 }}
                 exit={{ opacity: 0, height: 0, y: -6 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="overflow-hidden mt-3"
+                className="overflow-hidden mt-2"
               >
                 <div className="p-3.5 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] shadow-[var(--shadow-xs)]">
                   <PasswordStrength value={form.password} />
@@ -340,13 +350,15 @@ export function SignUp() {
               {showConfirm ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
             </button>
           </div>
-          {touched.confirm && !errors.confirm && form.confirm && (
-            <p className="mt-1 text-[11px] text-[var(--color-v-true)] font-semibold flex items-center gap-1">
-              <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
-              Passwords match
-            </p>
-          )}
-          {errors.confirm && <p id="reg-confirm-error" className="mt-1 text-[11px] text-[var(--color-v-false)] font-medium">{errors.confirm}</p>}
+          <div className="mt-1 min-h-4 text-[11px] leading-4">
+            {touched.confirm && !errors.confirm && form.confirm && (
+              <p className="text-[var(--color-v-true)] font-semibold flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
+                Passwords match
+              </p>
+            )}
+            {errors.confirm && <p id="reg-confirm-error" className="text-[var(--color-v-false)] font-medium">{errors.confirm}</p>}
+          </div>
         </div>
 
         {/* Agreement checkbox */}

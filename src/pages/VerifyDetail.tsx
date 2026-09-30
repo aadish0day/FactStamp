@@ -32,7 +32,7 @@ import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { determineSourceQuality } from '@/lib/confidenceScore'
 import { cn, formatDistanceToNow } from '@/lib/utils'
-import { VERDICT_META, type Verdict, type SourceQuality, canVerify } from '@/lib/types'
+import { VERDICT_META, type Verdict, type SourceQuality, canVerify, isClosedWithoutQuorum, isOverdue } from '@/lib/types'
 
 const VERDICT_ICONS: Record<Verdict, LucideIcon> = {
   TRUE: CheckCircle2,
@@ -62,27 +62,26 @@ const SOURCE_QUALITY_LABELS: Record<SourceQuality, { title: string; desc: string
 function timeRemaining(deadline: string): {
   label: string
   urgent: boolean
-  expired: boolean
 } {
   const now = new Date()
   const deadlineDate = new Date(deadline)
   const diffMs = deadlineDate.getTime() - now.getTime()
 
   if (diffMs <= 0) {
-    return { label: 'Consensus window closed', urgent: false, expired: true }
+    return { label: 'Overdue', urgent: true }
   }
 
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
   const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
 
   if (days > 0) {
-    return { label: `${days}d ${hours}h remaining`, urgent: false, expired: false }
+    return { label: `${days}d ${hours}h remaining`, urgent: false }
   }
   if (hours > 0) {
-    return { label: `${hours}h remaining`, urgent: hours <= 8, expired: false }
+    return { label: `${hours}h remaining`, urgent: hours <= 8 }
   }
   const minutes = Math.floor(diffMs / (1000 * 60))
-  return { label: `${minutes}m remaining`, urgent: true, expired: false }
+  return { label: `${minutes}m remaining`, urgent: true }
 }
 
 /**
@@ -153,20 +152,16 @@ export function VerifyDetail() {
     )
   }
 
-  // Check if claim consensus window passed
-  const now = new Date()
-  const deadlineDate = new Date(claim.consensusDeadline)
-  const isExpired = claim.status === 'pending' && deadlineDate <= now
-  const deadlinePassed = claim.verdict === 'CONTESTED' && claim.verificationCount < 3
-
-  if (isExpired || deadlinePassed) {
+  // Only a claim actually settled as CONTESTED is closed. An overdue pending
+  // claim stays verifiable (see isOverdue) — nothing expires it automatically.
+  if (isClosedWithoutQuorum(claim)) {
     return (
       <div className="container mx-auto px-4 py-12 max-w-xl text-center">
         <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-sm">
           <RefreshCw className="w-12 h-12 text-[var(--color-v-contested)] mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-[var(--color-fg)] mb-2">Consensus Window Closed</h1>
           <p className="text-sm text-[var(--color-fg-2)] mb-6 leading-relaxed">
-            This claim did not receive the required 3 independent peer verifications within the 7-day period. It has been marked as <strong>CONTESTED</strong>.
+            This claim did not receive the required 3 independent peer verifications within its consensus window. It has been marked as <strong>CONTESTED</strong>.
           </p>
 
           <div className="flex gap-3 justify-center">
@@ -341,6 +336,16 @@ export function VerifyDetail() {
           </div>
         </div>
 
+        {isOverdue(claim) && (
+          <p className="mt-4 flex items-start gap-2 rounded-[var(--radius-md)] border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
+            <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden="true" />
+            <span>
+              This claim is past its consensus deadline but still needs {3 - claim.verificationCount} more
+              verdict{3 - claim.verificationCount !== 1 ? 's' : ''}. Your review still counts.
+            </span>
+          </p>
+        )}
+
         {/* Claim Text (Headline Hero) */}
         <div className="py-4">
           <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand)] mb-2">
@@ -384,7 +389,7 @@ export function VerifyDetail() {
             {claim.verificationCount} of 3 verifications recorded
           </span>
           <span>
-            Reported by {claim.submittedByName || 'Citizen'} {formatDistanceToNow(new Date(claim.createdAt), { addSuffix: true })}
+            Reported {formatDistanceToNow(new Date(claim.createdAt), { addSuffix: true })}
           </span>
         </div>
       </section>

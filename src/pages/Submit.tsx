@@ -212,7 +212,6 @@ export function Submit() {
         text: sanitizeTextInput(claimText.trim()),
         category,
         submittedBy: user?.uid || '',
-        submittedByName: sanitizeTextInput(user?.displayName || 'Anonymous'),
         thumbnailUrl,
         hasScreenshot: Boolean(screenshotUrl),
       })

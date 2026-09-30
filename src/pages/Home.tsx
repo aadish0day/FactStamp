@@ -51,9 +51,14 @@ function HomeInner() {
         verifiedClaims.reduce((sum, c) => sum + (c.confidenceScore ?? 0), 0) / verifiedClaims.length
       )
     : 0
-  const activeVerifiers = new Set(
-    claims.flatMap((c) => c.verifications.map((v) => v.verifierId))
-  ).size
+  const verifierNames = new Map(
+    claims.flatMap((c) => c.verifications.map((v) => [v.verifierId, v.verifierName] as const))
+  )
+  const activeVerifiers = verifierNames.size
+  const verdictPct = (verdict: string) =>
+    verifiedClaims.length
+      ? `${Math.round((verifiedClaims.filter((c) => c.verdict === verdict).length / verifiedClaims.length) * 100)}%`
+      : '—'
 
   // Feed shows the 6 most recent verified claims
   const feedClaims = verifiedClaims.slice(0, 6)
@@ -237,10 +242,10 @@ function HomeInner() {
               </div>
               <div>
                 <div className="text-4xl sm:text-5xl font-extrabold font-mono tabular-nums text-[var(--color-fg)] tracking-tight leading-none">
-                  <AnimatedCounter value={Math.max(claims.length, 32)} />
+                  <AnimatedCounter value={verifiedClaims.length} />
                 </div>
                 <p className="text-sm text-[var(--color-fg-2)] mt-1.5 font-sans leading-relaxed">
-                  Suspicious WhatsApp forwards analysed and debunked by the community consensus network.
+                  Suspicious WhatsApp forwards that reached a community consensus verdict, out of {claims.length} submitted.
                 </p>
               </div>
             </div>
@@ -255,19 +260,19 @@ function HomeInner() {
                   <span className="text-[var(--color-fg-2)] flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-v-false)]" /> False
                   </span>
-                  <span className="font-mono font-bold text-[var(--color-fg)]">68%</span>
+                  <span className="font-mono font-bold text-[var(--color-fg)]">{verdictPct('FALSE')}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm gap-6">
                   <span className="text-[var(--color-fg-2)] flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-v-mislead)]" /> Misleading
                   </span>
-                  <span className="font-mono font-bold text-[var(--color-fg)]">22%</span>
+                  <span className="font-mono font-bold text-[var(--color-fg)]">{verdictPct('MISLEADING')}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm gap-6">
                   <span className="text-[var(--color-fg-2)] flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-v-true)]" /> True
                   </span>
-                  <span className="font-mono font-bold text-[var(--color-fg)]">10%</span>
+                  <span className="font-mono font-bold text-[var(--color-fg)]">{verdictPct('TRUE')}</span>
                 </div>
               </div>
             </div>
@@ -290,7 +295,7 @@ function HomeInner() {
 
             <div>
               <div className="text-4xl font-extrabold font-mono tabular-nums text-[var(--color-fg)] tracking-tight leading-none">
-                <AnimatedCounter value={Math.max(avgConfidence, 81)} suffix="%" />
+                <AnimatedCounter value={avgConfidence} suffix="%" />
               </div>
               <div className="text-sm font-bold text-[var(--color-fg)] uppercase tracking-wider mt-1.5">
                 Avg Consensus Score
@@ -318,28 +323,26 @@ function HomeInner() {
 
             <div>
               <div className="text-4xl font-extrabold font-mono tabular-nums text-[var(--color-fg)] tracking-tight leading-none">
-                <AnimatedCounter value={Math.max(activeVerifiers, 21)} />
+                <AnimatedCounter value={activeVerifiers} />
               </div>
               <div className="text-sm font-bold text-[var(--color-fg)] uppercase tracking-wider mt-1.5">
                 Active Verifiers
               </div>
               
-              {/* Overlapping verifier avatar mockups */}
-              <div className="flex items-center gap-1 mt-2.5">
+              {/* Initials of real verifiers who have cast verdicts */}
+              {activeVerifiers > 0 && <div className="flex items-center gap-1 mt-2.5">
                 <div className="flex -space-x-2 overflow-hidden">
-                  {['A', 'R', 'P', 'V'].map((initial) => (
+                  {[...verifierNames].slice(0, 4).map(([id, name]) => (
                     <span
-                      key={initial}
+                      key={id}
+                      title={name}
                       className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-full bg-[var(--color-surface-2)] text-xs font-bold text-[var(--color-fg)] border border-[var(--color-border)] shadow-xs"
                     >
-                      {initial}
+                      {(name?.trim() || '?').charAt(0).toUpperCase()}
                     </span>
                   ))}
                 </div>
-                <span className="text-xs font-semibold text-[var(--color-fg-2)] ml-1.5">
-                  Indian network
-                </span>
-              </div>
+              </div>}
             </div>
           </motion.div>
         </div>
@@ -453,7 +456,7 @@ function HomeInner() {
           {/* Clean 2-Column Comparison with layering and depth */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-stretch relative">
             {/* Column 1: Legacy - Muted, Sunken Grid */}
-            <div className="lg:col-span-5 rounded-[var(--radius-xl)] bg-[var(--color-surface-2)]/50 p-8 border border-[var(--color-border-soft)] flex flex-col justify-between space-y-6 opacity-85">
+            <div className="lg:col-span-5 rounded-[var(--radius-xl)] bg-[var(--color-surface-2)]/50 p-8 border border-[var(--color-border-soft)] flex flex-col justify-between space-y-6">
               <div>
                 <div className="flex items-center gap-2 text-xs sm:text-sm font-mono font-semibold text-[var(--color-fg-muted)] uppercase tracking-wider mb-4">
                   <AlertTriangle className="w-4 h-4 text-amber-600/70" /> Traditional Portals &amp; Plain AI
@@ -533,10 +536,10 @@ function HomeInner() {
       <section className="container mx-auto px-[clamp(1rem,4vw,3rem)]">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-[var(--color-fg)]">Recently Debunked Claims</h2>
+            <h2 className="text-2xl font-bold text-[var(--color-fg)]">Recently Fact-Checked Claims</h2>
             <p className="text-sm sm:text-base text-[var(--color-fg-2)] mt-1">Browse claims already fact-checked by the community</p>
           </div>
-          <Button intent="ghost" size="sm" onClick={() => navigate('/verify')}>
+          <Button intent="ghost" size="sm" onClick={() => navigate('/dashboard')}>
             View all claims
             <ArrowRight className="w-4 h-4 ml-1" aria-hidden="true" />
           </Button>

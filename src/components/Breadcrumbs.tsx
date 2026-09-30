@@ -38,7 +38,7 @@ export function Breadcrumbs({ className, currentLabel }: BreadcrumbsProps) {
 
     // Detect if this segment is a dynamic claim or verification ID (e.g., Firebase ID or demo ID)
     const parentSegment = index > 0 ? segments[index - 1] : ''
-    const isIdSegment = parentSegment === 'claim' || parentSegment === 'verify' || segment.startsWith('c') || segment.startsWith('v')
+    const isIdSegment = parentSegment === 'claim' || parentSegment === 'verify'
 
     if (isIdSegment) {
       label = isLast && currentLabel ? currentLabel : parentSegment === 'verify' ? 'Submit Verdict' : 'Claim Details'

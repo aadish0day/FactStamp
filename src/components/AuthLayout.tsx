@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ArrowLeft, ShieldAlert, CheckCircle2, Forward, ShieldCheck, Users, Zap } from 'lucide-react'
+import { ArrowLeft, ShieldAlert, CheckCircle2, Forward, ShieldCheck, Zap } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 import { VerdictPill } from '@/components/ui/VerdictPill'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -8,14 +8,8 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 const BENEFITS = [
   'Community-verified verdicts & consensus',
   'Downloadable 1080p WhatsApp PNG cards',
-  'Real-time automated verification queue',
+  'Real-time community verification queue',
   'Built specifically for Indian WhatsApp forwards',
-]
-
-const STATS = [
-  { value: '12,840+', label: 'Claims Debunked' },
-  { value: '99.4%', label: 'Consensus Accuracy' },
-  { value: '< 3 min', label: 'Avg Verify Time' },
 ]
 
 interface AuthLayoutProps {
@@ -30,9 +24,9 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
 
   return (
     <div className="min-h-dvh bg-[var(--color-bg)] flex flex-col relative overflow-hidden">
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1.08fr_1fr] min-h-dvh">
+      <div className="flex-1 grid grid-cols-1 grid-rows-[auto_1fr] lg:grid-rows-none lg:grid-cols-[1.08fr_1fr] min-h-dvh">
         {/* ── Brand Aside (Left Panel) ── */}
-        <aside className="relative bg-[var(--color-surface-2)] overflow-hidden flex flex-col justify-between px-6 py-8 lg:px-14 lg:py-12 border-r border-[var(--color-border)] select-none">
+        <aside className="relative bg-[var(--color-surface-2)] overflow-hidden flex flex-col justify-between px-6 py-4 lg:px-14 lg:py-12 border-b lg:border-b-0 lg:border-r border-[var(--color-border)] select-none">
           {/* Ambient glow orbs */}
           <div
             className="absolute w-[580px] h-[580px] rounded-full pointer-events-none -top-[200px] -right-[180px]"
@@ -64,7 +58,7 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
           />
 
           {/* Header Back Button & Brand */}
-          <div className="relative z-10 flex items-center justify-between mb-8 lg:mb-0">
+          <div className="relative z-10 flex items-center justify-between">
             <Link
               to="/"
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold text-[var(--color-fg-2)] bg-[var(--color-surface)] border border-[var(--color-border-soft)] hover:text-[var(--color-fg)] hover:border-[var(--color-border)] transition-all shadow-[var(--shadow-xs)]"
@@ -82,7 +76,7 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
           </div>
 
           {/* Main Hero Content */}
-          <div className="relative z-10 my-auto py-4 w-full max-w-[460px] mx-auto flex flex-col">
+          <div className="relative z-10 my-auto py-4 w-full max-w-[460px] mx-auto hidden lg:flex flex-col">
             {/* Interactive WhatsApp Demo Card */}
             <div className="relative mb-8 p-5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] overflow-hidden group hover:border-[var(--color-brand-subtle)] transition-colors">
               <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-[var(--color-brand-subtle)] opacity-50 blur-xl pointer-events-none" />
@@ -117,26 +111,12 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
             </div>
 
             {/* Headline & Subhead */}
-            <h1 className="text-2xl lg:text-3xl font-extrabold text-[var(--color-fg)] leading-tight tracking-tight mb-3">
+            <p className="text-2xl lg:text-3xl font-extrabold text-[var(--color-fg)] leading-tight tracking-tight mb-3">
               Stop misinformation before it spreads to your family.
-            </h1>
-            <p className="text-sm text-[var(--color-fg-2)] leading-relaxed mb-6">
-              Join thousands of community fact-checkers verifying viral forwards every day with source-backed evidence.
             </p>
-
-            {/* Live Stats Row */}
-            <div className="grid grid-cols-3 gap-3 mb-6 p-3 rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border-soft)] shadow-[var(--shadow-xs)]">
-              {STATS.map((s) => (
-                <div key={s.label} className="flex flex-col text-center">
-                  <span className="text-base lg:text-lg font-extrabold font-mono text-[var(--color-brand)] tracking-tight">
-                    {s.value}
-                  </span>
-                  <span className="text-[10px] font-medium text-[var(--color-fg-muted)] uppercase tracking-wider">
-                    {s.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <p className="text-sm text-[var(--color-fg-2)] leading-relaxed mb-6">
+              Join community fact-checkers verifying viral forwards with source-backed evidence.
+            </p>
 
             {/* Bullet Benefits */}
             <ul className="flex flex-col gap-2.5">
@@ -158,7 +138,7 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
           </div>
 
           {/* Footer Copyright */}
-          <div className="relative z-10 pt-6 border-t border-[var(--color-border-soft)] flex items-center justify-between text-xs text-[var(--color-fg-muted)]">
+          <div className="relative z-10 pt-6 border-t border-[var(--color-border-soft)] hidden lg:flex items-center justify-between text-xs text-[var(--color-fg-muted)]">
             <span>&copy; {new Date().getFullYear()} FactStamp</span>
             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-fg-2)]">
               <Zap className="w-3 h-3 text-[var(--color-brand)]" />
@@ -168,7 +148,8 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
         </aside>
 
         {/* ── Form Side (Right Panel) ── */}
-        <main className="relative flex items-center justify-center p-5 lg:p-12 bg-[var(--color-bg)]">
+        {/* Not <main>: App.tsx already wraps every route in <main id="main-content">. */}
+        <div className="relative flex items-center justify-center p-5 pt-16 lg:p-12 bg-[var(--color-bg)]">
           {/* Theme Toggle Top-Right */}
           <div className="absolute top-4 right-4 lg:top-6 lg:right-6 z-20">
             <ThemeToggle />
@@ -205,16 +186,16 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
             </div>
 
             {/* Header */}
-            <header className="mb-6">
-              <h2 className="text-2xl font-extrabold text-[var(--color-fg)] tracking-tight">
+            <div className="mb-6">
+              <h1 className="text-2xl font-extrabold text-[var(--color-fg)] tracking-tight">
                 {heading}
-              </h2>
+              </h1>
               {subheading && (
                 <p className="text-xs lg:text-sm text-[var(--color-fg-2)] mt-1.5 leading-relaxed">
                   {subheading}
                 </p>
               )}
-            </header>
+            </div>
 
             {children}
 
@@ -222,11 +203,11 @@ export function AuthLayout({ heading, subheading, mode, children }: AuthLayoutPr
             <div className="mt-6 pt-4 border-t border-[var(--color-border-soft)] text-center">
               <span className="inline-flex items-center gap-1.5 text-xs text-[var(--color-fg-muted)] font-medium">
                 <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-v-true)]" aria-hidden="true" />
-                256-bit encrypted authentication
+                Secured by Firebase Authentication
               </span>
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   )

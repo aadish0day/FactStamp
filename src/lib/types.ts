@@ -49,7 +49,8 @@ export interface Claim {
    */
   consensusDeadlineMs?: number
   submittedBy: string
-  submittedByName: string
+  /** Legacy: no longer stored on new claims, so reporters stay anonymous publicly. */
+  submittedByName?: string
   /**
    * Legacy inline screenshot. New claims store the full image in
    * `claim_media/{claimId}` and keep only `thumbnailUrl` here, so list views
@@ -113,7 +114,7 @@ export const VERDICT_META: Record<Verdict, {
     bgVar: '--color-v-false-bg',
     borderVar: '--color-v-false-border',
     thudColor: 'rgba(215, 55, 55, 0.15)',
-    hexColor: '#dc2626',
+    hexColor: '#c81e1e',
     hexBg: '#fef2f2',
     hexBorder: '#fecaca',
   },
@@ -123,7 +124,7 @@ export const VERDICT_META: Record<Verdict, {
     bgVar: '--color-v-mislead-bg',
     borderVar: '--color-v-mislead-border',
     thudColor: 'rgba(210, 130, 20, 0.15)',
-    hexColor: '#d97706',
+    hexColor: '#b45309',
     hexBg: '#fffbeb',
     hexBorder: '#fef3c7',
   },

@@ -88,7 +88,7 @@ function AppShell() {
       </a>
       {!isStandalonePage && <Navbar />}
       <OnlineStatusBar />
-                <main id="main-content" tabIndex={-1} aria-live="polite" aria-atomic="true">
+                <main id="main-content" tabIndex={-1}>
                   <Suspense
                     fallback={
                       <div className="flex items-center justify-center py-24">

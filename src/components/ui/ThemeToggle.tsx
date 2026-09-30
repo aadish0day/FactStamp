@@ -11,7 +11,8 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
   const isDark = theme === 'dark'
 
   return (
-    <div
+    <button
+      type="button"
       className={cn(
         'flex w-16 h-8 p-1 rounded-full cursor-pointer transition-all duration-300 select-none shrink-0',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:ring-offset-2',
@@ -21,19 +22,11 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         className
       )}
       onClick={toggleTheme}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          toggleTheme()
-        }
-      }}
-      role="button"
-      tabIndex={0}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      <div className="flex justify-between items-center w-full">
-        <div
+      <span className="flex justify-between items-center w-full">
+        <span
           className={cn(
             'flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300',
             isDark
@@ -54,8 +47,8 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
               aria-hidden="true"
             />
           )}
-        </div>
-        <div
+        </span>
+        <span
           className={cn(
             'flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300',
             isDark
@@ -76,8 +69,8 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
               aria-hidden="true"
             />
           )}
-        </div>
-      </div>
-    </div>
+        </span>
+      </span>
+    </button>
   )
 }

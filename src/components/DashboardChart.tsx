@@ -68,7 +68,7 @@ export function DashboardChart({ categoryData }: DashboardChartProps) {
   return (
     <div className="flex flex-col items-center">
       <ResponsiveContainer width="100%" height={240}>
-        <PieChart>
+        <PieChart title="Claims by category">
           <Pie
             data={categoryData}
             dataKey="count"
@@ -81,9 +81,11 @@ export function DashboardChart({ categoryData }: DashboardChartProps) {
             stroke="var(--color-surface)"
             strokeWidth={2}
           >
-            {categoryData.map((entry: { name: string }) => (
+            {categoryData.map((entry) => (
               <Cell
                 key={entry.name}
+                // Each sector renders as <path role="img">; name it for screen readers.
+                aria-label={`${entry.name}: ${entry.count} claim${entry.count !== 1 ? 's' : ''}`}
                 fill={CATEGORY_COLORS[entry.name.toLowerCase()] || 'var(--color-cat-other)'}
               />
             ))}

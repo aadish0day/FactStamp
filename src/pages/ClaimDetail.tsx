@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Download, ShieldCheck, Plus, RefreshCw, ChevronDown } from 'lucide-react'
+import { Download, ShieldCheck, Plus, RefreshCw, ChevronDown, Hourglass, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Seo } from '@/components/Seo'
@@ -18,7 +18,7 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { ClaimDetailSkeleton } from '@/components/ui/Skeletons'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { VERDICT_META } from '@/lib/types'
+import { REQUIRED_VERIFICATIONS, isClosedWithoutQuorum } from '@/lib/types'
 import { toPng } from 'html-to-image'
 
 /** Detail view for individual claim with verification timeline and share cards. */
@@ -83,11 +83,17 @@ export function ClaimDetail() {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl text-center">
         <Seo title="Claim Not Found" description="The claim you're looking for doesn't exist or may have been removed." />
-        <ErrorState
-          title="Claim not found"
-          message="The claim you're looking for doesn't exist or may have been removed."
-          onRetry={() => navigate('/verify')}
-        />
+        {/* ErrorState renders an h3; this is the page's only heading, so it must be the h1. */}
+        <div className="flex flex-col items-center justify-center py-16 px-6">
+          <AlertCircle className="w-12 h-12 text-[var(--color-v-false)] mb-4" aria-hidden="true" />
+          <h1 className="text-lg font-semibold text-[var(--color-fg)]">Claim not found</h1>
+          <p className="mt-2 max-w-sm text-sm text-[var(--color-fg-2)]">
+            The claim you're looking for doesn't exist or may have been removed.
+          </p>
+          <Button intent="secondary" onClick={() => navigate('/verify')} className="mt-6">
+            Go to the verify queue
+          </Button>
+        </div>
       </div>
     )
   }
@@ -171,16 +177,27 @@ export function ClaimDetail() {
             </a>
           )}
 
-          {/* Verdict Stamp */}
-          {claim.verdict && (
+          {/* Verdict Stamp — only once consensus settles. A pending claim's
+              verdict/score are a running preview written after the first vote. */}
+          {claim.status === 'verified' && claim.verdict ? (
             <div className="flex items-center justify-center py-8">
               <VerdictStamp verdict={claim.verdict} confidenceScore={claim.confidenceScore} />
+            </div>
+          ) : claim.status === 'pending' && (
+            <div className="flex flex-col items-center gap-2 py-8 text-center rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-2)]/50">
+              <Hourglass className="w-10 h-10 text-[var(--color-fg-muted)]" aria-hidden="true" />
+              <p className="text-lg font-bold text-[var(--color-fg)]">
+                Pending consensus — {claim.verificationCount} of {REQUIRED_VERIFICATIONS} verifications
+              </p>
+              <p className="text-sm text-[var(--color-fg-2)] max-w-sm">
+                No verdict yet. A verdict is published only after {REQUIRED_VERIFICATIONS} independent reviews.
+              </p>
             </div>
           )}
         </div>
 
         {/* Contested State Card — No Consensus accordion */}
-        {claim.verdict === 'CONTESTED' && (
+        {claim.status === 'verified' && claim.verdict === 'CONTESTED' && (
           <div
             className="hairline-card p-6 border-2"
             style={{ borderColor: 'var(--color-v-contested-border)' }}
@@ -205,18 +222,22 @@ export function ClaimDetail() {
 
             {/* Explanation */}
             <p className="text-sm text-[var(--color-fg-2)] leading-relaxed mb-4">
-              This claim did not receive the minimum 3 independent verifications within the 7-day consensus window.
-              {claim.verificationCount > 0
-                ? ` Only ${claim.verificationCount} of 3 required verifications were submitted.`
-                : ' No verifications were submitted before the deadline.'}
+              {!isClosedWithoutQuorum(claim)
+                ? 'Verifiers disagreed — no majority verdict.'
+                : claim.verificationCount > 0
+                  ? `Only ${claim.verificationCount} of ${REQUIRED_VERIFICATIONS} required verifications were submitted before the deadline.`
+                  : 'No verifications were submitted before the deadline.'}
             </p>
 
             {/* Deadline info */}
             <p className="text-xs text-[var(--color-fg-muted)] mb-4">
-              Consensus deadline was {claim.verifiedAt
-                ? formatDistanceToNow(new Date(claim.verifiedAt), { addSuffix: true })
-                : formatDistanceToNow(new Date(claim.consensusDeadline), { addSuffix: true })}
-              &nbsp;&middot; Confidence score: {claim.confidenceScore ?? '—'}%
+              {isClosedWithoutQuorum(claim) && (
+                <>
+                  Consensus deadline was {formatDistanceToNow(new Date(claim.consensusDeadline), { addSuffix: true })}
+                  &nbsp;&middot;{' '}
+                </>
+              )}
+              Confidence score: {claim.confidenceScore ?? '—'}%
             </p>
 
             {/* Native <details> accordion for submitted verifications */}
@@ -313,6 +334,9 @@ export function ClaimDetail() {
                 ({claim.verificationCount}/3 — pending consensus)
               </span>
             </h2>
+            <p className="text-xs text-[var(--color-fg-muted)] -mt-2 mb-4">
+              Individual verifier verdicts — not a final ruling until {REQUIRED_VERIFICATIONS} reviews are in.
+            </p>
             <div className="space-y-6">
               {claim.verifications.map((v) => (
                 <div key={v.id} className="flex gap-4 pb-6 border-b border-[var(--color-border-soft)] last:border-b-0 last:pb-0">
@@ -427,7 +451,9 @@ export function ClaimDetail() {
               </div>
             </div>
             <p className="text-sm text-[var(--color-fg-2)] leading-relaxed mb-3">
-              This claim did not reach consensus within the 7-day window. The verdict is marked contested, indicating insufficient verification data.
+              {isClosedWithoutQuorum(claim)
+                ? 'This claim did not reach consensus before its deadline. The verdict is marked contested, indicating insufficient verification data.'
+                : 'Verifiers disagreed — no majority verdict. The verdict is marked contested.'}
             </p>
             <p className="text-xs text-[var(--color-fg-muted)] mb-4">
               Confidence score: {claim.confidenceScore ?? '—'}% &middot; {claim.verificationCount} verification{claim.verificationCount !== 1 ? 's' : ''}
@@ -475,8 +501,8 @@ export function ClaimDetail() {
           </div>
         )}
 
-            {/* Confidence Breakdown Card */}
-            {claim.agreementRatio !== undefined && (
+            {/* Confidence Breakdown Card — settled claims only */}
+            {claim.status === 'verified' && claim.agreementRatio !== undefined && (
               <div className="hairline-card p-5 space-y-4">
                 {/* Header */}
                 <div className="border-b border-[var(--color-border-soft)] pb-3 space-y-1">

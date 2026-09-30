@@ -264,7 +264,7 @@ export function Admin() {
     return claims.filter((c) => {
       const matchSearch =
         c.text.toLowerCase().includes(claimSearch.toLowerCase()) ||
-        c.submittedByName.toLowerCase().includes(claimSearch.toLowerCase()) ||
+        c.submittedBy.toLowerCase().includes(claimSearch.toLowerCase()) ||
         c.id.toLowerCase().includes(claimSearch.toLowerCase())
       const matchCat = claimCategoryFilter === 'all' || c.category === claimCategoryFilter
       const matchStatus = claimStatusFilter === 'all' || c.status === claimStatusFilter
@@ -1210,7 +1210,7 @@ export function Admin() {
 
                       <td className="px-4 py-3.5 text-xs text-[var(--color-fg-muted)]">
                         <p className="text-[var(--color-fg)] font-medium truncate max-w-[120px]">
-                          {c.submittedByName}
+                          {c.submittedByName ?? c.submittedBy.slice(0, 8)}
                         </p>
                         <p className="text-[10px]">{formatDistanceToNow(c.createdAt)}</p>
                       </td>

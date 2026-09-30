@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   Clock,
   ArrowRight,
-  RotateCcw,
   Search,
   Zap,
   Flag,
@@ -43,27 +42,27 @@ const FILTERS = [
 function timeRemaining(deadline: string): {
   label: string;
   urgent: boolean;
-  expired: boolean;
 } {
   const now = new Date();
   const deadlineDate = new Date(deadline);
   const diffMs = deadlineDate.getTime() - now.getTime();
 
   if (diffMs <= 0) {
-    return { label: "Consensus closed", urgent: false, expired: true };
+    // Still pending and still verifiable — see isOverdue in lib/types.
+    return { label: "Overdue", urgent: true };
   }
 
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
   if (days > 0) {
-    return { label: `${days}d ${hours}h left`, urgent: false, expired: false };
+    return { label: `${days}d ${hours}h left`, urgent: false };
   }
   if (hours > 0) {
-    return { label: `${hours}h left`, urgent: hours <= 8, expired: false };
+    return { label: `${hours}h left`, urgent: hours <= 8 };
   }
   const minutes = Math.floor(diffMs / (1000 * 60));
-  return { label: `${minutes}m left`, urgent: true, expired: false };
+  return { label: `${minutes}m left`, urgent: true };
 }
 
 function ConsensusStepper({ count, max = 3 }: { count: number; max?: number }) {
@@ -169,7 +168,7 @@ export function VerifyQueue() {
         title="Verification Queue"
         description="Help fact-check these claims by researching and submitting your verdict with sources."
       />
-      <Breadcrumbs />
+      <Breadcrumbs currentLabel="Verify Queue" />
 
       {/* Header Banner */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 bg-gradient-to-r from-[var(--color-surface-2)] via-[var(--color-surface)] to-[var(--color-surface-2)] p-6 lg:p-8 rounded-[var(--radius-xl)] border border-[var(--color-border)] shadow-[var(--shadow-md)]">
@@ -367,24 +366,17 @@ function ClaimDossierCard({
 
         {/* Deadline Indicator */}
         <div className="text-right">
-          {deadline.expired ? (
-            <span className="inline-flex items-center gap-1 text-xs font-mono font-bold text-[var(--color-v-contested)]">
-              <RotateCcw className="w-3.5 h-3.5" />
-              {deadline.label}
-            </span>
-          ) : (
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 text-xs font-mono font-bold tabular-nums px-2 py-0.5 rounded",
-                deadline.urgent
-                  ? "text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/30"
-                  : "text-[var(--color-fg-muted)] bg-[var(--color-surface-2)] border border-[var(--color-border-soft)]"
-              )}
-            >
-              <Clock className="w-3 h-3" />
-              {deadline.label}
-            </span>
-          )}
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 text-xs font-mono font-bold tabular-nums px-2 py-0.5 rounded",
+              deadline.urgent
+                ? "text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/30"
+                : "text-[var(--color-fg-muted)] bg-[var(--color-surface-2)] border border-[var(--color-border-soft)]"
+            )}
+          >
+            <Clock className="w-3 h-3" />
+            {deadline.label}
+          </span>
         </div>
       </div>
 

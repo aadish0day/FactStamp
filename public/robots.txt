@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fact-stamp.vercel.app/sitemap.xml

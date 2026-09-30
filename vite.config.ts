@@ -1,9 +1,15 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // Single source of truth for the public site URL (OG tags in index.html via
+  // %VITE_SITE_URL%, and import.meta.env.VITE_SITE_URL in the app).
+  const env = loadEnv(mode, process.cwd(), 'VITE_')
+  process.env.VITE_SITE_URL = (env.VITE_SITE_URL || 'https://fact-stamp.vercel.app').replace(/\/+$/, '')
+
+  return {
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -45,11 +51,12 @@ export default defineConfig({
           // into the eager vendor chunk every visitor downloads.
           'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
           'vendor-ui': ['lucide-react', 'framer-motion'],
-          'vendor-charts': ['recharts'],
-          'vendor-html-to-image': ['html-to-image'],
-          'vendor-ocr': ['tesseract.js'],
+          // recharts, html-to-image and tesseract.js are deliberately NOT named
+          // here: they are only reached from lazy routes, and a named manual
+          // chunk gets an eager <link rel=modulepreload> in index.html.
         },
       },
     },
   },
+}
 })

@@ -17,6 +17,9 @@ export const ClaimCard = memo(function ClaimCard({ claim, to, className }: Claim
   const cardRef = useRef<HTMLAnchorElement>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
+  // A pending claim's verdict/score are only a running preview after the first
+  // vote — never show them as a result before consensus.
+  const verdict = claim.status === 'verified' ? claim.verdict : undefined
 
   const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!cardRef.current) return
@@ -61,9 +64,9 @@ export const ClaimCard = memo(function ClaimCard({ claim, to, className }: Claim
       {/* Footer */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {claim.verdict && <VerdictStamp verdict={claim.verdict} size="sm" />}
-          {claim.verdict ? (
-            <VerdictPill verdict={claim.verdict} size="sm" />
+          {verdict && <VerdictStamp verdict={verdict} size="sm" />}
+          {verdict ? (
+            <VerdictPill verdict={verdict} size="sm" />
           ) : (
             <span className="text-xs text-[var(--color-fg-muted)] font-medium">
               {claim.verificationCount === 0
@@ -73,7 +76,7 @@ export const ClaimCard = memo(function ClaimCard({ claim, to, className }: Claim
           )}
         </div>
 
-        {claim.confidenceScore !== undefined && (
+        {verdict && claim.confidenceScore !== undefined && (
           <div className="flex items-center gap-2">
             <div className="w-20 h-1.5 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
               <div

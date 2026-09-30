@@ -228,8 +228,11 @@ export async function getClaimScreenshot(claimId: string): Promise<string | null
 }
 
 export async function addClaimToFirestore(claimData: Omit<Claim, 'id'>): Promise<string> {
+  // Claims are publicly readable, so the reporter's name is never stored on
+  // them (the rules reject it); only the submittedBy uid is kept.
+  const { submittedByName: _name, ...publicData } = claimData
   const docRef = await addDoc(collection(db, COLLECTIONS.CLAIMS), {
-    ...withoutUndefined(claimData as unknown as Record<string, unknown>),
+    ...withoutUndefined(publicData as unknown as Record<string, unknown>),
     serverTime: serverTimestamp(),
   })
   return docRef.id
@@ -247,7 +250,9 @@ let permissionDeniedWarned = false
  * Uses setDoc with merge when document may not exist yet in Firestore (e.g. seed claims).
  */
 export async function updateClaimInFirestore(claim: Claim): Promise<void> {
-  const { id: _id, ...data } = claim
+  // submittedByName is left out: new claims have none, and the read mapper's
+  // placeholder would otherwise be written back and fail identityUnchanged().
+  const { id: _id, submittedByName: _name, ...data } = claim
   // Rejections propagate. This used to console.warn and resolve, so a verdict
   // the rules refused still looked like it had been saved to every caller.
   const docRef = doc(db, COLLECTIONS.CLAIMS, claim.id)

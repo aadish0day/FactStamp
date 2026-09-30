@@ -21,6 +21,7 @@ export const SourceQualityDot = memo(function SourceQualityDot({ quality, source
     <span
       className={cn('inline-block w-2 h-2 rounded-full flex-shrink-0 transition-transform hover:scale-125', className)}
       style={{ backgroundColor: config.color }}
+      role="img"
       aria-label={config.label}
       title={config.label}
     />

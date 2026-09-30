@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Menu, X, ShieldAlert, User, Star, LogOut } from 'lucide-react'
 import { useEffect, useCallback, useRef, useState } from 'react'
@@ -10,6 +10,14 @@ import { NotificationBell } from '@/components/NotificationBell'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/lib/utils'
+
+// Links styled like <Button intent="primary"> — a single focusable element
+// instead of a <button> nested inside an <a>.
+const primaryLinkClass =
+  'inline-flex items-center justify-center gap-2 font-semibold whitespace-nowrap select-none rounded-full ' +
+  'transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:ring-offset-2 ' +
+  'bg-[var(--color-brand)] text-[var(--color-brand-fg)] hover:bg-[var(--color-brand-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] border border-transparent'
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -25,6 +33,7 @@ export function Navbar() {
   }
   const { theme, toggleTheme } = useTheme()
   const location = useLocation()
+  const navigate = useNavigate()
 
   const navLinks = [
     { label: 'Home', path: '/' },
@@ -46,7 +55,10 @@ export function Navbar() {
   useEffect(() => {
     if (!mobileOpen) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeMobile()
+      if (e.key === 'Escape') {
+        closeMobile()
+        toggleRef.current?.focus() // drawer goes inert; don't strand focus on <body>
+      }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
@@ -77,7 +89,8 @@ export function Navbar() {
   }, [mobileOpen])
 
   return (
-    <nav className="sticky top-0 z-50 h-[60px] bg-[var(--color-surface)] border-b border-[var(--color-border-soft)] shadow-[var(--shadow-sm)]">
+    <header className="sticky top-0 z-50">
+    <nav aria-label="Main" className="h-[60px] bg-[var(--color-surface)] border-b border-[var(--color-border-soft)] shadow-[var(--shadow-sm)]">
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
         {/* Logo */}
         <Link
@@ -121,9 +134,12 @@ export function Navbar() {
           {/* User Menu */}
           {user ? (
             <>
-              <Link to="/submit" className="hidden lg:block">
-                <InteractiveHoverButton text="Submit claim" className="min-w-[120px] px-4 py-1.5 min-h-[36px] text-xs" />
-              </Link>
+              <InteractiveHoverButton
+                type="button"
+                text="Submit claim"
+                onClick={() => navigate('/submit')}
+                className="hidden lg:inline-flex min-w-[120px] px-4 py-1.5 min-h-[36px] text-xs"
+              />
 
               {/* User indicator — desktop link to profile */}
               <Link
@@ -154,10 +170,8 @@ export function Navbar() {
               </Button>
             </>
           ) : (
-            <Link to="/signin">
-              <Button intent="primary" size="sm">
-                Sign in
-              </Button>
+            <Link to="/signin" className={cn(primaryLinkClass, 'px-3.5 py-1.5 text-xs h-8')}>
+              Sign in
             </Link>
           )}
 
@@ -197,6 +211,10 @@ export function Navbar() {
         role="dialog"
         aria-modal={mobileOpen ? 'true' : undefined}
         aria-label="Mobile navigation"
+        aria-hidden={mobileOpen ? undefined : true}
+        // Closed drawer stays mounted for the slide animation; inert removes it
+        // from tab order and the a11y tree. @types/react 18 lacks `inert`.
+        {...(mobileOpen ? {} : { inert: '' })}
         className={cn(
           'fixed top-[60px] right-0 z-40 h-[calc(100dvh-60px)] w-full sm:w-80',
           'bg-[var(--color-surface)] border-l border-[var(--color-border-soft)]',
@@ -264,10 +282,8 @@ export function Navbar() {
             </Link>
 
             {/* Mobile Submit CTA */}
-            <Link to="/submit" onClick={closeMobile}>
-              <Button intent="primary" className="w-full">
-                Submit claim
-              </Button>
+            <Link to="/submit" onClick={closeMobile} className={cn(primaryLinkClass, 'w-full px-5 py-2 text-sm min-h-[44px]')}>
+              Submit claim
             </Link>
 
             <button
@@ -286,10 +302,8 @@ export function Navbar() {
         {/* Bottom section — logged out */}
         {!user && (
           <div className="border-t border-[var(--color-border-soft)] px-4 py-5 flex-shrink-0">
-            <Link to="/signin" onClick={closeMobile}>
-              <Button intent="primary" className="w-full">
-                Sign in
-              </Button>
+            <Link to="/signin" onClick={closeMobile} className={cn(primaryLinkClass, 'w-full px-5 py-2 text-sm min-h-[44px]')}>
+              Sign in
             </Link>
             <p className="mt-3 text-center text-xs text-[var(--color-fg-muted)]">
               Track your claims and earn reputation
@@ -298,5 +312,6 @@ export function Navbar() {
         )}
       </div>
     </nav>
+    </header>
   )
 }

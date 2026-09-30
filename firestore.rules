@@ -20,10 +20,10 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // Public display names are written by the client, but `submittedBy`/`verifierId`
-    // are bound to request.auth.uid — so without this a user could bypass the UI and
-    // post a claim as "WHO Official" or a verdict under a real verifier's name, on a
-    // product where perceived source credibility is the entire point.
+    // Verifier display names are written by the client, but `verifierId` is bound
+    // to request.auth.uid — so without this a user could bypass the UI and post a
+    // verdict under a real verifier's name, on a product where perceived source
+    // credibility is the entire point.
     // Profiles with a blank stored displayName are exempt: the UI falls back to the
     // email prefix for those, and requiring equality would block them from posting.
     function nameMatchesCaller(name) {
@@ -111,15 +111,14 @@ service cloud.firestore {
           && request.resource.data.get('totalVerifications', 0) >= 0
         )
         ||
-        // Self-update: users can only update display profile info; sensitive fields are strictly immutable
+        // Self-update: the only self-edit the app makes is renaming (Profile's
+        // edit-name flow and ensureProfile's sign-up race fallback both write
+        // just displayName). This used to be a blocklist of immutable fields, so
+        // a user could PATCH anything else onto their own doc — `role: "admin"`,
+        // a rewritten createdAt, or padding up to the 1 MB document limit.
         (
           request.auth.uid == uid
-          && isUnchanged('uid')
-          && isUnchanged('email')
-          && isUnchanged('joinedAt')
-          && isUnchanged('reputation')
-          && isUnchanged('totalVerifications')
-          && isUnchanged('isAdmin')
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
           && request.resource.data.displayName is string
           && request.resource.data.displayName.size() <= 100
         )
@@ -146,8 +145,11 @@ service cloud.firestore {
         && request.resource.data.status == 'pending'
         && request.resource.data.verificationCount == 0
         && request.resource.data.verifications == []
-        && request.resource.data.submittedByName is string
-        && request.resource.data.submittedByName.size() <= 100
+        // Claims are publicly readable, so a stored reporter name told anyone who
+        // reported which forward. New claims carry only the submittedBy uid (the
+        // rules and "my submissions" views need it). Admin seeding is exempt: its
+        // demo claims use fictional personas.
+        && (isAdmin() || !('submittedByName' in request.resource.data))
         && request.resource.data.get('imageUrl', 'https://placeholder.com').matches('^(data:image/(jpeg|png|webp);base64,|https?://).*')
         && request.resource.data.get('imageUrl', '').size() <= 800000
         // Thumbnails ride along on the claim and are read by every list view,
@@ -155,7 +157,10 @@ service cloud.firestore {
         && request.resource.data.get('thumbnailUrl', 'https://placeholder.com').matches('^(data:image/(jpeg|png|webp);base64,|https?://).*')
         && request.resource.data.get('thumbnailUrl', '').size() <= 60000
         && (request.resource.data.submittedBy == request.auth.uid || isAdmin())
-        && (isAdmin() || nameMatchesCaller(request.resource.data.submittedByName))
+        // An admin-deleted account keeps its Auth login but has no profile; this
+        // is what stops it posting (the name check that used to read the profile
+        // went with submittedByName).
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         // `consensusDeadline` is an ISO string, which rules cannot parse or compare
         // to request.time — so claims also carry the same instant as epoch millis,
         // which Case B below can actually check. Without this a claim could be
@@ -191,6 +196,19 @@ service cloud.firestore {
             // Legacy claims written before consensusDeadlineMs existed default to a
             // far-future value, so they can only be expired by an admin (Case A).
             && resource.data.get('consensusDeadlineMs', 99999999999999) <= request.time.toMillis()
+            // Exactly what expireOverdueClaims writes (via updateClaimInFirestore,
+            // which also stamps serverTime) and nothing else. A bare
+            // status+verdict write used to pass, leaving a settled claim with no
+            // confidenceScore, agreementRatio or verifiedAt for every view to trip on.
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'verdict', 'confidenceScore', 'agreementRatio', 'verifiedAt', 'serverTime'])
+            && request.resource.data.confidenceScore is number
+            && request.resource.data.confidenceScore >= 0
+            && request.resource.data.confidenceScore <= 100
+            && request.resource.data.agreementRatio is number
+            && request.resource.data.agreementRatio >= 0
+            && request.resource.data.agreementRatio <= 100
+            && request.resource.data.verifiedAt is string
           )
           ||
           // Case C: Adding a source-backed verification
@@ -200,6 +218,9 @@ service cloud.firestore {
             && isUnchanged('adminFlaggedAt')
             // Only open claims take verdicts. Without this a claim closed as
             // CONTESTED (fewer than 3 verifications) could be reopened by appending.
+            // Deliberately no consensusDeadlineMs check: an overdue claim that is
+            // still pending stays in the queue and keeps taking verdicts until it
+            // reaches 3 or someone closes it through Case B.
             && resource.data.status == 'pending'
             // A claim's author cannot sit on its jury.
             && resource.data.submittedBy != request.auth.uid

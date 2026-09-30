@@ -102,7 +102,7 @@ export function SignIn() {
         if (!updated.isLockedOut) {
           clearInterval(interval)
           setErrors((prev) => ({ ...prev, form: '' }))
-          toast.success('Security Lockout Expired', {
+          toast.success('Sign-in Cooldown Ended', {
             description: 'You can now attempt to sign in again.',
           })
         }
@@ -156,7 +156,7 @@ export function SignIn() {
     if (currentStatus.isLockedOut) {
       setRateLimit(currentStatus)
       setLockoutRemaining(currentStatus.lockoutRemainingMs)
-      toast.error('Account Temporarily Locked', {
+      toast.error('Sign-in Paused', {
         description: `Too many failed attempts. Unlock in ${formatLockoutRemaining(currentStatus.lockoutRemainingMs)}.`,
       })
       return
@@ -211,13 +211,13 @@ export function SignIn() {
       setLockoutRemaining(updatedLimit.lockoutRemainingMs)
 
       if (updatedLimit.isLockedOut) {
-        const errorMsg = `Account locked due to 5 consecutive failed attempts. Please wait ${formatLockoutRemaining(updatedLimit.lockoutRemainingMs)} before retrying.`
+        const errorMsg = `Sign-in paused on this browser after ${MAX_LOGIN_ATTEMPTS} failed attempts. Please wait ${formatLockoutRemaining(updatedLimit.lockoutRemainingMs)} before retrying.`
         setErrors((prev) => ({ ...prev, form: errorMsg }))
-        toast.error('Security Lockout Triggered', {
+        toast.error('Sign-in Paused', {
           description: errorMsg,
         })
       } else {
-        const remainingNote = `${updatedLimit.remainingAttempts} attempt${updatedLimit.remainingAttempts === 1 ? '' : 's'} remaining before temporary 15-minute lockout.`
+        const remainingNote = `${updatedLimit.remainingAttempts} attempt${updatedLimit.remainingAttempts === 1 ? '' : 's'} remaining before a 15-minute sign-in cooldown.`
         const generalMsg = err instanceof Error ? err.message : 'Invalid email or password.'
         const fullMsg = `${generalMsg} (${remainingNote})`
         setErrors((prev) => ({ ...prev, form: fullMsg }))
@@ -262,7 +262,7 @@ export function SignIn() {
       heading="Welcome back"
       subheading="Sign in to your verifier account to fact-check community claims and earn reputation."
     >
-      <Seo title="Sign In — FactStamp" description="Sign in to FactStamp to participate in community fact-checks." />
+      <Seo title="Sign In" description="Sign in to FactStamp to participate in community fact-checks." />
 
       {/* ── Security Lockout Banner (active when 5 failed attempts reached) ── */}
       {rateLimit.isLockedOut && (
@@ -275,10 +275,10 @@ export function SignIn() {
             <ShieldAlert className="w-5 h-5" aria-hidden="true" />
           </div>
           <h3 className="text-xs font-extrabold uppercase tracking-wide text-[var(--color-v-false)]">
-            Security Rate Limit Active
+            Sign-in Cooldown Active
           </h3>
           <p className="text-xs text-[var(--color-fg-2)] leading-relaxed">
-            Too many failed login attempts recorded. Sign-in is temporarily suspended to protect accounts against credential guessing.
+            Too many failed sign-in attempts from this browser. Sign-in here is paused for a short while.
           </p>
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] font-mono text-xs font-bold text-[var(--color-fg)] shadow-xs">
             <Clock className="w-3.5 h-3.5 text-[var(--color-v-false)] animate-pulse" aria-hidden="true" />

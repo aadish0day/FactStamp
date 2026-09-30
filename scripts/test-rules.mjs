@@ -24,11 +24,12 @@ async function mkUserWithEmail(tag,email){
   return {uid:body.localId,H,name:tag}
 }
 
-const fields=(uid,ms,name='Author')=>({text:S('This is a seeded test claim about public health policy.'),
+// New claims no longer carry submittedByName; pass a name only to test that it is refused.
+const fields=(uid,ms,name)=>({text:S('This is a seeded test claim about public health policy.'),
   category:S('health'),status:S('pending'),verificationCount:I(0),verifications:{arrayValue:{values:[]}},
-  submittedBy:S(uid),submittedByName:S(name),createdAt:S(new Date().toISOString()),
+  submittedBy:S(uid),...(name?{submittedByName:S(name)}:{}),createdAt:S(new Date().toISOString()),
   consensusDeadline:S(new Date(ms).toISOString()),consensusDeadlineMs:I(ms),imageUrl:S('https://placeholder.com/x.png')})
-const mkClaim=async(u,ms=Date.now()+7*864e5)=>{const r=await call(`${FS}/claims`,{method:'POST',headers:u.H,body:JSON.stringify({fields:fields(u.uid,ms,u.name)})});return r.ok?r.body.name.split('/').pop():null}
+const mkClaim=async(u,ms=Date.now()+7*864e5)=>{const r=await call(`${FS}/claims`,{method:'POST',headers:u.H,body:JSON.stringify({fields:fields(u.uid,ms)})});return r.ok?r.body.name.split('/').pop():null}
 const verif=(u,verdict='TRUE')=>({mapValue:{fields:{verifierId:S(u.uid),verifierReputation:I(50),verdict:S(verdict),
   sourceUrl:S('https://example.com/s'),explanation:S('x'.repeat(60)),verifierName:S(u.name),sourceQuality:S('high'),createdAt:S(new Date().toISOString())}}})
 const mask=(...f)=>f.map(x=>`updateMask.fieldPaths=${x}`).join('&')
@@ -55,7 +56,7 @@ expect('Case C: append 2 verifications in one write',
       status:S('pending'),verdict:S('TRUE'),confidenceScore:I(50)}})})).ok, false)
 
 expect('Create claim pre-expired (backdated deadline)',
-  (await call(`${FS}/claims`,{method:'POST',headers:att.H,body:JSON.stringify({fields:fields(att.uid,Date.now()-864e5,att.name)})})).ok, false)
+  (await call(`${FS}/claims`,{method:'POST',headers:att.H,body:JSON.stringify({fields:fields(att.uid,Date.now()-864e5)})})).ok, false)
 
 console.log('\n── Legitimate flows (must still be ALLOWED) ──')
 const c4=await mkClaim(author)
@@ -72,17 +73,28 @@ for (const [i,u] of [v1,v2,v3].entries()) {
 
 // A normal user cannot create an already-overdue claim (that create is denied
 // above), so make one that expires in ~2s and let it lapse.
+// What expireOverdueClaims actually changes (updateClaimInFirestore adds serverTime).
+const expiry=(extra={})=>({status:S('verified'),verdict:S('CONTESTED'),confidenceScore:I(30),
+  agreementRatio:I(0),verifiedAt:S(new Date().toISOString()),serverTime:{timestampValue:new Date().toISOString()},...extra})
+const expire=(id,f)=>call(`${FS}/claims/${id}?${mask(...Object.keys(f))}`,{method:'PATCH',headers:att.H,body:JSON.stringify({fields:f})})
 const c5=await mkClaim(author, Date.now()+2000)
-expect('Expiry BEFORE deadline passes (must be denied)',
-  (await call(`${FS}/claims/${c5}?${mask('status','verdict')}`,{method:'PATCH',headers:att.H,
-    body:JSON.stringify({fields:{status:S('verified'),verdict:S('CONTESTED')}})})).ok, false)
+const cOver=await mkClaim(author, Date.now()+2000)
+expect('Expiry BEFORE deadline passes (must be denied)', (await expire(c5,expiry())).ok, false)
 await new Promise(r=>setTimeout(r,3500))
-expect('Expiry AFTER deadline passes -> CONTESTED',
-  (await call(`${FS}/claims/${c5}?${mask('status','verdict')}`,{method:'PATCH',headers:att.H,
-    body:JSON.stringify({fields:{status:S('verified'),verdict:S('CONTESTED')}})})).ok, true)
+expect('Expiry writing only status+verdict (partial)',
+  (await expire(c5,{status:S('verified'),verdict:S('CONTESTED')})).ok, false)
+expect('Expiry that also sneaks in an extra field',
+  (await expire(c5,expiry({confidenceBoost:I(1)}))).ok, false)
+expect('Expiry that rewrites avgVerifierReputation',
+  (await expire(c5,expiry({avgVerifierReputation:I(99)}))).ok, false)
+expect('Expiry AFTER deadline passes -> CONTESTED (full write)', (await expire(c5,expiry())).ok, true)
+expect('Verdict on an overdue, still-pending claim',
+  (await call(`${FS}/claims/${cOver}?${mask('verifications','verificationCount','status','verdict','confidenceScore')}`,{method:'PATCH',headers:v1.H,
+    body:JSON.stringify({fields:{verifications:{arrayValue:{values:[verif(v1)]}},verificationCount:I(1),
+      status:S('pending'),verdict:S('TRUE'),confidenceScore:I(60)}})})).ok, true)
 
 expect('Create a normal claim with a valid deadline',
-  (await call(`${FS}/claims`,{method:'POST',headers:author.H,body:JSON.stringify({fields:fields(author.uid,Date.now()+7*864e5,author.name)})})).ok, true)
+  (await call(`${FS}/claims`,{method:'POST',headers:author.H,body:JSON.stringify({fields:fields(author.uid,Date.now()+7*864e5)})})).ok, true)
 
 console.log('\n── Consensus integrity (must be DENIED) ──')
 const patchV=(claimId,u,values,n,status='pending',verdict='TRUE')=>call(`${FS}/claims/${claimId}?${mask('verifications','verificationCount','status','verdict','confidenceScore')}`,
@@ -138,6 +150,8 @@ expect('Append to a claim already closed as CONTESTED',
 console.log('\n── Identity spoofing (must be DENIED) ──')
 expect('Submit a claim as "WHO Official"',
   (await call(`${FS}/claims`,{method:'POST',headers:att.H,body:JSON.stringify({fields:fields(att.uid,Date.now()+7*864e5,'WHO Official')})})).ok, false)
+expect('Create a claim carrying own submittedByName',
+  (await call(`${FS}/claims`,{method:'POST',headers:att.H,body:JSON.stringify({fields:fields(att.uid,Date.now()+7*864e5,att.name)})})).ok, false)
 const c6=await mkClaim(author)
 const spoofV={mapValue:{fields:{verifierId:S(att.uid),verifierReputation:I(50),verdict:S('TRUE'),
   sourceUrl:S('https://example.com/s'),explanation:S('x'.repeat(60)),verifierName:S('Dr. Anita Verma'),
@@ -190,6 +204,14 @@ expect('Read own profile',
 expect('List the whole users collection',
   (await call(`${FS}/users?pageSize=50`,{method:'GET',headers:att.H})).ok, false)
 
+console.log('\n── Profile self-edit is an allowlist ──')
+const selfPatch=(f)=>call(`${FS}/users/${att.uid}?${mask(...Object.keys(f))}`,{method:'PATCH',headers:att.H,body:JSON.stringify({fields:f})})
+expect('Self-add role: "admin"', (await selfPatch({role:S('admin')})).ok, false)
+expect('Self-add arbitrary padding field', (await selfPatch({junk:S('x'.repeat(1000))})).ok, false)
+expect('Self-rewrite createdAt', (await selfPatch({createdAt:S('2000-01-01T00:00:00Z')})).ok, false)
+expect('Rename plus an extra field', (await selfPatch({displayName:S('attacker'),role:S('admin')})).ok, false)
+expect('Self-rename (Profile edit-name flow)', (await selfPatch({displayName:S('attacker')})).ok, true)
+
 console.log('\n── Admin-deleted accounts stay deleted ──')
 // Stage what deleteUserFromFirestore does (tombstone + profile delete) with the
 // emulator's rules-bypassing owner token.
@@ -201,7 +223,7 @@ expect('Deleted account recreates its profile',
   (await call(`${FS}/users?documentId=${gone.uid}`,{method:'POST',headers:gone.H,body:JSON.stringify({fields:{
     uid:S(gone.uid),displayName:S('gone'),email:S(`x@example.com`),reputation:I(50),totalVerifications:I(0),isAdmin:B(false),joinedAt:S(new Date().toISOString())}})})).ok, false)
 expect('Deleted account submits a claim',
-  (await call(`${FS}/claims`,{method:'POST',headers:gone.H,body:JSON.stringify({fields:fields(gone.uid,Date.now()+7*864e5,gone.name)})})).ok, false)
+  (await call(`${FS}/claims`,{method:'POST',headers:gone.H,body:JSON.stringify({fields:fields(gone.uid,Date.now()+7*864e5)})})).ok, false)
 expect('Deleted account removes its own tombstone',
   (await call(`${FS}/deleted_users/${gone.uid}`,{method:'DELETE',headers:gone.H})).ok, false)
 

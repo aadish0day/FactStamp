@@ -84,7 +84,7 @@ export function Dashboard() {
   const handleSortChange = (mode: SortMode) => {
     if (mode === sortMode) return
     setSortMode(mode)
-    const label = mode === 'count' ? 'most verified first' : 'most recent first'
+    const label = mode === 'count' ? 'most checked first' : 'most recent first'
     toast(`Sorted by ${label}`, {
       description: 'Updated the claims directory list order.',
       duration: 3000,
@@ -591,6 +591,7 @@ export function Dashboard() {
                       key={filter}
                       type="button"
                       onClick={() => setStatusFilter(filter as StatusFilter)}
+                      aria-pressed={statusFilter === filter}
                       className={`px-3 py-1 text-xs font-bold rounded-[calc(var(--radius-lg)-2px)] transition-all cursor-pointer capitalize ${
                         statusFilter === filter
                           ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-[var(--shadow-xs)] border border-[var(--color-border-soft)]'
@@ -607,6 +608,7 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={() => handleSortChange('recent')}
+                    aria-pressed={sortMode === 'recent'}
                     className={`px-3 py-1 text-xs font-bold rounded-[calc(var(--radius-lg)-2px)] transition-all cursor-pointer ${
                       sortMode === 'recent'
                         ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-[var(--shadow-xs)] border border-[var(--color-border-soft)]'
@@ -618,6 +620,7 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={() => handleSortChange('count')}
+                    aria-pressed={sortMode === 'count'}
                     className={`px-3 py-1 text-xs font-bold rounded-[calc(var(--radius-lg)-2px)] transition-all cursor-pointer flex items-center gap-1.5 ${
                       sortMode === 'count'
                         ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-[var(--shadow-xs)] border border-[var(--color-border-soft)]'
@@ -625,7 +628,7 @@ export function Dashboard() {
                     }`}
                   >
                     <ArrowUpDown className="w-3.5 h-3.5" aria-hidden="true" />
-                    Verified
+                    Most checked
                   </button>
                 </div>
               </div>
@@ -635,7 +638,7 @@ export function Dashboard() {
             <div className="bg-[var(--color-brand-subtle)] border border-[var(--color-brand)]/15 p-4.5 rounded-[var(--radius-lg)] mb-6 text-sm flex gap-3 items-start relative overflow-hidden">
               <Sparkles className="w-5 h-5 text-[var(--color-brand)] flex-shrink-0 mt-0.5 animate-pulse" />
               <div className="space-y-1">
-                <h4 className="font-bold text-[var(--color-fg)] tracking-tight">Onboarding Guide:</h4>
+                <h3 className="font-bold text-[var(--color-fg)] tracking-tight">Onboarding Guide:</h3>
                 <p className="text-xs sm:text-sm text-[var(--color-fg-2)] leading-relaxed max-w-[85ch] text-pretty font-medium">
                   WhatsApp forwards are verified here via community consensus. Click <span className="font-bold text-[var(--color-brand)]">"Verify"</span> on pending items to review them, or click <span className="font-bold text-[var(--color-fg)]">"View"</span> to read completed verdicts. Once a claim is verified, you can download a stamped card to share back to WhatsApp chats to debunk fake news instantly.
                 </p>
