@@ -36,3 +36,6 @@ dist-ssr
 __pycache__/
 *.pyc
 functions/node_modules/
+.vercel
+.env*
+!.env.example
