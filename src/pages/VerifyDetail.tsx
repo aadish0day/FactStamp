@@ -30,6 +30,7 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { ClaimDetailSkeleton } from '@/components/ui/Skeletons'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { VerifyEmailNotice } from '@/components/VerifyEmailNotice'
 import { determineSourceQuality } from '@/lib/confidenceScore'
 import { cn, formatDistanceToNow } from '@/lib/utils'
 import { VERDICT_META, type Verdict, type SourceQuality, canVerify, isClosedWithoutQuorum, isOverdue } from '@/lib/types'
@@ -118,7 +119,7 @@ export function VerifyDetail() {
   const { claimId } = useParams<{ claimId: string }>()
   const navigate = useNavigate()
   const { getClaimById, isLoading: claimsLoading, addVerification } = useClaims()
-  const { user } = useAuth()
+  const { user, needsEmailVerification } = useAuth()
 
   const claim = claimId ? getClaimById(claimId) : undefined
   const screenshot = useClaimScreenshot(claim)
@@ -423,6 +424,8 @@ export function VerifyDetail() {
             </Button>
           </div>
         </div>
+      ) : needsEmailVerification ? (
+        <VerifyEmailNotice action="cast verdicts" />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-7">
           {/* Step 1: Verdict Selection */}

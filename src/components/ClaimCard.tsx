@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { VerdictPill } from '@/components/ui/VerdictPill'
 import { VerdictStamp } from '@/components/VerdictStamp'
+import { ExampleBadge } from '@/components/ui/ExampleBadge'
+import { isDemoClaim } from '@/lib/features'
 import type { Claim } from '@/lib/types'
 import { formatDistanceToNow } from '@/lib/utils'
 
@@ -50,7 +52,10 @@ export const ClaimCard = memo(function ClaimCard({ claim, to, className }: Claim
       />
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <CategoryBadge category={claim.category} />
+        <div className="flex items-center gap-1.5">
+          <CategoryBadge category={claim.category} />
+          {isDemoClaim(claim.id) && <ExampleBadge />}
+        </div>
         <time className="text-xs text-[var(--color-fg-muted)] font-mono tabular-nums">
           {formatDistanceToNow(new Date(claim.createdAt), { addSuffix: true })}
         </time>

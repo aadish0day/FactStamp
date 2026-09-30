@@ -32,6 +32,59 @@ jobs:
       - name: Production build (tsc -b && vite build)
         run: npm run build
 
+  duplicate-detection:
+    name: Duplicate-detection self-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The script imports src/lib/duplicateDetection.ts directly, which needs
+      # Node's built-in type stripping (on by default from Node 23.6 / 22.18).
+      # Node 24 LTS runs it with no flags, no build step and no extra deps.
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run self-test
+        run: npm run test:dupes
+
+  firestore-rules:
+    name: Firestore rules tests (emulator)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # The Firestore emulator is a Java app (needs Java 11+).
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Firebase emulator jars
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          # firebase-tools pins the emulator versions, so the lockfile is the key.
+          key: firebase-emulators-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Uses firebase.emulator-test.json (auth 9099, firestore 8083) and the
+      # demo project id; no Firebase credentials are needed.
+      - name: Run rules tests
+        run: npm run test:rules
+
   docker-compose-config:
     name: Validate Docker Compose
     runs-on: ubuntu-latest

@@ -1,6 +1,7 @@
 import { ShieldAlert, Download, CheckCircle2, XCircle, AlertTriangle, HelpCircle, Scale, Users, Globe } from 'lucide-react'
 import { VERDICT_META, type Claim } from '@/lib/types'
 import { SITE_HOST } from '@/components/Seo'
+import { isDemoClaim } from '@/lib/features'
 
 interface FactCheckCardProps {
   claim: Claim
@@ -68,6 +69,7 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
   const VIcon = VERDICT_ICONS[claim.verdict]
   const topV = claim.verifications?.[0]
   const domains = collectDomains(claim)
+  const isExample = isDemoClaim(claim.id)
 
   const explanation = topV
     ? topV.explanation.replace(/\s+/g, ' ').trim()
@@ -108,6 +110,17 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
           background: `linear-gradient(90deg, ${meta.hexColor}, ${P.brand}, ${meta.hexColor})`,
         }} />
 
+        {/* ─── Example marker: seeded demo claims must never pass as a real fact-check ─── */}
+        {isExample && (
+          <div style={{
+            backgroundColor: P.fg, color: P.white, textAlign: 'center',
+            fontFamily: fontMono, fontSize: '10px', fontWeight: 800,
+            letterSpacing: '0.12em', textTransform: 'uppercase', padding: '6px 12px',
+          }}>
+            Example · Sample data, not a real fact-check
+          </div>
+        )}
+
         {/* ─── Card Inner Padding Container ─── */}
         <div style={{ padding: '20px 20px 28px 20px', boxSizing: 'border-box' }}>
 
@@ -137,7 +150,7 @@ export function FactCheckCard({ claim, id = 'fact-check-card', onDownload }: Fac
                   FactStamp
                 </div>
                 <div style={{ fontSize: '9px', color: P.fgMuted, fontFamily: fontMono, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2px', fontWeight: 700 }}>
-                  Community Fact-Check
+                  {isExample ? 'Example Fact-Check' : 'Community Fact-Check'}
                 </div>
               </div>
             </div>

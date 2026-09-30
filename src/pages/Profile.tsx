@@ -35,6 +35,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { useAuth } from '@/contexts/AuthContext'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { formatDistanceToNow } from '@/lib/utils'
+import { REPUTATION_ENABLED } from '@/lib/features'
 import { scoredVerdict, REQUIRED_VERIFICATIONS, type Verification, type Verdict } from '@/lib/types'
 
 /* ── Reputation level helper ── */
@@ -211,6 +212,8 @@ export function Profile() {
   // Data-driven reputation progression curve based on actual verification history from Firestore
   const sparklineData = useMemo(() => {
     if (!user) return []
+    // Awards are off: the score hasn't moved, so don't draw a simulated climb.
+    if (!REPUTATION_ENABLED) return [user.reputation, user.reputation]
     const sortedOldestFirst = [...userVerifications].sort(
       (a, b) =>
         new Date(a.verification.createdAt).getTime() -
@@ -540,7 +543,7 @@ export function Profile() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--color-fg)] tracking-tight">
-                  Verdict History &amp; Rep Log
+                  Verdict History{REPUTATION_ENABLED && <> &amp; Rep Log</>}
                 </h2>
                 <p className="text-sm text-[var(--color-fg-2)] font-medium mt-1">All claims you have evaluated and voted on</p>
               </div>
@@ -574,12 +577,11 @@ export function Profile() {
                   const v = item.verification
                   const matchedConsensus =
                     item.finalVerdict && v.verdict === item.finalVerdict
-                  const repDelta =
-                    item.finalVerdict === undefined
+                  const repDelta = !REPUTATION_ENABLED
+                    ? matchedConsensus ? 'Matched consensus' : 'Differed from consensus'
+                    : item.finalVerdict === undefined
                       ? '—'
-                      : matchedConsensus
-                        ? '+2'
-                        : '-1'
+                      : `${matchedConsensus ? '+2' : '-1'} Rep`
 
                   return (
                     <Link
@@ -609,7 +611,7 @@ export function Profile() {
                                 ) : (
                                   <XCircle className="w-3.5 h-3.5" aria-hidden="true" />
                                 )}
-                                {repDelta} Rep
+                                {repDelta}
                               </span>
                             )}
                           </div>

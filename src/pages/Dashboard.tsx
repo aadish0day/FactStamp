@@ -34,6 +34,8 @@ import { computeWeeklyReport } from '@/lib/weeklyReport'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { VERDICT_META, isClosedWithoutQuorum, isOverdue } from '@/lib/types'
+import { isDemoClaim } from '@/lib/features'
+import { ExampleBadge } from '@/components/ui/ExampleBadge'
 
 const CATEGORY_COLOR_MAP: Record<string, string> = {
   health: 'var(--color-cat-health)',
@@ -56,6 +58,16 @@ export function Dashboard() {
 
   // Module 7 — weekly trending report computed live from the claims feed
   const weekly = useMemo(() => computeWeeklyReport(claims), [claims])
+  // Persona verifiers who only appear on seeded example claims. Keyed by name
+  // because WeeklyVerifierStat carries no id.
+  const sampleVerifierNames = useMemo(() => {
+    const demo = new Set<string>()
+    const real = new Set<string>()
+    for (const c of claims) {
+      for (const v of c.verifications) (isDemoClaim(c.id) ? demo : real).add(v.verifierName)
+    }
+    return new Set([...demo].filter((n) => !real.has(n)))
+  }, [claims])
 
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -384,6 +396,7 @@ export function Dashboard() {
                           </p>
                           <div className="flex items-center gap-1.5 mt-1.5">
                             <VerdictPill verdict={c.verdict!} size="sm" />
+                            {isDemoClaim(c.id) && <ExampleBadge />}
                             <span className="text-xs font-mono font-bold text-[var(--color-fg-muted)] tabular-nums">
                               {c.verificationCount} checks
                             </span>
@@ -414,7 +427,10 @@ export function Dashboard() {
                         </span>
                         <Avatar initials={v.name[0]} size="sm" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-[var(--color-fg)] truncate leading-tight">{v.name}</p>
+                          <p className="text-xs font-bold text-[var(--color-fg)] truncate leading-tight flex items-center gap-1.5">
+                            <span className="truncate">{v.name}</span>
+                            {sampleVerifierNames.has(v.name) && <ExampleBadge />}
+                          </p>
                           <p className="text-xs text-[var(--color-fg-muted)] font-mono font-bold mt-0.5">
                             {v.verifications} checks
                           </p>
@@ -424,6 +440,11 @@ export function Dashboard() {
                         </span>
                       </div>
                     ))}
+                    {weekly.topVerifiers.some((v) => sampleVerifierNames.has(v.name)) && (
+                      <p className="text-xs text-[var(--color-fg-muted)]">
+                        Includes sample verifiers from example claims.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -523,6 +544,7 @@ export function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
                         <CategoryBadge category={c.category} />
+                        {isDemoClaim(c.id) && <ExampleBadge />}
                         {c.adminFlagged && (
                           <span className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2 py-0.5 rounded-sm border border-[var(--color-brand-subtle)]">
                             <Flag className="w-3 h-3" aria-hidden="true" />
@@ -672,6 +694,7 @@ export function Dashboard() {
                           &ldquo;{item.text}&rdquo;
                         </Link>
                         <div className="flex items-center gap-2.5 text-xs text-[var(--color-fg-muted)] font-mono font-semibold">
+                          {isDemoClaim(item.claimId) && <ExampleBadge />}
                           <span>ID: {item.claimId.slice(0, 8)}</span>
                           <span>•</span>
                           <span>Added {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</span>
@@ -772,8 +795,9 @@ export function Dashboard() {
                       <p className="text-sm font-semibold text-[var(--color-fg)] truncate leading-relaxed group-hover:text-[var(--color-brand)] transition-colors max-w-[65ch] text-pretty">
                         &ldquo;{claim.text}&rdquo;
                       </p>
-                      <div className="mt-1.5">
+                      <div className="mt-1.5 flex items-center gap-1.5">
                         <VerdictPill verdict={claim.verdict!} size="sm" />
+                        {isDemoClaim(claim.id) && <ExampleBadge />}
                       </div>
                     </div>
                   </Link>

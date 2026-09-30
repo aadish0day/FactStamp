@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { REPUTATION_ENABLED } from '@/lib/features'
 import { toast } from 'sonner'
 import { Menu, X, ShieldAlert, User, Star, LogOut } from 'lucide-react'
 import { useEffect, useCallback, useRef, useState } from 'react'
@@ -306,7 +307,7 @@ export function Navbar() {
               Sign in
             </Link>
             <p className="mt-3 text-center text-xs text-[var(--color-fg-muted)]">
-              Track your claims and earn reputation
+              {REPUTATION_ENABLED ? 'Track your claims and earn reputation' : 'Track your claims and verdicts'}
             </p>
           </div>
         )}

@@ -13,8 +13,11 @@ import { InteractiveHoverButton } from '@/components/ui/InteractiveHoverButton'
 import { FlowButton } from '@/components/ui/FlowButton'
 import { ClaimCard } from '@/components/ClaimCard'
 import { AnimatedCounter } from '@/components/AnimatedCounter'
+import { ExampleBadge } from '@/components/ui/ExampleBadge'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { cn } from '@/lib/utils'
+import { isDemoClaim } from '@/lib/features'
+import { VERDICT_META } from '@/lib/types'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -55,6 +58,7 @@ function HomeInner() {
     claims.flatMap((c) => c.verifications.map((v) => [v.verifierId, v.verifierName] as const))
   )
   const activeVerifiers = verifierNames.size
+  const demoCount = claims.filter((c) => isDemoClaim(c.id)).length
   const verdictPct = (verdict: string) =>
     verifiedClaims.length
       ? `${Math.round((verifiedClaims.filter((c) => c.verdict === verdict).length / verifiedClaims.length) * 100)}%`
@@ -247,6 +251,11 @@ function HomeInner() {
                 <p className="text-sm text-[var(--color-fg-2)] mt-1.5 font-sans leading-relaxed">
                   Suspicious WhatsApp forwards that reached a community consensus verdict, out of {claims.length} submitted.
                 </p>
+                {demoCount > 0 && (
+                  <p className="text-xs text-[var(--color-fg-muted)] mt-1">
+                    Stats include {demoCount} example claim{demoCount === 1 ? '' : 's'} with sample verifiers.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -357,18 +366,25 @@ function HomeInner() {
               onClick={() => navigate(`/claim/${c.id}`)}
               className="inline-flex items-center gap-3.5 px-5 py-2.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border-soft)] shadow-xs hover:border-[var(--color-brand)] transition-all cursor-pointer select-none"
             >
+              {isDemoClaim(c.id) && <ExampleBadge />}
               <span className="text-xs sm:text-sm font-bold text-[var(--color-fg)] max-w-xs truncate">
                 {c.text}
               </span>
               <span
                 className={cn(
-                  'text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full',
-                  c.status === 'verified'
-                    ? c.verdict === 'FALSE'
-                      ? 'bg-[var(--color-v-false-bg)] text-[var(--color-v-false)] border border-[var(--color-v-false-border)]'
-                      : 'bg-[var(--color-v-true-bg)] text-[var(--color-v-true)] border border-[var(--color-v-true-border)]'
-                    : 'bg-[var(--color-v-unverif-bg)] text-[var(--color-v-unverif)] border border-[var(--color-v-unverif-border)]'
+                  'text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border',
+                  !(c.status === 'verified' && c.verdict) &&
+                    'bg-[var(--color-v-unverif-bg)] text-[var(--color-v-unverif)] border-[var(--color-v-unverif-border)]'
                 )}
+                style={
+                  c.status === 'verified' && c.verdict
+                    ? {
+                        backgroundColor: `var(${VERDICT_META[c.verdict].bgVar})`,
+                        color: `var(${VERDICT_META[c.verdict].colorVar})`,
+                        borderColor: `var(${VERDICT_META[c.verdict].borderVar})`,
+                      }
+                    : undefined
+                }
               >
                 {c.status === 'verified' ? c.verdict ?? 'VERIFIED' : 'PENDING'}
               </span>

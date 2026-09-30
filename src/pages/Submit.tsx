@@ -38,6 +38,8 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { Textarea } from '@/components/ui/Input'
 import { useClaims } from '@/contexts/ClaimsContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { VerifyEmailNotice } from '@/components/VerifyEmailNotice'
+import { REPUTATION_ENABLED } from '@/lib/features'
 import { findDuplicate } from '@/lib/duplicateDetection'
 import { saveClaimScreenshot } from '@/services/firebaseService'
 import { cn } from '@/lib/utils'
@@ -125,7 +127,7 @@ const SAMPLE_SCREENSHOTS = [
 export function Submit() {
   const navigate = useNavigate()
   const { addClaim, claims } = useClaims()
-  const { user } = useAuth()
+  const { user, needsEmailVerification } = useAuth()
   const [searchParams] = useSearchParams()
 
   const [activeTab, setActiveTab] = useState<Tab>('text')
@@ -478,6 +480,9 @@ export function Submit() {
       </div>
 
       {/* Main Form Container Card */}
+      {needsEmailVerification ? (
+        <VerifyEmailNotice action="submit claims" />
+      ) : (
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-6 lg:p-8">
         {/* Tab Selector */}
         <div className="flex items-center p-1 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)] border border-[var(--color-border-soft)] mb-7">
@@ -1077,6 +1082,7 @@ export function Submit() {
           </div>
         )}
       </div>
+      )}
 
       {/* About OCR Engine Informational Modal */}
       <Modal
@@ -1188,9 +1194,11 @@ export function Submit() {
                 <ShieldAlert className="w-3.5 h-3.5 text-[var(--color-brand)]" />
                 3 Verifiers Quorum Required
               </span>
-              <span className="text-[var(--color-v-true)] font-bold">
-                +2 Rep On Completion
-              </span>
+              {REPUTATION_ENABLED && (
+                <span className="text-[var(--color-v-true)] font-bold">
+                  +2 Rep On Completion
+                </span>
+              )}
             </div>
           </div>
 

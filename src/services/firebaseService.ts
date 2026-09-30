@@ -27,6 +27,7 @@ import {
   writeBatch,
   COLLECTIONS,
 } from '@/lib/firebase'
+import { sendEmailVerification } from 'firebase/auth'
 import type { User, Claim, AppNotification, ClaimCategory, Verdict, SourceQuality } from '@/lib/types'
 
 /** How many recent claims the app keeps live in the realtime subscription. */
@@ -74,7 +75,43 @@ export async function signUpWithEmail(name: string, email: string, pass: string)
     }
   }
 
+  // Claims and verdicts need a verified email (firestore.rules). A failed send is
+  // not fatal: the account exists and the verify notice offers a resend.
+  try {
+    await sendEmailVerification(firebaseUser)
+  } catch (err) {
+    console.warn('Could not send verification email:', err)
+  }
+
   return ensureProfile(firebaseUser, name)
+}
+
+/** Resend the verification link to the signed-in user. */
+export async function resendVerificationEmail(): Promise<void> {
+  if (!auth.currentUser) throw new Error('You are signed out. Sign in again to continue.')
+  try {
+    await sendEmailVerification(auth.currentUser)
+  } catch (err) {
+    // The generic message for this code talks about a locked account; here it
+    // only means Firebase is rate-limiting verification emails.
+    if ((err as { code?: string } | null)?.code === 'auth/too-many-requests') {
+      throw new Error('Too many emails sent. Wait a few minutes, then try again.')
+    }
+    throw err
+  }
+}
+
+/**
+ * Re-read the user's verification status. The forced token refresh is what
+ * matters: Firestore rules read email_verified from the ID token, which
+ * otherwise keeps the old value for up to an hour.
+ */
+export async function refreshEmailVerification(): Promise<boolean> {
+  const current = auth.currentUser
+  if (!current) return false
+  await current.reload()
+  await current.getIdToken(true)
+  return current.emailVerified
 }
 
 /** Thrown when a deleted account signs in; the session is already signed out. */

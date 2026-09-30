@@ -8,6 +8,8 @@ import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { getClaimScreenshot } from '@/services/firebaseService'
 import { Button } from '@/components/ui/Button'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
+import { ExampleBadge } from '@/components/ui/ExampleBadge'
+import { isDemoClaim } from '@/lib/features'
 import { VerdictPill } from '@/components/ui/VerdictPill'
 import { Avatar } from '@/components/ui/Avatar'
 import { SourceQualityDot } from '@/components/ui/SourceQualityDot'
@@ -150,11 +152,19 @@ export function ClaimDetail() {
         {/* Claim Card */}
         <div className="hairline-card p-6">
           <div className="flex items-center justify-between mb-4">
-            <CategoryBadge category={claim.category} />
+            <div className="flex items-center gap-1.5">
+              <CategoryBadge category={claim.category} />
+              {isDemoClaim(claim.id) && <ExampleBadge />}
+            </div>
             <time className="text-xs text-[var(--color-fg-muted)] font-mono tabular-nums">
               {formatDistanceToNow(new Date(claim.createdAt), { addSuffix: true })}
             </time>
           </div>
+          {isDemoClaim(claim.id) && (
+            <p className="text-xs text-[var(--color-fg-muted)] mb-4">
+              This is an example claim with sample verifiers, included to show how FactStamp works.
+            </p>
+          )}
 
           <p className="text-lg text-[var(--color-fg)] leading-relaxed mb-6">
             {claim.text}

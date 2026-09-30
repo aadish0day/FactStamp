@@ -15,7 +15,8 @@
     "create:admin": "node scripts/create-admin.mjs",
     "create:user": "node scripts/create-user.mjs",
     "audit:admins": "node scripts/audit-admins.mjs",
-    "test:rules": "firebase emulators:exec --only firestore,auth --project factstamp-app --config firebase.emulator-test.json 'node scripts/test-rules.mjs'"
+    "test:rules": "firebase emulators:exec --only firestore,auth --project factstamp-app --config firebase.emulator-test.json 'node scripts/test-rules.mjs'",
+    "test:dupes": "node scripts/test-duplicate-detection.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.0",

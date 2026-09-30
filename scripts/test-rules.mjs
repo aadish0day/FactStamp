@@ -6,14 +6,25 @@ const S=v=>({stringValue:v}),I=v=>({integerValue:String(v)}),B=v=>({booleanValue
 let pass=0,fail=0
 const expect=(label,got,want)=>{const ok=got===want;ok?pass++:fail++;console.log(`${ok?'  PASS':'**FAIL**'}  ${label.padEnd(52)} ${got?'ALLOWED':'DENIED'} (want ${want?'ALLOWED':'DENIED'})`)}
 
-async function mkUser(tag,rep=50){
+// Claims and verdicts need email_verified. Mark the account verified with the
+// emulator's owner credential, then sign in again so the token carries the claim.
+async function verifyEmail(localId,email){
+  await call(`${AUTH}/projects/factstamp-app/accounts:update`,{method:'POST',headers:{Authorization:'Bearer owner'},
+    body:JSON.stringify({localId,emailVerified:true})})
+  const {body}=await call(`${AUTH}/accounts:signInWithPassword?key=${KEY}`,{method:'POST',body:JSON.stringify({email,password:'Passw0rd!23',returnSecureToken:true})})
+  return {Authorization:`Bearer ${body.idToken}`}
+}
+
+async function mkUser(tag,rep=50,{verified=true}={}){
   const name=tag
   const email=`${tag}${Date.now()}${Math.random().toString(36).slice(2,6)}@example.com`
   const {body}=await call(`${AUTH}/accounts:signUp?key=${KEY}`,{method:'POST',body:JSON.stringify({email,password:'Passw0rd!23',returnSecureToken:true})})
-  const H={Authorization:`Bearer ${body.idToken}`}
-  await call(`${FS}/users?documentId=${body.localId}`,{method:'POST',headers:H,body:JSON.stringify({fields:{
+  let H={Authorization:`Bearer ${body.idToken}`}
+  // Profile creation must work before verification (sign-up happens first).
+  const prof=await call(`${FS}/users?documentId=${body.localId}`,{method:'POST',headers:H,body:JSON.stringify({fields:{
     uid:S(body.localId),displayName:S(tag),email:S(email),reputation:I(rep),totalVerifications:I(0),isAdmin:B(false),joinedAt:S(new Date().toISOString())}})})
-  return {uid:body.localId,H,name}
+  if(verified) H=await verifyEmail(body.localId,email)
+  return {uid:body.localId,H,name,email,profileOk:prof.ok}
 }
 
 async function mkUserWithEmail(tag,email){
@@ -226,6 +237,38 @@ expect('Deleted account submits a claim',
   (await call(`${FS}/claims`,{method:'POST',headers:gone.H,body:JSON.stringify({fields:fields(gone.uid,Date.now()+7*864e5)})})).ok, false)
 expect('Deleted account removes its own tombstone',
   (await call(`${FS}/deleted_users/${gone.uid}`,{method:'DELETE',headers:gone.H})).ok, false)
+
+console.log('\n── Email verification gate (one person, one vote) ──')
+const unv=await mkUser('unverified',50,{verified:false})
+expect('Unverified user creates own profile', unv.profileOk, true)
+expect('Unverified user reads own profile',
+  (await call(`${FS}/users/${unv.uid}`,{method:'GET',headers:unv.H})).ok, true)
+expect('Unverified user submits a claim',
+  (await call(`${FS}/claims`,{method:'POST',headers:unv.H,body:JSON.stringify({fields:fields(unv.uid,Date.now()+7*864e5)})})).ok, false)
+const cV=await mkClaim(author)
+expect('Unverified user casts a verdict',
+  (await patchV(cV,unv,[verif(unv)],1)).ok, false)
+const cOver2=await mkClaim(author, Date.now()+1500)
+await new Promise(r=>setTimeout(r,2500))
+expect('Unverified user expires an overdue claim',
+  (await call(`${FS}/claims/${cOver2}?${mask(...Object.keys(expiry()))}`,{method:'PATCH',headers:unv.H,body:JSON.stringify({fields:expiry()})})).ok, false)
+expect('Unverified user writes to verdicts subcollection',
+  (await call(`${FS}/claims/${cV}/verdicts`,{method:'POST',headers:unv.H,body:JSON.stringify({fields:{
+    verifierId:S(unv.uid),claimId:S(cV),explanation:S('x'.repeat(60)),createdAt:S(new Date().toISOString())}})})).ok, false)
+// Same account after clicking the link and refreshing its token.
+unv.H=await verifyEmail(unv.uid,unv.email)
+expect('Same user after verifying submits a claim',
+  (await call(`${FS}/claims`,{method:'POST',headers:unv.H,body:JSON.stringify({fields:fields(unv.uid,Date.now()+7*864e5)})})).ok, true)
+expect('Same user after verifying casts a verdict',
+  (await patchV(cV,unv,[verif(unv)],1)).ok, true)
+// Admins are exempt (seeding, moderation) even with an unverified email.
+const adm=await mkUser('admin',50,{verified:false})
+await call(`${FS}/users/${adm.uid}?${mask('isAdmin')}`,{method:'PATCH',headers:OWNER,body:JSON.stringify({fields:{isAdmin:B(true)}})})
+expect('Unverified admin creates a claim',
+  (await call(`${FS}/claims`,{method:'POST',headers:adm.H,body:JSON.stringify({fields:fields(adm.uid,Date.now()+7*864e5)})})).ok, true)
+expect('Unverified admin overrides a verdict',
+  (await call(`${FS}/claims/${cV}?${mask('status','verdict')}`,{method:'PATCH',headers:adm.H,
+    body:JSON.stringify({fields:{status:S('verified'),verdict:S('FALSE')}})})).ok, true)
 
 console.log(`\n${fail===0?'ALL GREEN':'FAILURES'} — ${pass} passed, ${fail} failed`)
 process.exit(fail===0?0:1)

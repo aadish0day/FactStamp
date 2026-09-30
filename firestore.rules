@@ -15,6 +15,13 @@ service cloud.firestore {
     // (FACTSTAMP_ADMIN_EMAIL / FACTSTAMP_ADMIN_PASSWORD), so isAdmin() is the
     // only elevated path.
 
+    // Accounts are free, so without this one person could open three and decide
+    // any verdict alone. Google sign-ins arrive verified; email/password accounts
+    // must click the link sent at sign-up (the client refreshes the ID token after).
+    function isVerifiedEmail() {
+      return request.auth.token.email_verified == true;
+    }
+
     // The caller's own stored profile.
     function callerProfile() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
@@ -138,6 +145,7 @@ service cloud.firestore {
       allow read: if true;
 
       allow create: if request.auth != null
+        && (isVerifiedEmail() || isAdmin())
         && request.resource.data.text is string
         && request.resource.data.text.size() >= 10
         && request.resource.data.text.size() <= 2000
@@ -180,7 +188,10 @@ service cloud.firestore {
           ||
           // Case B: Consensus expiry updates (claims overdue for verification marked CONTESTED)
           (
-            identityUnchanged()
+            // Closing a claim as CONTESTED settles its public verdict, so it gets
+            // the same one-person-one-vote gate as casting one.
+            isVerifiedEmail()
+            && identityUnchanged()
             && resource.data.status == 'pending'
             && request.resource.data.status == 'verified'
             && request.resource.data.verdict == 'CONTESTED'
@@ -213,7 +224,8 @@ service cloud.firestore {
           ||
           // Case C: Adding a source-backed verification
           (
-            identityUnchanged()
+            isVerifiedEmail()
+            && identityUnchanged()
             && isUnchanged('adminFlagged')
             && isUnchanged('adminFlaggedAt')
             // Only open claims take verdicts. Without this a claim closed as
@@ -294,6 +306,7 @@ service cloud.firestore {
       match /verdicts/{verdictId} {
         allow read: if true;
         allow create: if request.auth != null
+          && isVerifiedEmail()
           && request.resource.data.verifierId == request.auth.uid
           && request.resource.data.explanation is string
           && request.resource.data.explanation.size() <= 3000;

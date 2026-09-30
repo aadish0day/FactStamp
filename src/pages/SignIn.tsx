@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/Input'
 import { AuthLayout } from '@/components/AuthLayout'
 import { useAuth } from '@/contexts/AuthContext'
 import { ACCOUNT_REMOVED_MESSAGE } from '@/services/firebaseService'
+import { REPUTATION_ENABLED } from '@/lib/features'
 import {
   checkLoginRateLimit,
   recordFailedLogin,
@@ -260,7 +261,7 @@ export function SignIn() {
     <AuthLayout
       mode="signin"
       heading="Welcome back"
-      subheading="Sign in to your verifier account to fact-check community claims and earn reputation."
+      subheading={`Sign in to your verifier account to fact-check community claims${REPUTATION_ENABLED ? ' and earn reputation' : ''}.`}
     >
       <Seo title="Sign In" description="Sign in to FactStamp to participate in community fact-checks." />
 

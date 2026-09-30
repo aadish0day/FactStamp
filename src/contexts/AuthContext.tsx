@@ -18,6 +18,8 @@ import {
   updateUserProfile,
   getAuthErrorMessage,
   ensureProfile,
+  resendVerificationEmail,
+  refreshEmailVerification,
 } from '@/services/firebaseService'
 import {
   recordActivity,
@@ -35,6 +37,13 @@ interface AuthContextValue {
   updateUser: (updates: Partial<User>) => Promise<void>
   isLoading: boolean
   isFirebaseConfigured: boolean
+  /** Firebase Auth's emailVerified (Google sign-ins are always true). */
+  emailVerified: boolean
+  /** Signed in, not an admin, and the email is unverified: may browse but not submit or vote. */
+  needsEmailVerification: boolean
+  resendVerification: () => Promise<void>
+  /** Reloads the user and forces a token refresh; resolves to the new status. */
+  refreshVerification: () => Promise<boolean>
 }
 
 const defaultAuthContext: AuthContextValue = {
@@ -47,6 +56,10 @@ const defaultAuthContext: AuthContextValue = {
   updateUser: async () => {},
   isLoading: false,
   isFirebaseConfigured,
+  emailVerified: false,
+  needsEmailVerification: false,
+  resendVerification: async () => {},
+  refreshVerification: async () => false,
 }
 
 const AuthContext = createContext<AuthContextValue>(defaultAuthContext)
@@ -54,6 +67,7 @@ const AuthContext = createContext<AuthContextValue>(defaultAuthContext)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(isFirebaseConfigured)
+  const [emailVerified, setEmailVerified] = useState(false)
 
   // Realtime profile subscription to Firestore user document
   useEffect(() => {
@@ -69,6 +83,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (unsubscribeProfile) {
         unsubscribeProfile()
         unsubscribeProfile = null
+      }
+      setEmailVerified(firebaseUser?.emailVerified ?? false)
+      // Verified in another tab/session: the profile says so, but a cached ID
+      // token can still carry email_verified=false for up to an hour, and
+      // that token is what Firestore rules check.
+      if (firebaseUser?.emailVerified) {
+        firebaseUser.getIdTokenResult()
+          .then((t) => (t.claims.email_verified ? undefined : firebaseUser.getIdToken(true)))
+          .catch(() => {})
       }
 
       if (firebaseUser) {
@@ -227,8 +250,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updateUserProfile(uid, updates)
   }, [])
 
+  const resendVerification = useCallback(async () => {
+    try {
+      await resendVerificationEmail()
+    } catch (err) {
+      throw new Error(getAuthErrorMessage(err))
+    }
+  }, [])
+
+  const refreshVerification = useCallback(async () => {
+    try {
+      const verified = await refreshEmailVerification()
+      setEmailVerified(verified)
+      return verified
+    } catch (err) {
+      throw new Error(getAuthErrorMessage(err))
+    }
+  }, [])
+
+  const needsEmailVerification = !!user && !emailVerified && !user.isAdmin
+
   return (
-    <AuthContext.Provider value={{ user, login, loginWithGoogle, signup, logout, resetPassword, updateUser, isLoading, isFirebaseConfigured }}>
+    <AuthContext.Provider value={{ user, login, loginWithGoogle, signup, logout, resetPassword, updateUser, isLoading, isFirebaseConfigured, emailVerified, needsEmailVerification, resendVerification, refreshVerification }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,10 +1,18 @@
 import { initializeApp, getApps, getApp } from 'firebase/app'
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
 import {
   getAuth,
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  browserPopupRedirectResolver,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
+  signInWithPopup as firebaseSignInWithPopup,
+  type Auth,
+  type AuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
@@ -57,10 +65,43 @@ const useFirebaseEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'tr
 export const isFirebaseConfigured = true
 
 // Initialize Firebase App instance safely
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
+const isFreshApp = !getApps().length
+const app = isFreshApp ? initializeApp(firebaseConfig) : getApp()
+
+// App Check: attests requests come from this site, so the public API key can't
+// be reused by scripts. Off unless VITE_APPCHECK_SITE_KEY is set, and skipped on
+// the emulators (they don't verify tokens). Must run before Auth/Firestore
+// make their first request, hence a static import rather than a lazy one.
+// reCAPTCHA v3 (not Enterprise): free with no Cloud billing — fits the Spark plan.
+const appCheckSiteKey = import.meta.env.VITE_APPCHECK_SITE_KEY
+if (appCheckSiteKey && !useFirebaseEmulators) {
+  if (import.meta.env.DEV) {
+    // `true` makes the SDK print a debug token to register in the console;
+    // a pre-registered token can be supplied via VITE_APPCHECK_DEBUG_TOKEN.
+    ;(self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN ??=
+      import.meta.env.VITE_APPCHECK_DEBUG_TOKEN || true
+  }
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(appCheckSiteKey),
+    isTokenAutoRefreshEnabled: true,
+  })
+}
 
 // Core Firebase Services
-export const auth = getAuth(app)
+// Same persistence chain as getAuth(), minus the popup/redirect resolver: with
+// it, Auth eagerly loads <authDomain>/__/auth/iframe.js (~95 KB) plus gapi and a
+// getProjectConfig call on every mobile/Safari page view. The resolver is instead passed per
+// call in signInWithPopup below. Add it back here if signInWithRedirect or
+// getRedirectResult are ever used.
+// initializeAuth throws if called twice on one app (e.g. module re-run by HMR).
+export const auth = isFreshApp
+  ? initializeAuth(app, {
+      persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence],
+    })
+  : getAuth(app)
+
+export const signInWithPopup = (a: Auth, provider: AuthProvider) =>
+  firebaseSignInWithPopup(a, provider, browserPopupRedirectResolver)
 export const db = initializeFirestore(app, {
   experimentalAutoDetectLongPolling: true,
 })
@@ -91,7 +132,6 @@ export const COLLECTIONS = {
 export {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
   firebaseSignOut,
   onAuthStateChanged,
   sendPasswordResetEmail,

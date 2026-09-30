@@ -16,6 +16,8 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { CategoryBadge } from "@/components/ui/CategoryBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ExampleBadge } from "@/components/ui/ExampleBadge";
+import { isDemoClaim, REPUTATION_ENABLED } from "@/lib/features";
 import { useClaims } from "@/contexts/ClaimsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { canVerify } from "@/lib/types";
@@ -175,7 +177,11 @@ export function VerifyQueue() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-[var(--color-brand)] bg-[var(--color-brand-subtle)] border border-[var(--color-brand-subtle)] mb-3">
             <Zap className="w-3.5 h-3.5" />
-            <span>Earn +2 Reputation Per Verified Claim</span>
+            <span>
+              {REPUTATION_ENABLED
+                ? "Earn +2 Reputation Per Verified Claim"
+                : "Every claim needs 3 independent checks"}
+            </span>
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-[var(--color-fg)] tracking-tight mb-2">
             Verification Queue
@@ -341,6 +347,7 @@ function ClaimDossierCard({
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
           <CategoryBadge category={claim.category} />
+          {isDemoClaim(claim.id) && <ExampleBadge />}
 
           {claim.adminFlagged && (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">

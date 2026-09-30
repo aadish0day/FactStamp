@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => {
           // firebase/storage is intentionally absent: it is imported dynamically
           // by uploadClaimScreenshot(), and naming it here would pull it back
           // into the eager vendor chunk every visitor downloads.
-          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          'vendor-firebase': ['firebase/app', 'firebase/app-check', 'firebase/auth', 'firebase/firestore'],
           'vendor-ui': ['lucide-react', 'framer-motion'],
           // recharts, html-to-image and tesseract.js are deliberately NOT named
           // here: they are only reached from lazy routes, and a named manual

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { AppNotification } from '@/lib/types'
 import { isFirebaseConfigured } from '@/lib/firebase'
+import { REPUTATION_ENABLED } from '@/lib/features'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   subscribeNotificationsRealtime,
@@ -8,7 +9,7 @@ import {
   markAllNotificationsRead,
 } from '@/services/firebaseService'
 
-const DEFAULT_SEED_NOTIFICATIONS: AppNotification[] = [
+const DEFAULT_SEED_NOTIFICATIONS: AppNotification[] = ([
   {
     id: 'n_seed_1',
     userId: 'demo',
@@ -47,7 +48,9 @@ const DEFAULT_SEED_NOTIFICATIONS: AppNotification[] = [
     isRead: true,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
-]
+  // Offline-demo only (never shown when Firebase is configured). No reputation
+  // notice while reputation awards are switched off.
+] satisfies AppNotification[]).filter((n) => REPUTATION_ENABLED || n.type !== 'reputation_update')
 
 interface NotificationsContextValue {
   notifications: AppNotification[]

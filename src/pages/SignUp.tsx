@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Lock, Mail, User, Shield, Eye, EyeOff, Zap } from 'lucide-react'
+import { Check, Lock, Mail, User, Eye, EyeOff, Zap } from 'lucide-react'
 import { Seo } from '@/components/Seo'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -119,9 +119,10 @@ export function SignUp() {
     setLoading(true)
     try {
       await signup(form.name.trim(), form.email.trim(), form.password)
-      toast.success('Account created', {
-        description: `Welcome to FactStamp, ${form.name.trim()}!`,
-        icon: <Shield className="w-5 h-5 text-[var(--color-v-true)]" />,
+      toast.success('Account created — check your inbox', {
+        description: `We sent a verification link to ${form.email.trim()}. Open it to start submitting claims and casting verdicts.`,
+        icon: <Mail className="w-5 h-5 text-[var(--color-v-true)]" />,
+        duration: 10000,
       })
       navigate('/')
     } catch (err) {
