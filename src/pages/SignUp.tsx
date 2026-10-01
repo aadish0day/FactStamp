@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input'
 import { AuthLayout } from '@/components/AuthLayout'
 import { PasswordStrength } from '@/components/ui/PasswordStrength'
 import { useAuth } from '@/contexts/AuthContext'
+import { EMAIL_VERIFICATION_REQUIRED } from '@/lib/features'
 import { cn } from '@/lib/utils'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -119,8 +120,10 @@ export function SignUp() {
     setLoading(true)
     try {
       await signup(form.name.trim(), form.email.trim(), form.password)
-      toast.success('Account created — check your inbox', {
-        description: `We sent a verification link to ${form.email.trim()}. Open it to start submitting claims and casting verdicts.`,
+      toast.success(EMAIL_VERIFICATION_REQUIRED ? 'Account created — check your inbox' : 'Account created', {
+        description: EMAIL_VERIFICATION_REQUIRED
+          ? `We sent a verification link to ${form.email.trim()}. Open it to start submitting claims and casting verdicts.`
+          : 'You can now submit claims and cast verdicts.',
         icon: <Mail className="w-5 h-5 text-[var(--color-v-true)]" />,
         duration: 10000,
       })

@@ -28,6 +28,7 @@ import {
   COLLECTIONS,
 } from '@/lib/firebase'
 import { sendEmailVerification } from 'firebase/auth'
+import { EMAIL_VERIFICATION_REQUIRED } from '@/lib/features'
 import type { User, Claim, AppNotification, ClaimCategory, Verdict, SourceQuality } from '@/lib/types'
 
 /** How many recent claims the app keeps live in the realtime subscription. */
@@ -77,10 +78,12 @@ export async function signUpWithEmail(name: string, email: string, pass: string)
 
   // Claims and verdicts need a verified email (firestore.rules). A failed send is
   // not fatal: the account exists and the verify notice offers a resend.
-  try {
-    await sendEmailVerification(firebaseUser)
-  } catch (err) {
-    console.warn('Could not send verification email:', err)
+  if (EMAIL_VERIFICATION_REQUIRED) {
+    try {
+      await sendEmailVerification(firebaseUser)
+    } catch (err) {
+      console.warn('Could not send verification email:', err)
+    }
   }
 
   return ensureProfile(firebaseUser, name)

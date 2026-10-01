@@ -21,6 +21,7 @@ import {
   resendVerificationEmail,
   refreshEmailVerification,
 } from '@/services/firebaseService'
+import { EMAIL_VERIFICATION_REQUIRED } from '@/lib/features'
 import {
   recordActivity,
   isSessionExpired,
@@ -268,7 +269,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const needsEmailVerification = !!user && !emailVerified && !user.isAdmin
+  const needsEmailVerification = EMAIL_VERIFICATION_REQUIRED && !!user && !emailVerified && !user.isAdmin
 
   return (
     <AuthContext.Provider value={{ user, login, loginWithGoogle, signup, logout, resetPassword, updateUser, isLoading, isFirebaseConfigured, emailVerified, needsEmailVerification, resendVerification, refreshVerification }}>

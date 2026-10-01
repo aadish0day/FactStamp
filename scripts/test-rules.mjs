@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 const AUTH='http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1'
 const FS=process.env.FS_URL??'http://127.0.0.1:8083/v1/projects/factstamp-app/databases/(default)/documents'
 const KEY='fake-api-key'
@@ -238,29 +239,32 @@ expect('Deleted account submits a claim',
 expect('Deleted account removes its own tombstone',
   (await call(`${FS}/deleted_users/${gone.uid}`,{method:'DELETE',headers:gone.H})).ok, false)
 
-console.log('\n── Email verification gate (one person, one vote) ──')
+// The gate can be switched off (isVerifiedEmail() returning true); expectations follow the rules file.
+const GATE=!/function isVerifiedEmail\(\)\s*\{\s*return true;/.test(readFileSync(new URL('../firestore.rules',import.meta.url),'utf8'))
+console.log(`\n── Email verification gate (one person, one vote) — ${GATE?'ON':'OFF'} ──`)
 const unv=await mkUser('unverified',50,{verified:false})
 expect('Unverified user creates own profile', unv.profileOk, true)
 expect('Unverified user reads own profile',
   (await call(`${FS}/users/${unv.uid}`,{method:'GET',headers:unv.H})).ok, true)
 expect('Unverified user submits a claim',
-  (await call(`${FS}/claims`,{method:'POST',headers:unv.H,body:JSON.stringify({fields:fields(unv.uid,Date.now()+7*864e5)})})).ok, false)
+  (await call(`${FS}/claims`,{method:'POST',headers:unv.H,body:JSON.stringify({fields:fields(unv.uid,Date.now()+7*864e5)})})).ok, !GATE)
 const cV=await mkClaim(author)
 expect('Unverified user casts a verdict',
-  (await patchV(cV,unv,[verif(unv)],1)).ok, false)
+  (await patchV(cV,unv,[verif(unv)],1)).ok, !GATE)
 const cOver2=await mkClaim(author, Date.now()+1500)
 await new Promise(r=>setTimeout(r,2500))
 expect('Unverified user expires an overdue claim',
-  (await call(`${FS}/claims/${cOver2}?${mask(...Object.keys(expiry()))}`,{method:'PATCH',headers:unv.H,body:JSON.stringify({fields:expiry()})})).ok, false)
+  (await call(`${FS}/claims/${cOver2}?${mask(...Object.keys(expiry()))}`,{method:'PATCH',headers:unv.H,body:JSON.stringify({fields:expiry()})})).ok, !GATE)
 expect('Unverified user writes to verdicts subcollection',
   (await call(`${FS}/claims/${cV}/verdicts`,{method:'POST',headers:unv.H,body:JSON.stringify({fields:{
-    verifierId:S(unv.uid),claimId:S(cV),explanation:S('x'.repeat(60)),createdAt:S(new Date().toISOString())}})})).ok, false)
+    verifierId:S(unv.uid),claimId:S(cV),explanation:S('x'.repeat(60)),createdAt:S(new Date().toISOString())}})})).ok, !GATE)
 // Same account after clicking the link and refreshing its token.
 unv.H=await verifyEmail(unv.uid,unv.email)
 expect('Same user after verifying submits a claim',
   (await call(`${FS}/claims`,{method:'POST',headers:unv.H,body:JSON.stringify({fields:fields(unv.uid,Date.now()+7*864e5)})})).ok, true)
+const cV2=await mkClaim(author)
 expect('Same user after verifying casts a verdict',
-  (await patchV(cV,unv,[verif(unv)],1)).ok, true)
+  (await patchV(cV2,unv,[verif(unv)],1)).ok, true)
 // Admins are exempt (seeding, moderation) even with an unverified email.
 const adm=await mkUser('admin',50,{verified:false})
 await call(`${FS}/users/${adm.uid}?${mask('isAdmin')}`,{method:'PATCH',headers:OWNER,body:JSON.stringify({fields:{isAdmin:B(true)}})})

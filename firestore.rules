@@ -18,8 +18,10 @@ service cloud.firestore {
     // Accounts are free, so without this one person could open three and decide
     // any verdict alone. Google sign-ins arrive verified; email/password accounts
     // must click the link sent at sign-up (the client refreshes the ID token after).
+    // DISABLED for now (EMAIL_VERIFICATION_REQUIRED = false in src/lib/features.ts).
+    // To re-enable: return request.auth.token.email_verified == true;
     function isVerifiedEmail() {
-      return request.auth.token.email_verified == true;
+      return true;
     }
 
     // The caller's own stored profile.
